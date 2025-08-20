@@ -1,4 +1,4 @@
-package com.example.mocklocation.ui.theme
+package com.example.mocklocation.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
