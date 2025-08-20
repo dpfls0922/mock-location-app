@@ -12,7 +12,7 @@ import com.skt.tmap.vsm.map.VSMMap
 import timber.log.Timber
 import java.lang.ref.WeakReference
 
-class MyVSMHelper private constructor(context: Context) {
+class VSMHelper private constructor(context: Context) {
     private val mAppContext: Context = context.applicationContext
     private var mListener: WeakReference<InitializeListener>? = null
     private var mHandler: Handler
@@ -48,7 +48,7 @@ class MyVSMHelper private constructor(context: Context) {
     }
 
     companion object {
-        private var sSingleton: MyVSMHelper? = null
+        private var sSingleton: VSMHelper? = null
 
         private const val CONFIG_BASE_URL_FARM43 = "http://farm43.ids.onestore.co.kr:8012/hub/vsm_dev"
         private const val LOADER_ID = 1
@@ -68,12 +68,12 @@ class MyVSMHelper private constructor(context: Context) {
         fun createHelper(context: Context) {
             VSMMap.LoadLibrary()
             if (sSingleton == null) {
-                sSingleton = MyVSMHelper(context)
+                sSingleton = VSMHelper(context)
             }
         }
 
         @JvmStatic
-        fun getInstance(): MyVSMHelper = sSingleton ?: throw IllegalStateException("MyVSMHelper not initialized")
+        fun getInstance(): VSMHelper = sSingleton ?: throw IllegalStateException("VSMHelper not initialized")
     }
 
     init {

@@ -1,4 +1,4 @@
-package com.example.mocklocation.presentation.main
+package com.example.mocklocation.presentation.map
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
