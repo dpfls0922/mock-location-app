@@ -7,11 +7,12 @@ import androidx.activity.compose.setContent
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import com.example.mocklocation.core.helper.MyVSMHelper
+import com.example.mocklocation.core.helper.VSMHelper
+import com.example.mocklocation.presentation.map.MainActivity
 
 class IntroActivity : ComponentActivity() {
-    private val mListener: MyVSMHelper.InitializeListener = object :
-        MyVSMHelper.InitializeListener {
+    private val mListener: VSMHelper.InitializeListener = object :
+        VSMHelper.InitializeListener {
         override fun onProgress(count: Int, total: Int) { }
         override fun onSuccess() { onVSMInitialized() }
         override fun onError(errorCode: Int, errorMsg: String) { }
@@ -23,11 +24,11 @@ class IntroActivity : ComponentActivity() {
         setContent {
             IntroScreen(
                 onStartClick = {
-                    if (MyVSMHelper.getInstance() == null) {
-                        MyVSMHelper.createHelper(applicationContext)
+                    if (VSMHelper.getInstance() == null) {
+                        VSMHelper.createHelper(applicationContext)
                     }
-                    MyVSMHelper.getInstance().setListener(mListener)
-                    MyVSMHelper.getInstance().initialize()
+                    VSMHelper.getInstance().setListener(mListener)
+                    VSMHelper.getInstance().initialize()
                 }
             )
         }
@@ -41,13 +42,13 @@ class IntroActivity : ComponentActivity() {
 
     override fun onBackPressed() {
         super.onBackPressed()
-        MyVSMHelper.getInstance().stopLoading()
+        VSMHelper.getInstance().stopLoading()
         finish()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        MyVSMHelper.getInstance().setListener(null)
+        VSMHelper.getInstance().setListener(null)
     }
 }
 
