@@ -20,7 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MockLocation">
         <activity
-            android:name=".presentation.main.IntroActivity"
+            android:name=".IntroActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.MockLocation">
