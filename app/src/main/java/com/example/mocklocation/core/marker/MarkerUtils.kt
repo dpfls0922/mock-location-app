@@ -87,14 +87,15 @@ fun createDefaultMarker(
     type: MarkerType
 ): Bitmap? {
     val (width, height) = type.iconSize
-    val bitmapWidth = width.toInt()
-    val bitmapHeight = height.toInt()
+    val density = context.resources.displayMetrics.density
+    val bitmapWidthPx = (width * density).toInt()
+    val bitmapHeightPx = (height * density).toInt()
 
-    val drawable = ContextCompat.getDrawable(context, type.resId) ?: return null
-    val bitmap = createBitmap(bitmapWidth, bitmapHeight)
+    val bitmap = createBitmap(bitmapWidthPx, bitmapHeightPx)
     val canvas = Canvas(bitmap)
+    val drawable = ContextCompat.getDrawable(context, type.resId) ?: return null
 
-    drawable.setBounds(0, 0, bitmapWidth, bitmapHeight)
+    drawable.setBounds(0, 0, bitmapWidthPx, bitmapHeightPx)
     drawable.draw(canvas)
     return bitmap
 }
