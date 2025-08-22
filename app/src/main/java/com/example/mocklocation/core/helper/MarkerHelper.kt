@@ -16,8 +16,7 @@ enum class MarkerType(val resId: Int, val iconSize: Pair<Float, Float>) {
     START(R.drawable.marker_start, Pair(30F, 30F)),
     END(R.drawable.marker_end, Pair(30F, 30F)),
     DESTINATION(R.drawable.ic_map_destinationpoint, Pair(30F, 30F)),
-    CURRENT(com.skt.tmap.vsmsdk.R.drawable.location_marker, Pair(40F, 40F)),
-    DEFAULT(R.drawable.marker_current, Pair(30F, 30F))
+    CURRENT(R.drawable.marker_current, Pair(30F, 30F))
 }
 
 class MarkerHelper(
@@ -28,7 +27,7 @@ class MarkerHelper(
     fun addLocationMarker(
         latitude: Double,
         longitude: Double,
-        type: MarkerType = MarkerType.DEFAULT
+        type: MarkerType
     ): VSMMarkerLocation? {
         return runCatching {
             val position = VSMMapPoint(longitude, latitude)
@@ -87,5 +86,10 @@ class MarkerHelper(
 
     fun removeMarker(marker: VSMMarkerBase) {
         mapEngine.markerManager.removeMarker(marker)
+    }
+
+    fun setCenter(latitude: Double, longitude: Double) {
+        val result = mapEngine.setMapCenter(longitude, latitude, true)
+        Timber.d("setCenter 호출 결과: $result")
     }
 }

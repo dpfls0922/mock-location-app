@@ -1,7 +1,7 @@
 package com.example.mocklocation.di
 
-import com.example.mocklocation.data.repository.GpsRepositoryImpl
-import com.example.mocklocation.domain.repository.GpsRepository
+import com.example.mocklocation.data.service.MapServiceImpl
+import com.example.mocklocation.domain.service.MapService
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -10,8 +10,10 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class RepositoryModule {
+abstract class MapModule {
     @Binds
     @Singleton
-    abstract fun bindToGpsRepository(gpsRepositoryImpl: GpsRepositoryImpl): GpsRepository
+    abstract fun bindMapService(
+        vsmMapService: MapServiceImpl
+    ): MapService
 }
