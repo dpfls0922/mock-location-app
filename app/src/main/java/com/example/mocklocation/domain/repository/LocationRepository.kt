@@ -5,4 +5,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface LocationRepository {
     fun getCurrentLocation(): Flow<CurrentLocation>
+    suspend fun checkLocationPermission(): Boolean
 }

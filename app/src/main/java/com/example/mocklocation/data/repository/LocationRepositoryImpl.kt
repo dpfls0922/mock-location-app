@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,4 +22,9 @@ class LocationRepositoryImpl @Inject constructor(
             .flowOn(ioDispatcher)
             .conflate()
     }
+
+    override suspend fun checkLocationPermission(): Boolean =
+        withContext(ioDispatcher) {
+            locationDataSource.hasLocationPermission()
+        }
 }

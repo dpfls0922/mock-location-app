@@ -2,7 +2,9 @@ package com.example.mocklocation.data.datasource
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Looper
+import androidx.core.content.ContextCompat
 import com.example.mocklocation.di.DefaultDispatcher
 import com.example.mocklocation.domain.entity.CurrentLocation
 import com.google.android.gms.location.LocationCallback
@@ -26,12 +28,18 @@ class LocationDataSourceImpl @Inject constructor(
 ) : LocationDataSource {
     private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
     private val locationRequest: LocationRequest = LocationRequest.Builder(
-        Priority.PRIORITY_HIGH_ACCURACY, LOCATION_REQUEST_INTERVAL_MS)
+        Priority.PRIORITY_HIGH_ACCURACY, LOCATION_REQUEST_INTERVAL_MS
+    )
         .setMinUpdateIntervalMillis(LOCATION_REQUEST_FASTEST_INTERVAL_MS)
         .build()
 
     @SuppressLint("MissingPermission")
     override fun getCurrentLocation(): Flow<CurrentLocation> = callbackFlow {
+        if (!hasLocationPermission()) {
+            close(SecurityException("위치 권한이 없습니다."))
+            return@callbackFlow
+        }
+
         val locationCallback = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
                 result.lastLocation?.let { loc ->
@@ -43,7 +51,7 @@ class LocationDataSourceImpl @Inject constructor(
                             accuracy = loc.accuracy,
                             bearing = loc.bearing
                         )
-                    )
+                    ).isSuccess
                 }
             }
         }
@@ -56,6 +64,14 @@ class LocationDataSourceImpl @Inject constructor(
             fusedLocationClient.removeLocationUpdates(locationCallback)
         }
     }.flowOn(defaultDispatcher)
+
+    override suspend fun hasLocationPermission(): Boolean {
+        val permission = ContextCompat.checkSelfPermission(
+            context,
+            android.Manifest.permission.ACCESS_FINE_LOCATION
+        )
+        return permission == PackageManager.PERMISSION_GRANTED
+    }
 
     companion object {
         private const val LOCATION_REQUEST_INTERVAL_MS = 3000L
