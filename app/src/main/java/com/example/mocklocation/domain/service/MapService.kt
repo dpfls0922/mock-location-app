@@ -1,9 +1,15 @@
 package com.example.mocklocation.domain.service
 
+import android.content.Context
+import com.example.mocklocation.domain.entity.CurrentLocation
 import com.skt.tmap.vsm.map.VSMMapView
 
+/**
+ * 외부 지도 SDK와 직접 연동해 지도 화면과 위치 표시 같은 플랫폼의 구체 기능을 처리하는 인프라스트럭처 서비스
+ */
 interface MapService {
-    fun initializeMap(mapView: VSMMapView)
+    fun createView(context: Context): VSMMapView
+    fun updateCurrentLocationMarker(location: CurrentLocation)
     fun cleanupMap()
     fun onResume()
     fun onPause()

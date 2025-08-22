@@ -1,6 +1,6 @@
 package com.example.mocklocation.di
 
-import com.example.mocklocation.data.service.VSMMapService
+import com.example.mocklocation.data.service.MapServiceImpl
 import com.example.mocklocation.domain.service.MapService
 import dagger.Binds
 import dagger.Module
@@ -14,6 +14,6 @@ abstract class MapModule {
     @Binds
     @Singleton
     abstract fun bindMapService(
-        vsmMapService: VSMMapService
+        vsmMapService: MapServiceImpl
     ): MapService
 }
