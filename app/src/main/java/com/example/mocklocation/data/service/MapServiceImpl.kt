@@ -34,7 +34,7 @@ class MapServiceImpl @Inject constructor() : MapService {
 
     override fun updateCurrentLocationMarker(location: CurrentLocation) {
         currentMarker?.let { markerHelper?.removeMarker(it) }
-        markerHelper?.addLocationMarker(
+        currentMarker = markerHelper?.addLocationMarker(
             location.latitude,
             location.longitude,
             MarkerType.CURRENT
