@@ -1,5 +1,6 @@
 package com.example.mocklocation.data.parser
 
+import com.example.mocklocation.data.datasource.CsvGpsParser
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
@@ -41,7 +42,7 @@ class CsvGpsParserTest {
     }
 
     @Test
-    @DisplayName("parse: 파일 내 여러 줄에서 gps 데이터만 추출")
+    @DisplayName("parse: InputStream에서 GPS 데이터만 추출")
     fun parseFileTest() {
         val tempFile = createTempFile().apply {
             writeText(
@@ -53,8 +54,9 @@ class CsvGpsParserTest {
                 """
             )
         }
+        val inputStream = tempFile.inputStream()
 
-        val result = parser.parse(tempFile)
+        val result = parser.parse(inputStream)
 
         assertEquals(2, result.size)
         assertEquals(35.158273, result[0].latitude)

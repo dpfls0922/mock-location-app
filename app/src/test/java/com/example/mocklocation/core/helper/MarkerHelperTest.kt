@@ -49,7 +49,7 @@ class MarkerHelperTest {
     fun testAddLocationMarker() {
         val latitude = 37.0
         val longitude = 127.0
-        val type = MarkerType.DEFAULT
+        val type = MarkerType.CURRENT
 
         val marker = markerHelper.addLocationMarker(latitude, longitude, type)
 
