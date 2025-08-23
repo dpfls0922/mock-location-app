@@ -2,14 +2,15 @@ package com.example.mocklocation.data.datasource
 
 import android.content.Context
 import android.net.Uri
-import com.example.mocklocation.data.parser.CsvGpsParser
 import com.example.mocklocation.di.IoDispatcher
 import com.example.mocklocation.domain.entity.CsvFile
+import com.example.mocklocation.domain.usecase.GpsParserFactory
+import com.example.mocklocation.domain.usecase.ParserType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.io.InputStream
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,13 +18,15 @@ import javax.inject.Singleton
 @Singleton
 class FileDataSourceImpl @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val csvParser: CsvGpsParser,
+    private val parserFactory: GpsParserFactory,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : FileDataSource {
     override suspend fun uploadFile(uri: Uri, fileName: String): CsvFile = withContext(ioDispatcher) {
         Timber.d("[파일 업로드 시작] 파일명: $fileName, URI: $uri")
         val inputStream = context.contentResolver.openInputStream(uri) ?: throw IllegalArgumentException("URI를 열 수 없습니다: $uri")
-        val gpsPoints = csvParser.parse(inputStream)
+
+        val parser = parserFactory.getParser<InputStream>(ParserType.CSV)
+        val gpsPoints = parser.parse(inputStream)
 
         Timber.d("파싱 완료: GPS 포인트 총 ${gpsPoints.size}개 발견")
         gpsPoints.forEachIndexed { index, point ->

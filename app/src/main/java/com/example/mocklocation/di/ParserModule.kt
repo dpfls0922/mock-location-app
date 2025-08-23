@@ -1,18 +1,19 @@
 package com.example.mocklocation.di
 
-import com.example.mocklocation.data.parser.CsvGpsParser
+import com.example.mocklocation.data.datasource.CsvGpsParser
+import com.example.mocklocation.domain.usecase.GpsDataParser
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import java.io.InputStream
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object ParserModule {
+    @CsvParser
     @Provides
     @Singleton
-    fun provideCsvGpsParser(): CsvGpsParser {
-        return CsvGpsParser()
-    }
+    fun provideCsvParser(): GpsDataParser<InputStream> = CsvGpsParser()
 }

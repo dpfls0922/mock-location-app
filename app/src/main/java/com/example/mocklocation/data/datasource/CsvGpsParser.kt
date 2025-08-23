@@ -1,14 +1,15 @@
-package com.example.mocklocation.data.parser
+package com.example.mocklocation.data.datasource
 
 import com.example.mocklocation.domain.entity.GpsPoint
+import com.example.mocklocation.domain.usecase.GpsDataParser
 import java.io.InputStream
 
 class CsvGpsParser(
     private val gpsRegex: Regex = DEFAULT_REGEX
-) {
-    fun parse(inputStream: InputStream): List<GpsPoint> {
+) : GpsDataParser<InputStream> {
+    override fun parse(input: InputStream): List<GpsPoint> {
         val result = mutableListOf<GpsPoint>()
-        inputStream.bufferedReader().useLines { lines ->
+        input.bufferedReader().useLines { lines ->
             lines.forEachIndexed { idx, line ->
                 if (!line.contains("#onLocationChanged")) return@forEachIndexed
                 parseLine(line)?.let { result.add(it) }
