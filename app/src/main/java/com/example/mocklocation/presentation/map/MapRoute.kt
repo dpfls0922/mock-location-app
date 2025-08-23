@@ -1,29 +1,47 @@
 package com.example.mocklocation.presentation.map
 
 import android.Manifest
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.mocklocation.presentation.file.FileUploadStatusHandler
+import com.example.mocklocation.presentation.file.FileUploadViewModel
+import com.example.mocklocation.presentation.map.MapRouteConstants.DEFAULT_FILE_NAME
+import com.example.mocklocation.presentation.map.MapRouteConstants.MIME_TYPE_TEXT
+import com.example.mocklocation.presentation.ui.common.rememberFileSelectorLauncher
+import com.example.mocklocation.presentation.ui.common.rememberPermissionLauncher
 
 @Composable
 fun MapRoute(
-    viewModel: MapViewModel = hiltViewModel()
+    mapViewModel: MapViewModel = hiltViewModel(),
+    uploadViewModel: FileUploadViewModel = hiltViewModel()
 ) {
-    val permissionGranted by viewModel.locationPermissionGranted.collectAsState()
+    val permissionGranted by mapViewModel.locationPermissionGranted.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = viewModel::onPermissionResult
-    )
+    val permissionLauncher = rememberPermissionLauncher(mapViewModel::onPermissionResult)
+    val fileSelectorLauncher = rememberFileSelectorLauncher(coroutineScope = coroutineScope) { uri ->
+        uploadViewModel.uploadFile(uri, uri.lastPathSegment ?: DEFAULT_FILE_NAME)
+    }
 
+    FileUploadStatusHandler(uploadViewModel = uploadViewModel)
     MapScreen(
-        mapViewModel = viewModel,
+        mapViewModel = mapViewModel,
         permissionGranted = permissionGranted,
         onRequestPermission = {
             permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
+        },
+        onClickSelectCsvFile = {
+            fileSelectorLauncher.launch(MIME_TYPE_TEXT)
+        },
+        onClickStartMockSend = { },
+        onClickStopMockSend = { }
     )
+}
+
+private object MapRouteConstants {
+    const val DEFAULT_FILE_NAME = "unknown.csv"
+    const val MIME_TYPE_TEXT = "text/*"
 }
