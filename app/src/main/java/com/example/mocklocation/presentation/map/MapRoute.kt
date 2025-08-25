@@ -44,5 +44,5 @@ fun MapRoute(
 
 private object MapRouteConstants {
     const val DEFAULT_FILE_NAME = "unknown.csv"
-    const val MIME_TYPE_TEXT = "*/*" // "text/*"
+    const val MIME_TYPE_TEXT = "*/*"
 }
