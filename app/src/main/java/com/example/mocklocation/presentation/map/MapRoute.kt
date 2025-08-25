@@ -1,12 +1,10 @@
 package com.example.mocklocation.presentation.map
 
 import android.Manifest
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.mocklocation.presentation.file.FileUploadStatusHandler
 import com.example.mocklocation.presentation.file.FileUploadViewModel
