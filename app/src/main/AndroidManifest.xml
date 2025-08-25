@@ -33,7 +33,7 @@
         </activity>
         <activity android:name=".presentation.map.MapActivity" />
         <service
-            android:name="com.example.mocklocation.domain.service.MockLocationSenderService"
+            android:name="com.example.mocklocation.service.MockLocationSenderService"
             android:enabled="true"
             android:exported="false" />
     </application>
