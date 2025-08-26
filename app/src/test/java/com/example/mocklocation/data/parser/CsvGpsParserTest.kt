@@ -29,6 +29,7 @@ class CsvGpsParserTest {
         assertEquals(0.6285398f, result?.accuracy)
         assertEquals(0.014438872f, result?.speed)
         assertEquals(254.5473f, result?.bearing)
+        assertEquals(20, result?.satellites)
     }
 
     @Test
@@ -71,7 +72,7 @@ class CsvGpsParserTest {
     @DisplayName("findValues: regex로 문자열에서 값 추출")
     fun findValuesTest() {
         val line = "728848 2025/06/24 14:33:58.608278 5469.4844 204 IDCE ALD LCAT 930 log info verbose 1 #onLocationChanged[5683]:isSensorMode false : accuracy:0.6268064, satelliteCount:40, speed:0.026479315, bearing:252.62878, provider:gps, time: 1750743262804 Location[gps 35.158272,129.027485 hAcc=0.6268064 et=+1h31m9s417ms alt=73.7088623046875 vAcc=1.059966 vel=0.026479315 sAcc=0.38278857 bear=252.62878 bAcc=2.086191 {Bundle[{satellites=20, maxCn0=46, meanCn0=20}]}]"
-        val expected = listOf("1750743262804", "35.158272", "129.027485", "0.6268064", "0.026479315", "252.62878")
+        val expected = listOf("1750743262804", "35.158272", "129.027485", "0.6268064", "0.026479315", "252.62878", "20")
 
         val result = parser.findValues(line, CsvGpsParser.DEFAULT_REGEX)
 
