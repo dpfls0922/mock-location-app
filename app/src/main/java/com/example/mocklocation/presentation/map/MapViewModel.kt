@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mocklocation.domain.entity.CurrentLocation
+import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.domain.service.MapService
 import com.example.mocklocation.domain.usecase.CheckLocationPermissionUseCase
 import com.example.mocklocation.domain.usecase.GetCurrentLocationUseCase
@@ -27,6 +28,9 @@ class MapViewModel @Inject constructor(
     private val _currentLocation = MutableStateFlow<CurrentLocation?>(null)
     val currentLocation: StateFlow<CurrentLocation?> = _currentLocation
 
+    private val _gpsPoints = MutableStateFlow<List<GpsPoint>>(emptyList())
+    val gpsPoints: StateFlow<List<GpsPoint>> = _gpsPoints
+
     fun createMapView(context: Context) = mapService.createView(context)
 
     suspend fun checkAndFetchInitialLocation() {
@@ -48,6 +52,10 @@ class MapViewModel @Inject constructor(
                 Timber.d("위치 업데이트: $location")
             }
             .launchIn(viewModelScope)
+    }
+
+    fun updateGpsPoints(newPoints: List<GpsPoint>) {
+        _gpsPoints.value = newPoints
     }
 
     fun onResume() = mapService.onResume()

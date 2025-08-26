@@ -6,5 +6,6 @@ data class GpsPoint(
     val longitude: Double,
     val accuracy: Float,
     val speed: Float,
-    val bearing: Float
+    val bearing: Float,
+    val satellites: Int
 )

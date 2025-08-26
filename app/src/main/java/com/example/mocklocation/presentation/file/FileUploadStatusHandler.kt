@@ -7,9 +7,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.mocklocation.presentation.map.MapViewModel
 
 @Composable
 fun FileUploadStatusHandler(
+    mapViewModel: MapViewModel = hiltViewModel(),
     uploadViewModel: FileUploadViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -22,6 +24,7 @@ fun FileUploadStatusHandler(
             }
             is UploadUiState.Success -> {
                 Toast.makeText(context, "주행 로그 파싱 성공", Toast.LENGTH_SHORT).show()
+                mapViewModel.updateGpsPoints((uploadState as UploadUiState.Success).gpsPoints)
                 uploadViewModel.resetState()
             }
             is UploadUiState.Error -> {

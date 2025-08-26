@@ -10,38 +10,39 @@ import com.example.mocklocation.presentation.file.FileUploadStatusHandler
 import com.example.mocklocation.presentation.file.FileUploadViewModel
 import com.example.mocklocation.presentation.map.MapRouteConstants.DEFAULT_FILE_NAME
 import com.example.mocklocation.presentation.map.MapRouteConstants.MIME_TYPE_TEXT
+import com.example.mocklocation.presentation.mock.MockLocationViewModel
 import com.example.mocklocation.presentation.ui.common.rememberFileSelectorLauncher
 import com.example.mocklocation.presentation.ui.common.rememberPermissionLauncher
 
 @Composable
 fun MapRoute(
     mapViewModel: MapViewModel = hiltViewModel(),
-    uploadViewModel: FileUploadViewModel = hiltViewModel()
+    mockLocationViewModel: MockLocationViewModel = hiltViewModel(),
+    uploadViewModel: FileUploadViewModel = hiltViewModel(),
 ) {
     val permissionGranted by mapViewModel.locationPermissionGranted.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
-
     val permissionLauncher = rememberPermissionLauncher(mapViewModel::onPermissionResult)
+
+    val coroutineScope = rememberCoroutineScope()
     val fileSelectorLauncher = rememberFileSelectorLauncher(coroutineScope = coroutineScope) { uri ->
         uploadViewModel.uploadFile(uri, uri.lastPathSegment ?: DEFAULT_FILE_NAME)
     }
 
+    val gpsPoints = mapViewModel.gpsPoints.collectAsState().value
+
     FileUploadStatusHandler(uploadViewModel = uploadViewModel)
+
     MapScreen(
         mapViewModel = mapViewModel,
         permissionGranted = permissionGranted,
-        onRequestPermission = {
-            permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-        },
-        onClickSelectCsvFile = {
-            fileSelectorLauncher.launch(MIME_TYPE_TEXT)
-        },
-        onClickStartMockSend = { },
-        onClickStopMockSend = { }
+        onRequestPermission = { permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION) },
+        onClickSelectCsvFile = { fileSelectorLauncher.launch(MIME_TYPE_TEXT) },
+        onClickStartMockSend = { mockLocationViewModel.startMocking(gpsPoints) },
+        onClickStopMockSend = { mockLocationViewModel.stopMocking() }
     )
 }
 
 private object MapRouteConstants {
     const val DEFAULT_FILE_NAME = "unknown.csv"
-    const val MIME_TYPE_TEXT = "text/*"
+    const val MIME_TYPE_TEXT = "*/*"
 }

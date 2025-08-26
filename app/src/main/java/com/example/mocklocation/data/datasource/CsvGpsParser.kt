@@ -20,7 +20,7 @@ class CsvGpsParser(
 
     fun parseLine(line: String): GpsPoint? {
         val values = findValues(line, gpsRegex) ?: return null
-        if (values.size != 6) return null
+        if (values.size != 7) return null
 
         val timestamp = values.getOrNull(0)?.toLongOrNull() ?: return null
         val latitude = values.getOrNull(1)?.toDoubleOrNull() ?: return null
@@ -28,8 +28,9 @@ class CsvGpsParser(
         val accuracy = values.getOrNull(3)?.toFloatOrNull() ?: return null
         val speed = values.getOrNull(4)?.toFloatOrNull() ?: return null
         val bearing = values.getOrNull(5)?.toFloatOrNull() ?: return null
+        val satellites = values.getOrNull(6)?.toIntOrNull() ?: return null
 
-        return GpsPoint(timestamp, latitude, longitude, accuracy, speed, bearing)
+        return GpsPoint(timestamp, latitude, longitude, accuracy, speed, bearing, satellites)
     }
 
     fun findValues(line: String, regex: Regex): List<String>? {
@@ -38,7 +39,7 @@ class CsvGpsParser(
 
     companion object {
         val DEFAULT_REGEX = Regex(
-            """time:\s*(\d+).*?Location\[gps\s*([\d.-]+),([\d.-]+).*?hAcc=([\d.]+).*?vel=([\d.]+).*?bear=([\d.]+)""",
+            """time:\s*(\d+).*?Location\[gps\s*([\d.-]+),([\d.-]+).*?hAcc=([\d.]+).*?vel=([\d.]+).*?bear=([\d.]+).*?Bundle\[\{satellites=(\d+)""",
             RegexOption.DOT_MATCHES_ALL
         )
     }
