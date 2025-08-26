@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    kotlin("kapt")
+    id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
     id("kotlin-parcelize")
 }
@@ -29,6 +29,10 @@ android {
     buildTypes {
         debug {
             isDebuggable = true
+            buildConfigField("String", "BASE_URL", "\"https://ntmapstg.tmap.co.kr:9443/tmap-channel/\"")
+            buildConfigField("String", "POI_DETAIL_URL", "\"https://tmapauto-stg.tmobiweb.com/\"")
+            buildConfigField("String", "AUTO_COMPLETE_URL", "\"https://acnf.tmap.co.kr:13132/\"")
+            buildConfigField("String", "TMAP_ACCESS_KEY", "\"550e8400-e29b-41d4-a716-446655440000\"")
         }
         release {
             isDebuggable = false
@@ -37,6 +41,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "BASE_URL", "\"https://ntmapstg.tmap.co.kr:9443/tmap-channel/\"")
+            buildConfigField("String", "POI_DETAIL_URL", "\"https://tmapauto-stg.tmobiweb.com/\"")
+            buildConfigField("String", "AUTO_COMPLETE_URL", "\"https://acnf.tmap.co.kr:13132/\"")
+            buildConfigField("String", "TMAP_ACCESS_KEY", "\"550e8400-e29b-41d4-a716-446655440000\"")
         }
     }
     compileOptions {
@@ -48,6 +56,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -80,6 +89,11 @@ dependencies {
     kapt("androidx.hilt:hilt-compiler:1.2.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation("com.jakewharton.timber:timber:5.0.1")
+
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     implementation("androidx.compose.material3:material3:1.1.0")
     implementation("androidx.compose.material:material-icons-extended:1.4.3")
