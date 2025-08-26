@@ -11,13 +11,14 @@ data class GpsPointParcelable(
     val longitude: Double,
     val accuracy: Float,
     val speed: Float,
-    val bearing: Float
+    val bearing: Float,
+    val satellites: Int
 ) : Parcelable
 
 fun GpsPoint.toParcelable() = GpsPointParcelable(
-    timestamp, latitude, longitude, accuracy, speed, bearing
+    timestamp, latitude, longitude, accuracy, speed, bearing, satellites
 )
 
 fun GpsPointParcelable.toDomainModel() = GpsPoint(
-    timestamp, latitude, longitude, accuracy, speed, bearing
+    timestamp, latitude, longitude, accuracy, speed, bearing, satellites
 )
