@@ -4,6 +4,7 @@ import com.example.mocklocation.di.ApplicationScope
 import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.domain.usecase.SendMockLocationUseCase
 import kotlinx.coroutines.*
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -39,7 +40,10 @@ class MockLocationHandler @Inject constructor(
             try {
                 sendMockLocationUseCase.createMockLocationFlow(allGpsPoints, lastSentIndex)
                     .collect { point ->
-                        sendMockLocationUseCase.sendLocation(point)
+                        val result = sendMockLocationUseCase.sendLocation(point)
+                        if (result.isFailure) {
+                            Timber.e("❗️위치 전송 실패: 다음 지점으로 넘어갑니다")
+                        }
                         lastSentIndex++
                     }
             } finally {

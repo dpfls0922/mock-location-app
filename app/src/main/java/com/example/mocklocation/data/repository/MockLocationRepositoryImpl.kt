@@ -52,9 +52,9 @@ class MockLocationRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun sendLocation(point: GpsPoint) {
+    override fun sendLocation(point: GpsPoint): Result<Unit> {
         val mockLocation = createMockLocation(point)
-        runCatching {
+        return runCatching {
             locationManager.setTestProviderLocation(PROVIDER_NAME, mockLocation)
             Timber.d("➡️ Mock GPS 전송: (위도=${point.latitude}, 경도=${point.longitude}), 속도=${point.speed}m/s, 시간=${point.timestamp}, 정확도=${point.accuracy}m, 방위=${point.bearing}°, 위성=${point.satellites}개")
         }.onFailure {

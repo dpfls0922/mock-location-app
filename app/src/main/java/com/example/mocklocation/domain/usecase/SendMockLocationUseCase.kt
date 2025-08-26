@@ -34,7 +34,7 @@ class SendMockLocationUseCase @Inject constructor(
         }
     }
 
-    fun sendLocation(point: GpsPoint) {
-        repository.sendLocation(point)
+    fun sendLocation(point: GpsPoint): Result<Unit> {
+        return repository.sendLocation(point)
     }
 }
