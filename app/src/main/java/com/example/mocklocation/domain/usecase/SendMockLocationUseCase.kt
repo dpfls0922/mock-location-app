@@ -4,6 +4,7 @@ import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.domain.repository.MockLocationRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
+import timber.log.Timber
 import javax.inject.Inject
 
 class SendMockLocationUseCase @Inject constructor(
@@ -15,6 +16,7 @@ class SendMockLocationUseCase @Inject constructor(
 
     fun createMockLocationFlow(gpsPoints: List<GpsPoint>, startIndex: Int) = flow {
         repository.startMocking()
+        Timber.d("🗺️ Mocking Flow 전송 시작: (${startIndex}/${gpsPoints.size})")
         try {
             for (i in startIndex until gpsPoints.size) {
                 val point = gpsPoints[i]

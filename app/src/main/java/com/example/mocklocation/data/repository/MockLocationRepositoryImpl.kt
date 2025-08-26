@@ -38,6 +38,7 @@ class MockLocationRepositoryImpl @Inject constructor(
             locationManager.setTestProviderEnabled(PROVIDER_NAME, true)
             Timber.d("✅ Mock GPS 전송 시작")
         }.onFailure {
+            Timber.e(it, "Mock GPS 전송 시작 실패")
         }
     }
 
@@ -47,6 +48,7 @@ class MockLocationRepositoryImpl @Inject constructor(
             removeTestProvider()
             Timber.d("✅ Mock GPS 전송 종료")
         }.onFailure {
+            Timber.e(it, "Mock GPS 전송 종료 실패")
         }
     }
 
@@ -56,7 +58,11 @@ class MockLocationRepositoryImpl @Inject constructor(
             locationManager.setTestProviderLocation(PROVIDER_NAME, mockLocation)
             Timber.d("➡️ Mock GPS 전송: (위도=${point.latitude}, 경도=${point.longitude}), 속도=${point.speed}m/s, 시간=${point.timestamp}, 정확도=${point.accuracy}m, 방위=${point.bearing}°, 위성=${point.satellites}개")
         }.onFailure {
-            Timber.e(it, "Mock 위치 전송 실패: ${it.message})")
+            if (it is SecurityException) {
+                Timber.e(it, "개발자 옵션에서 '모의 위치 앱'을 활성화해주세요")
+            } else {
+                Timber.e(it, "Mock 위치 전송 실패: ${it.message})")
+            }
         }
     }
 
