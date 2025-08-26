@@ -5,39 +5,54 @@ import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.domain.usecase.SendMockLocationUseCase
 import kotlinx.coroutines.*
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class MockLocationHandler @Inject constructor(
     private val sendMockLocationUseCase: SendMockLocationUseCase,
     @ApplicationScope private val scope: CoroutineScope
 ) {
-    companion object {
-        private const val MIN_DELAY_MS = 100L
-    }
     private var mockJob: Job? = null
+    private var allGpsPoints: List<GpsPoint> = emptyList()
+    private var lastSentIndex: Int = 0
 
     fun startSending(gpsPoints: List<GpsPoint>) {
         if (gpsPoints.isEmpty()) return
-
         stopSending()
+        this.allGpsPoints = gpsPoints
+        this.lastSentIndex = 0
+        startMockingFromIndex()
+    }
+
+    fun resumeSending() {
+        if (mockJob?.isActive == true || allGpsPoints.isEmpty()) return
+        startMockingFromIndex()
+    }
+
+    private fun startMockingFromIndex() {
+        if (lastSentIndex >= allGpsPoints.size) {
+            resetIndex()
+            return
+        }
 
         mockJob = scope.launch {
-            sendMockLocationUseCase.startMocking()
-            gpsPoints.forEachIndexed { index, point ->
-                sendMockLocationUseCase.sendLocation(point)
-                delay(calculateDelay(gpsPoints, index))
+            try {
+                sendMockLocationUseCase.createMockLocationFlow(allGpsPoints, lastSentIndex)
+                    .collect { point ->
+                        sendMockLocationUseCase.sendLocation(point)
+                        lastSentIndex++
+                    }
+            } finally {
+                if (lastSentIndex >= allGpsPoints.size) {
+                    resetIndex()
+                }
             }
-            sendMockLocationUseCase.stopMocking()
         }
     }
 
-    private fun calculateDelay(gpsPoints: List<GpsPoint>, currentIndex: Int): Long {
-        if (currentIndex >= gpsPoints.size - 1) return 0L // 마지막 지점은 딜레이 없음
-
-        val currentTimestamp = gpsPoints[currentIndex].timestamp
-        val nextTimestamp = gpsPoints[currentIndex + 1].timestamp
-        val diff = nextTimestamp - currentTimestamp
-
-        return if (diff > 0) diff else MIN_DELAY_MS
+    private fun resetIndex() {
+        this.lastSentIndex = 0
+        this.allGpsPoints = emptyList()
     }
 
     fun stopSending() {

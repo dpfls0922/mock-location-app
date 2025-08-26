@@ -20,15 +20,21 @@ class MockLocationSenderService : Service() {
 
     companion object {
         const val ACTION_START_MOCKING = "com.example.mocklocation.action.START_MOCKING"
+        const val ACTION_RESUME_MOCKING = "com.example.mocklocation.action.RESUME_MOCKING"
         const val EXTRA_GPS_POINTS = "com.example.mocklocation.extra.GPS_POINTS"
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action == ACTION_START_MOCKING) {
-            val parcelableList = getGpsPointParcelableFromIntent(intent)
-            parcelableList?.let {
-                val domainGpsPoints = it.map { p -> p.toDomainModel() }
-                mockLocationHandler.startSending(domainGpsPoints)
+        when (intent?.action) {
+            ACTION_START_MOCKING -> {
+                val parcelableList = getGpsPointParcelableFromIntent(intent)
+                parcelableList?.let {
+                    val domainGpsPoints = it.map { p -> p.toDomainModel() }
+                    mockLocationHandler.startSending(domainGpsPoints)
+                }
+            }
+            ACTION_RESUME_MOCKING -> {
+                mockLocationHandler.resumeSending()
             }
         }
         return START_STICKY

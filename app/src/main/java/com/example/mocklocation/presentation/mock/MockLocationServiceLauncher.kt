@@ -24,6 +24,13 @@ class MockLocationServiceLauncher @Inject constructor(
         context.startService(intent)
     }
 
+    fun resumeMocking() {
+        val intent = Intent(context, MockLocationSenderService::class.java).apply {
+            action = MockLocationSenderService.ACTION_RESUME_MOCKING
+        }
+        context.startService(intent)
+    }
+
     fun stopMocking() {
         val intent = Intent(context, MockLocationSenderService::class.java)
         context.stopService(intent)
