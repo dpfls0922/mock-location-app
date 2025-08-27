@@ -1,4 +1,4 @@
-package com.example.mocklocation.data.datasource
+package com.example.mocklocation.data.parser
 
 import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.domain.usecase.GpsDataParser
