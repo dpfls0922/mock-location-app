@@ -12,6 +12,7 @@ import com.example.mocklocation.domain.usecase.GpsDataParser
 import timber.log.Timber
 import java.nio.ByteBuffer
 import javax.inject.Inject
+import android.util.Base64
 
 /**
  * TVAS(ByteArray) → GpsPoint 리스트 파싱기
@@ -21,9 +22,10 @@ class TvasKotlinParser @Inject constructor(
     private val tileParser: TileSectionParser,
     private val vertexParser: VertexSectionParser,
     private val converter: TvasToWgs84Converter
-) : GpsDataParser<ByteArray> {
-    override fun parse(input: ByteArray): List<GpsPoint> {
-        val tvas = parseTvas(input, tileParser, vertexParser) ?: return emptyList()
+) : GpsDataParser<String> {
+    override fun parse(input: String): List<GpsPoint> {
+        val tvasBytes = Base64.decode(input, Base64.DEFAULT)
+        val tvas = parseTvas(tvasBytes, tileParser, vertexParser) ?: return emptyList()
         val wgsPoints = converter.convert(tvas)
         Timber.d(tvas.detailInfo())
 
