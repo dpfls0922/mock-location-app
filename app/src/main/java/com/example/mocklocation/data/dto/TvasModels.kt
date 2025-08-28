@@ -107,44 +107,43 @@ fun Tvas.detailInfo(): String {
         return if (m > 0) "${m}분 ${s}초" else "${s}초"
     }
 
-    return buildString {
-        appendLine("📍 경로 기본 정보")
-        appendLine("- 포맷 버전: ${header.tvasVersion.tvasFormatVersion}")
-        appendLine("- 언어 코드: ${header.tvasVersion.language} (0=한국어)")
-        appendLine("- 문자 인코딩 코드: ${header.tvasVersion.charset} (0=EUC-KR, 1=UTF-8)")
-        appendLine("- 지도 버전: ${header.tvasVersion.mapVersion}")
-        appendLine("- 총 거리: ${formatDist(header.routeSearchInfo.totalDistance)}")
-        appendLine("- 총 시간: ${formatTime(header.routeSearchInfo.totalTime)}")
-        appendLine("- 예상 택시 요금: ${header.routeSearchInfo.taxiFare} 원")
-        appendLine("- 출발지: ${header.mapInfo.departName} (${header.mapInfo.departX})")
-        appendLine("- 도착지: ${header.mapInfo.destName} (${header.mapInfo.destX})")
+    val totalVertices = vertexInfo?.vertices?.size ?: 0
+    val totalTiles = tileInfo?.tiles?.size ?: 0
+    val log = StringBuilder()
 
-        appendLine()
-        appendLine("📂 데이터 인덱스 목록 (${header.infoIndexes.size}개)")
-        header.infoIndexes.take(2).forEachIndexed { i, idx ->
-            appendLine("${i + 1}. ID='${idx.id}' | 오프셋=${idx.offset} | 크기=${idx.size}바이트")
-        }
+    log.append("-------------------- 경로 기본 정보 ---------------------\n")
+    log.append(" 포맷 버전: ${header.tvasVersion.tvasFormatVersion}\n")
+    log.append(" 언어 코드: ${header.tvasVersion.language} (0=한국어)\n")
+    log.append(" 문자 인코딩: ${header.tvasVersion.charset} (0=EUC-KR, 1=UTF-8)\n")
+    log.append(" 지도 버전: ${header.tvasVersion.mapVersion}\n")
+    log.append(" 총 거리: ${formatDist(header.routeSearchInfo.totalDistance)}\n")
+    log.append(" 총 시간: ${formatTime(header.routeSearchInfo.totalTime)}\n")
+    log.append(" 예상 택시 요금: ${header.routeSearchInfo.taxiFare} 원\n")
+    log.append(" 출발지: ${header.mapInfo.departName} (좌표: ${header.mapInfo.departX}, ${header.mapInfo.departY})\n")
+    log.append(" 도착지: ${header.mapInfo.destName} (좌표: ${header.mapInfo.destX}, ${header.mapInfo.destY})\n")
 
-        appendLine()
-        appendLine("🗺 타일 정보 (TI)")
-        if (tileInfo?.tiles.isNullOrEmpty()) {
-            appendLine("- 타일 데이터 없음")
-        } else {
-            tileInfo?.tiles?.take(5)?.forEachIndexed { i, t ->
-                appendLine("${i + 1}. 타일코드=${t.tileCode} | 마지막 보간점 인덱스=${t.lastVertexIndex}")
-            }
-            if ((tileInfo?.tiles?.size ?: 0) > 5) appendLine("...")
-        }
+    log.append("----------------- 데이터 인덱스 목록 (${header.infoIndexes.size}개) -----------------\n")
+    header.infoIndexes.take(2).forEachIndexed { i, idx ->
+        log.append(" ${i + 1}. ID: '${idx.id}' | 오프셋: ${idx.offset} | 크기: ${idx.size}바이트\n")
+    }
 
-        appendLine()
-        appendLine("📌 보간점 정보 (VX) - 총 ${vertexInfo?.vertices?.size ?: 0}개")
-        if (vertexInfo?.vertices.isNullOrEmpty()) {
-            appendLine("- 보간점 없음")
-        } else {
-            vertexInfo?.vertices?.take(5)?.forEachIndexed { i, v ->
-                appendLine("#${i + 1} 좌표=(${v.x}, ${v.y}) | 거리=${formatDist(v.distanceBetweenVertex.toInt())} | 시간=${formatTime(v.timeBetweenVertex.toInt())}")
-            }
-            if ((vertexInfo?.vertices?.size ?: 0) > 5) appendLine("...")
+    log.append("------------------ 타일 정보 (TI) - 총 ${totalTiles}개 -------------------\n")
+    if (tileInfo?.tiles.isNullOrEmpty()) {
+        log.append("  타일 데이터 없음\n")
+    } else {
+        tileInfo?.tiles?.forEachIndexed { i, t ->
+            log.append(" ${i + 1}. 타일코드: ${t.tileCode} | 마지막 보간점 인덱스: ${t.lastVertexIndex}\n")
         }
     }
+
+    log.append("--------------- 보간점 정보 (VX) - 총 ${totalVertices}개 ----------------\n")
+    if (vertexInfo?.vertices.isNullOrEmpty()) {
+        log.append("  보간점 없음\n")
+    } else {
+        vertexInfo?.vertices?.forEachIndexed { i, v ->
+            log.append(" #${i + 1} 좌표: (${v.x}, ${v.y}) | 거리: ${formatDist(v.distanceBetweenVertex.toInt())} | 시간: ${formatTime(v.timeBetweenVertex.toInt())}\n")
+        }
+    }
+    log.append("---------------------------------------------------\n")
+    return log.toString()
 }
