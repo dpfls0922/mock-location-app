@@ -20,36 +20,28 @@ class MockLocationRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : MockLocationRepository {
     companion object {
-        private const val GPS_PROVIDER_NAME = LocationManager.GPS_PROVIDER
-        private const val DR_GPS_PROVIDER_NAME = "dr_gps"
+        private const val PROVIDER_NAME = LocationManager.GPS_PROVIDER
+        private const val EXTRA_SATELLITES = "satellites"
+        private const val EXTRA_MAX_CN0 = "maxCn0"
+        private const val EXTRA_MEAN_CN0 = "meanCn0"
     }
 
     private val locationManager: LocationManager by lazy {
         context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     }
-    private var currentProviderName: String = GPS_PROVIDER_NAME
 
     override fun startMocking() {
         runCatching {
-            removeTestProvider(GPS_PROVIDER_NAME)
-            removeTestProvider(DR_GPS_PROVIDER_NAME)
+            removeTestProvider()
 
             locationManager.addTestProvider(
-                GPS_PROVIDER_NAME,
+                PROVIDER_NAME,
                 false, false, false, false, true, true, true,
                 ProviderProperties.POWER_USAGE_LOW,
                 ProviderProperties.ACCURACY_FINE
             )
-            locationManager.setTestProviderEnabled(GPS_PROVIDER_NAME, true)
-
-            locationManager.addTestProvider(
-                DR_GPS_PROVIDER_NAME,
-                false, false, false, false, true, true, true,
-                ProviderProperties.POWER_USAGE_LOW,
-                ProviderProperties.ACCURACY_COARSE
-            )
-            locationManager.setTestProviderEnabled(DR_GPS_PROVIDER_NAME, true)
-            Timber.d("✅ Mock GPS 전송 시작: GPS 및 DR-GPS 제공자 등록 완료")
+            locationManager.setTestProviderEnabled(PROVIDER_NAME, true)
+            Timber.d("✅ Mock GPS 전송 시작")
         }.onFailure {
             Timber.e(it, "Mock GPS 전송 시작 실패")
         }
@@ -57,25 +49,18 @@ class MockLocationRepositoryImpl @Inject constructor(
 
     override fun stopMocking() {
         runCatching {
-            removeTestProvider(GPS_PROVIDER_NAME)
-            removeTestProvider(DR_GPS_PROVIDER_NAME)
+            removeTestProvider()
             Timber.d("✅ Mock GPS 전송 종료")
         }.onFailure {
             Timber.e(it, "Mock GPS 전송 종료 실패")
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun sendLocation(point: GpsPoint): Result<Unit> {
-        val provider = point.provider
-
-        if (provider != currentProviderName) {
-            Timber.d("➡️ 제공자 변경: ${currentProviderName} -> ${provider}")
-            currentProviderName = provider
-        }
-
-        val mockLocation = createMockLocation(point, provider)
+        val mockLocation = createMockLocation(point)
         return runCatching {
-            locationManager.setTestProviderLocation(provider, mockLocation)
+            locationManager.setTestProviderLocation(PROVIDER_NAME, mockLocation)
             Timber.d("➡️ Mock GPS 전송: $mockLocation")
             Timber.d("➡️ Mock GPS 전송: (위도=${point.latitude}, 경도=${point.longitude}), 속도=${point.speed}m/s, 시간=${point.timestamp}, 정확도=${point.hAcc}m, 방위=${point.bearing}°, 위성=${point.satellites}개")
         }.onFailure {
@@ -87,17 +72,17 @@ class MockLocationRepositoryImpl @Inject constructor(
         }
     }
 
-    private fun removeTestProvider(providerName: String) {
+    private fun removeTestProvider() {
         runCatching {
-            locationManager.removeTestProvider(providerName)
+            locationManager.removeTestProvider(PROVIDER_NAME)
         }.onFailure {
-            Timber.w(it, "Mock GPS 제공자 제거 실패: $providerName")
+            Timber.w(it, "Mock GPS 제공자 제거 실패: $PROVIDER_NAME")
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun createMockLocation(gpsPoint: GpsPoint, providerName: String): Location {
-        return Location(providerName).apply {
+    private fun createMockLocation(gpsPoint: GpsPoint): Location {
+        return Location(PROVIDER_NAME).apply {
             latitude = gpsPoint.latitude
             longitude = gpsPoint.longitude
             time = gpsPoint.timestamp
@@ -113,9 +98,9 @@ class MockLocationRepositoryImpl @Inject constructor(
             bearingAccuracyDegrees = gpsPoint.bAcc
 
             val extras = Bundle().apply {
-                putInt("satellites", gpsPoint.satellites)
-                putInt("maxCn0", gpsPoint.maxCn0)
-                putInt("meanCn0", gpsPoint.meanCn0)
+                putInt(EXTRA_SATELLITES, gpsPoint.satellites)
+                putInt(EXTRA_MAX_CN0, gpsPoint.maxCn0)
+                putInt(EXTRA_MEAN_CN0, gpsPoint.meanCn0)
             }
             this.extras = extras
         }
