@@ -1,6 +1,7 @@
 package com.example.mocklocation.presentation.map.component
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,11 +32,10 @@ fun MockGpsButton(
     onStartMock: () -> Unit,
     onStopMock: () -> Unit,
 ) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Button(
             onClick = onStartMock,
+            modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF4CAF50)
             ),
@@ -48,6 +48,7 @@ fun MockGpsButton(
         Spacer(modifier = Modifier.width(8.dp))
         Button(
             onClick = onStopMock,
+            modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFFF44336)
             ),
