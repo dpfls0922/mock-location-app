@@ -81,7 +81,7 @@ fun MockGpsStatus(isEnabled: Boolean) {
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = if (isEnabled) "Mock GPS 제어" else "GPS 비활성화",
+                text = if (isEnabled) "Mock GPS 주행 중" else "Mock GPS 주행 중지",
                 fontWeight = FontWeight.Medium,
                 fontSize = 14.sp,
                 color = if (isEnabled) Color(0xFF4CAF50) else Color(0xFFF44336)

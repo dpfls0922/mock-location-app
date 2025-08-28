@@ -30,7 +30,7 @@ fun GPSMockCard(
     var selectedMode by remember { mutableStateOf(GpsMode.GPS) }
     var repeatMode by remember { mutableStateOf(RepeatMode.INFINITE) }
     var repeatCount by remember { mutableIntStateOf(3) }
-    var isGpsEnabled by remember { mutableStateOf(true) }
+    var isGpsEnabled by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var currentLocation by remember {
         mutableStateOf(
