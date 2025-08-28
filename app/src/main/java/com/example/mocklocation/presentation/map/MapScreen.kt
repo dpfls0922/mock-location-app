@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.Button
 import androidx.compose.material3.FloatingActionButton
@@ -26,6 +27,7 @@ fun MapScreen(
     mapViewModel: MapViewModel,
     permissionGranted: Boolean,
     onRequestPermission: () -> Unit,
+    onClickMyLocation: () -> Unit,
     onClickSelectCsvFile: () -> Unit,
     onClickStartMockSend: () -> Unit,
     onClickStopMockSend: () -> Unit
@@ -42,8 +44,15 @@ fun MapScreen(
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = onClickSelectCsvFile) {
-                Icon(Icons.Default.Upload, contentDescription = "CSV 파일 업로드")
+            androidx.compose.foundation.layout.Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                FloatingActionButton(onClick = onClickMyLocation) {
+                    Icon(Icons.Default.MyLocation, contentDescription = "현위치 조회")
+                }
+                FloatingActionButton(onClick = onClickSelectCsvFile) {
+                    Icon(Icons.Default.Upload, contentDescription = "CSV 파일 업로드")
+                }
             }
         }
     ) { innerPadding ->
