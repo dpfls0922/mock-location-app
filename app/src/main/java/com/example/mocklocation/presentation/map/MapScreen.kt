@@ -6,12 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MyLocation
-import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.Button
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.example.mocklocation.presentation.map.component.FloatingButtons
 
 @Composable
 fun MapScreen(
@@ -44,16 +40,10 @@ fun MapScreen(
 
     Scaffold(
         floatingActionButton = {
-            androidx.compose.foundation.layout.Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                FloatingActionButton(onClick = onClickMyLocation) {
-                    Icon(Icons.Default.MyLocation, contentDescription = "현위치 조회")
-                }
-                FloatingActionButton(onClick = onClickSelectCsvFile) {
-                    Icon(Icons.Default.Upload, contentDescription = "CSV 파일 업로드")
-                }
-            }
+            FloatingButtons(
+                onClickMyLocation = onClickMyLocation,
+                onClickSelectCsvFile = onClickSelectCsvFile
+            )
         }
     ) { innerPadding ->
         Box(Modifier.padding(innerPadding).fillMaxSize()) {
