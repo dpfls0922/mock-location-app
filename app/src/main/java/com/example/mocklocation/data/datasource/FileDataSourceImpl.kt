@@ -28,7 +28,7 @@ class FileDataSourceImpl @Inject constructor(
 
         Timber.d("파싱 완료: GPS 포인트 총 ${gpsPoints.size}개 발견")
         gpsPoints.forEachIndexed { index, point ->
-            Timber.d("    [$index] 위도: ${point.latitude}, 경도: ${point.longitude}, 속도: ${point.speed}, 정확도: ${point.accuracy}")
+            Timber.d("    [$index] 위도: ${point.latitude}, 경도: ${point.longitude}, 속도: ${point.speed}, 정확도: ${point.hAcc}")
         }
 
         val csvFile = CsvFile(

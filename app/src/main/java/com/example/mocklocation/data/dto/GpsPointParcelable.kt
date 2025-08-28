@@ -6,19 +6,30 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class GpsPointParcelable(
+    val provider: String,
     val timestamp: Long,
     val latitude: Double,
     val longitude: Double,
-    val accuracy: Float,
+    val altitude: Double,
+    val hAcc: Float,
+    val vAcc: Float,
+    val sAcc: Float,
     val speed: Float,
     val bearing: Float,
-    val satellites: Int
+    val bAcc: Float,
+    val satellites: Int,
+    val maxCn0: Int,
+    val meanCn0: Int
 ) : Parcelable
 
 fun GpsPoint.toParcelable() = GpsPointParcelable(
-    timestamp, latitude, longitude, accuracy, speed, bearing, satellites
+    provider, timestamp, latitude, longitude, altitude,
+    hAcc, vAcc, sAcc, speed, bearing, bAcc,
+    satellites, maxCn0, meanCn0
 )
 
 fun GpsPointParcelable.toDomainModel() = GpsPoint(
-    timestamp, latitude, longitude, accuracy, speed, bearing, satellites
+    provider, timestamp, latitude, longitude, altitude,
+    hAcc, vAcc, sAcc, speed, bearing, bAcc,
+    satellites, maxCn0, meanCn0
 )

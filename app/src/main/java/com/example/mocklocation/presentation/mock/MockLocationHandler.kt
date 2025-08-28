@@ -3,7 +3,9 @@ package com.example.mocklocation.presentation.mock
 import com.example.mocklocation.di.ApplicationScope
 import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.domain.usecase.SendMockLocationUseCase
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton

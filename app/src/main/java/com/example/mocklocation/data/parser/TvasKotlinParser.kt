@@ -31,13 +31,20 @@ class TvasKotlinParser @Inject constructor(
 
         return wgsPoints.map { wgs ->
             GpsPoint(
+                provider = "tvas_gps",
                 timestamp = System.currentTimeMillis(),
                 latitude = wgs.latitude,
                 longitude = wgs.longitude,
-                accuracy = 5f,
+                altitude = 5.0,
+                hAcc = 5f,
+                vAcc = 5f,
+                sAcc = 5f,
                 speed = 5f,
                 bearing = 5f,
-                satellites = 3
+                bAcc = 5f,
+                satellites = 3,
+                maxCn0 = 3,
+                meanCn0 = 3
             )
         }
     }
