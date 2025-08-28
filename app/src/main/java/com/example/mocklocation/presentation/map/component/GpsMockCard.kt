@@ -24,7 +24,9 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun GPSMockCard(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onStartMock: () -> Unit,
+    onStopMock: () -> Unit
 ) {
     var selectedSpeed by remember { mutableStateOf("60km/h") }
     var selectedMode by remember { mutableStateOf(GpsMode.GPS) }
@@ -86,8 +88,14 @@ fun GPSMockCard(
                 )
 
                 MockGpsButton(
-                    onStartMock = { isGpsEnabled = true },
-                    onStopMock = { isGpsEnabled = false }
+                    onStartMock = {
+                        isGpsEnabled = true
+                        onStartMock()
+                    },
+                    onStopMock = {
+                        isGpsEnabled = false
+                        onStopMock()
+                    }
                 )
             }
         }
@@ -97,5 +105,8 @@ fun GPSMockCard(
 @Preview(showBackground = true)
 @Composable
 fun GPSMockCardPreview() {
-    GPSMockCard()
+    GPSMockCard(
+        onStartMock = { },
+        onStopMock = { }
+    )
 }
