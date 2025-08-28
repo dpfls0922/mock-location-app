@@ -1,6 +1,9 @@
 package com.example.mocklocation.di
 
-import com.example.mocklocation.data.datasource.CsvGpsParser
+import com.example.mocklocation.data.parser.CsvGpsParser
+import com.example.mocklocation.data.parser.TileSectionParser
+import com.example.mocklocation.data.parser.TvasToWgs84Converter
+import com.example.mocklocation.data.parser.VertexSectionParser
 import com.example.mocklocation.domain.usecase.GpsDataParser
 import com.example.mocklocation.domain.usecase.GpsParserAbstractFactory
 import com.example.mocklocation.domain.usecase.GpsParserFactory
@@ -19,11 +22,34 @@ object ParserModule {
     @Singleton
     fun provideCsvParser(): GpsDataParser<InputStream> = CsvGpsParser()
 
+    @TvasKotlinParser
+    @Provides
+    @Singleton
+    fun provideTvasParser(
+        tileParser: TileSectionParser,
+        vertexParser: VertexSectionParser,
+        converter: TvasToWgs84Converter
+    ): GpsDataParser<String> = com.example.mocklocation.data.parser.TvasKotlinParser(
+        tileParser,
+        vertexParser,
+        converter
+    )
+
+    @Provides
+    fun provideTileParser(): TileSectionParser = TileSectionParser
+
+    @Provides
+    fun provideVertexParser(): VertexSectionParser = VertexSectionParser
+
+    @Provides
+    fun provideTvasConverter(): TvasToWgs84Converter = TvasToWgs84Converter()
+
     @Provides
     @Singleton
     fun provideGpsParserFactory(
-        @CsvParser csvParser: GpsDataParser<InputStream>
+        @CsvParser csvParser: GpsDataParser<InputStream>,
+        @TvasKotlinParser tvasKotlinParser: GpsDataParser<String>
     ): GpsParserAbstractFactory {
-        return GpsParserFactory(csvParser)
+        return GpsParserFactory(csvParser, tvasKotlinParser)
     }
 }

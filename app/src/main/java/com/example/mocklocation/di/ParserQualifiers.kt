@@ -8,4 +8,4 @@ annotation class CsvParser
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class TvasParser
+annotation class TvasKotlinParser
