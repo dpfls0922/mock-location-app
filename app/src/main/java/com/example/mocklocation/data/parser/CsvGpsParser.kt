@@ -39,7 +39,7 @@ class CsvGpsParser(
 
     companion object {
         val DEFAULT_REGEX = Regex(
-            """time:\s*(\d+).*?Location\[gps\s*([\d.-]+),([\d.-]+).*?hAcc=([\d.]+).*?vel=([\d.]+).*?bear=([\d.]+).*?Bundle\[\{satellites=(\d+)""",
+            """time:\s*(\d+).*?Location\[(?:gps|dr_gps)\s*([\d.-]+),([\d.-]+).*?hAcc=([\d.]+).*?vel=([\d.]+).*?bear=([\d.]+).*?Bundle\[\{satellites=(\d+)""",
             RegexOption.DOT_MATCHES_ALL
         )
     }
