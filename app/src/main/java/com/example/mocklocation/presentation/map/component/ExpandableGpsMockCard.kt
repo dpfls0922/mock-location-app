@@ -12,7 +12,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 
 @Composable
-fun ExpandableGpsMockCard() {
+fun ExpandableGpsMockCard(
+    onStartMock: () -> Unit,
+    onStopMock: () -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Box(Modifier.fillMaxSize()) {
@@ -35,7 +38,9 @@ fun ExpandableGpsMockCard() {
                     .fillMaxHeight()
                     .fillMaxWidth(0.3f)
                     .align(Alignment.TopStart)
-                    .padding(8.dp)
+                    .padding(8.dp),
+                onStartMock,
+                onStopMock
             )
         }
     }
