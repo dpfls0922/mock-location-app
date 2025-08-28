@@ -16,9 +16,25 @@ class CsvGpsParserTest {
     }
 
     @Test
-    @DisplayName("parseLine: CSV 한 줄을 파싱해서 GpsPoint 객체로 변환")
-    fun parse() {
+    @DisplayName("parseLine(gps 모드): CSV 한 줄을 파싱해서 GpsPoint 객체로 변환")
+    fun parseGps() {
         val line = "713644 2025/06/24 14:33:56.468559 5467.3430 72 IDCE ALD LCAT 930 log info verbose 1 #onLocationChanged[5683]:isSensorMode false : accuracy:0.6285398, satelliteCount:40, speed:0.014438872, bearing:254.5473, provider:gps, time: 1750743260694 Location[gps 35.158274,129.027484 hAcc=0.6285398 et=+1h31m7s320ms alt=73.45844268798828 vAcc=1.0635567 vel=0.014438872 sAcc=0.37752575 bear=254.5473 bAcc=2.086191 {Bundle[{satellites=20, maxCn0=45, meanCn0=20}]}]"
+
+        val result = parser.parseLine(line)
+
+        assertEquals(1750743260694L, result?.timestamp)
+        assertEquals(35.158274, result?.latitude)
+        assertEquals(129.027484, result?.longitude)
+        assertEquals(0.6285398f, result?.accuracy)
+        assertEquals(0.014438872f, result?.speed)
+        assertEquals(254.5473f, result?.bearing)
+        assertEquals(20, result?.satellites)
+    }
+
+    @Test
+    @DisplayName("parseLine(dr_gps 모드): CSV 한 줄을 파싱해서 GpsPoint 객체로 변환")
+    fun parseDrGps() {
+        val line = "713644 2025/06/24 14:33:56.468559 5467.3430 72 IDCE ALD LCAT 930 log info verbose 1 #onLocationChanged[5683]:isSensorMode false : accuracy:0.6285398, satelliteCount:40, speed:0.014438872, bearing:254.5473, provider:dr_gps, time: 1750743260694 Location[gps 35.158274,129.027484 hAcc=0.6285398 et=+1h31m7s320ms alt=73.45844268798828 vAcc=1.0635567 vel=0.014438872 sAcc=0.37752575 bear=254.5473 bAcc=2.086191 {Bundle[{satellites=20, maxCn0=45, meanCn0=20}]}]"
 
         val result = parser.parseLine(line)
 
