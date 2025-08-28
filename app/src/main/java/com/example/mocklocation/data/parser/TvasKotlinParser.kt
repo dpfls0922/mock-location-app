@@ -13,6 +13,7 @@ import timber.log.Timber
 import java.nio.ByteBuffer
 import javax.inject.Inject
 import android.util.Base64
+import com.google.android.gms.security.ProviderInstaller.PROVIDER_NAME
 
 /**
  * TVAS(ByteArray) → GpsPoint 리스트 파싱기
@@ -31,7 +32,7 @@ class TvasKotlinParser @Inject constructor(
 
         return wgsPoints.map { wgs ->
             GpsPoint(
-                provider = "tvas_gps",
+                provider = PROVIDER_NAME,
                 timestamp = System.currentTimeMillis(),
                 latitude = wgs.latitude,
                 longitude = wgs.longitude,
