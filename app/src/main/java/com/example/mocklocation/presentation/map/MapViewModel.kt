@@ -8,6 +8,7 @@ import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.domain.service.MapService
 import com.example.mocklocation.domain.usecase.CheckLocationPermissionUseCase
 import com.example.mocklocation.domain.usecase.GetCurrentLocationUseCase
+import com.example.mocklocation.presentation.map.component.MockLocationUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,6 +28,9 @@ class MapViewModel @Inject constructor(
 
     private val _currentLocation = MutableStateFlow<CurrentLocation?>(null)
     val currentLocation: StateFlow<CurrentLocation?> = _currentLocation
+
+    private val _currentLocationUiModel = MutableStateFlow<MockLocationUiModel?>(null)
+    val currentLocationUiModel: StateFlow<MockLocationUiModel?> = _currentLocationUiModel
 
     private val _gpsPoints = MutableStateFlow<List<GpsPoint>>(emptyList())
     val gpsPoints: StateFlow<List<GpsPoint>> = _gpsPoints
@@ -50,6 +54,11 @@ class MapViewModel @Inject constructor(
                 _currentLocation.value = location
                 mapService.updateCurrentLocationMarker(location)
                 Timber.d("위치 업데이트: $location")
+
+                _currentLocationUiModel.value = MockLocationUiModel(
+                    latitude = location.latitude,
+                    longitude = location.longitude,
+                )
             }
             .launchIn(viewModelScope)
     }

@@ -25,6 +25,7 @@ import com.example.mocklocation.presentation.mock.MockingState
 fun GPSMockCard(
     modifier: Modifier = Modifier,
     mockingState: MockingState,
+    currentLocationUiModel: MockLocationUiModel?,
     onStartMock: () -> Unit,
     onStopMock: () -> Unit
 ) {
@@ -34,16 +35,6 @@ fun GPSMockCard(
     var repeatCount by remember { mutableIntStateOf(3) }
     var isGpsEnabled by remember { mutableStateOf(true) }
     var searchQuery by remember { mutableStateOf("") }
-    var currentLocation by remember {
-        mutableStateOf(
-            MockLocationUiModel(
-                "한통빌딩",
-                37.5665,
-                126.9780,
-                "서울특별시 용산구 원효로"
-            )
-        )
-    }
 
     Column(
         modifier = modifier
@@ -69,7 +60,7 @@ fun GPSMockCard(
                     onValueChange = { searchQuery = it }
                 )
 
-                CurrentLocation(location = currentLocation)
+                CurrentLocation(location = currentLocationUiModel)
 
                 GPSMode(
                     selectedMode = selectedMode,
@@ -108,6 +99,7 @@ fun GPSMockCard(
 fun GPSMockCardPreview() {
     GPSMockCard(
         mockingState = MockingState.IDLE,
+        currentLocationUiModel = MockLocationUiModel(37.5665, 126.9780),
         onStartMock = { },
         onStopMock = { }
     )
