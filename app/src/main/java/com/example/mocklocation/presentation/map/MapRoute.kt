@@ -28,8 +28,6 @@ fun MapRoute(
         uploadViewModel.uploadFile(uri, uri.lastPathSegment ?: DEFAULT_FILE_NAME)
     }
 
-    val gpsPoints = mapViewModel.gpsPoints.collectAsState().value
-
     FileUploadStatusHandler(uploadViewModel = uploadViewModel)
 
     MapScreen(
@@ -39,7 +37,7 @@ fun MapRoute(
         onRequestPermission = { permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION) },
         onClickMyLocation = { },
         onClickSelectCsvFile = { fileSelectorLauncher.launch(MIME_TYPE_TEXT) },
-        onClickStartMockSend = { mockViewModel.startOrResumeMocking(gpsPoints) },
+        onClickStartMockSend = { mockViewModel.startOrResumeMocking() },
         onClickStopMockSend = { mockViewModel.stopMocking() }
     )
 }

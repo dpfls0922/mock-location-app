@@ -21,25 +21,41 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.presentation.mock.MockingState
+import timber.log.Timber
 
 @Composable
 fun MockGpsButton(
+    mockingState: MockingState,
+    gpsPoints: List<GpsPoint>,
     onStartMock: () -> Unit,
-    onStopMock: () -> Unit,
+    onStopMock: () -> Unit
 ) {
+    val isEnabled = when (mockingState) {
+        MockingState.IDLE -> gpsPoints.isNotEmpty()
+        MockingState.PAUSED -> gpsPoints.isNotEmpty()
+        MockingState.RUNNING -> gpsPoints.isNotEmpty()
+    }
+    LaunchedEffect(mockingState, gpsPoints) {
+        Timber.d("[MockGpsButton]: mockingState=$mockingState, gpsPoints.isNotEmpty()=${gpsPoints.isNotEmpty()}, isEnabled=$isEnabled")
+    }
+
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Button(
             onClick = onStartMock,
             modifier = Modifier.fillMaxWidth(),
+            enabled = isEnabled,
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF4CAF50)
+                containerColor = Color(0xFF4CAF50),
+                disabledContainerColor = Color(0xFFBDBDBD)
             ),
             shape = RoundedCornerShape(12.dp)
         ) {
@@ -47,12 +63,14 @@ fun MockGpsButton(
             Spacer(modifier = Modifier.width(8.dp))
             Text("Mock GPS 전송 시작")
         }
-        Spacer(modifier = Modifier.width(8.dp))
+
         Button(
             onClick = onStopMock,
             modifier = Modifier.fillMaxWidth(),
+            enabled = isEnabled,
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFF44336)
+                containerColor = Color(0xFFF44336),
+                disabledContainerColor = Color(0xFFBDBDBD)
             ),
             shape = RoundedCornerShape(12.dp)
         ) {

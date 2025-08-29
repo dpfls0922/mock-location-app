@@ -19,11 +19,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.presentation.mock.MockingState
 
 @Composable
 fun ExpandableGpsMockCard(
     mockingState: MockingState,
+    gpsPoints: List<GpsPoint>,
     currentLocationUiModel: MockLocationUiModel?,
     onStartMock: () -> Unit,
     onStopMock: () -> Unit
@@ -52,6 +54,7 @@ fun ExpandableGpsMockCard(
                     .align(Alignment.TopStart)
                     .padding(8.dp),
                 mockingState = mockingState,
+                gpsPoints = gpsPoints,
                 currentLocationUiModel = currentLocationUiModel,
                 onStartMock,
                 onStopMock

@@ -19,12 +19,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.presentation.mock.MockingState
 
 @Composable
 fun GPSMockCard(
     modifier: Modifier = Modifier,
     mockingState: MockingState,
+    gpsPoints: List<GpsPoint>,
     currentLocationUiModel: MockLocationUiModel?,
     onStartMock: () -> Unit,
     onStopMock: () -> Unit
@@ -80,6 +82,8 @@ fun GPSMockCard(
                 )
 
                 MockGpsButton(
+                    mockingState = mockingState,
+                    gpsPoints = gpsPoints,
                     onStartMock = {
                         isGpsEnabled = true
                         onStartMock()
@@ -99,6 +103,7 @@ fun GPSMockCard(
 fun GPSMockCardPreview() {
     GPSMockCard(
         mockingState = MockingState.IDLE,
+        gpsPoints = listOf(),
         currentLocationUiModel = MockLocationUiModel(37.5665, 126.9780),
         onStartMock = { },
         onStopMock = { }
