@@ -5,6 +5,7 @@ import com.example.mocklocation.domain.entity.GpsPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
@@ -14,11 +15,14 @@ class MockLocationViewModel @Inject constructor(
 ) : ViewModel() {
     val mockingState: StateFlow<MockingState> = mockLocationHandler.mockingState
 
-    fun startOrResumeMocking(gpsPoints: List<GpsPoint>) {
+    private val _gpsPoints = MutableStateFlow<List<GpsPoint>>(emptyList())
+    val gpsPoints: StateFlow<List<GpsPoint>> = _gpsPoints.asStateFlow()
+
+    fun startOrResumeMocking() {
         when (mockingState.value) {
             MockingState.IDLE -> {
-                if (gpsPoints.isNotEmpty()) {
-                    mockLocationServiceLauncher.startMocking(gpsPoints)
+                if (_gpsPoints.value.isNotEmpty()) {
+                    mockLocationServiceLauncher.startMocking(_gpsPoints.value)
                 }
             }
             MockingState.PAUSED -> {
@@ -31,5 +35,9 @@ class MockLocationViewModel @Inject constructor(
 
     fun stopMocking() {
         mockLocationServiceLauncher.stopMocking()
+    }
+
+    fun updateGpsPoints(newPoints: List<GpsPoint>) {
+        _gpsPoints.value = newPoints
     }
 }
