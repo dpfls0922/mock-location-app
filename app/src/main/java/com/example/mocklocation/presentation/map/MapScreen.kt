@@ -29,6 +29,7 @@ fun MapScreen(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val mockingState by mockViewModel.mockingState.collectAsState()
+    val currentLocationUiModel by mapViewModel.currentLocationUiModel.collectAsState()
 
     LaunchedEffect(permissionGranted) {
         if (!permissionGranted) {
@@ -55,6 +56,7 @@ fun MapScreen(
                 MapLifecycleHandler(lifecycleOwner, mapViewModel)
                 ExpandableGpsMockCard(
                     mockingState = mockingState,
+                    currentLocationUiModel = currentLocationUiModel,
                     onStartMock = onClickStartMockSend,
                     onStopMock = onClickStopMockSend
                 )

@@ -24,6 +24,7 @@ import com.example.mocklocation.presentation.mock.MockingState
 @Composable
 fun ExpandableGpsMockCard(
     mockingState: MockingState,
+    currentLocationUiModel: MockLocationUiModel?,
     onStartMock: () -> Unit,
     onStopMock: () -> Unit
 ) {
@@ -51,6 +52,7 @@ fun ExpandableGpsMockCard(
                     .align(Alignment.TopStart)
                     .padding(8.dp),
                 mockingState = mockingState,
+                currentLocationUiModel = currentLocationUiModel,
                 onStartMock,
                 onStopMock
             )

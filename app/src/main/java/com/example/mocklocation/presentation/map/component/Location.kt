@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun CurrentLocation(location: MockLocationUiModel) {
+fun CurrentLocation(location: MockLocationUiModel?) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -51,34 +51,28 @@ fun CurrentLocation(location: MockLocationUiModel) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = location.name,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
-            )
-
-            Text(
-                text = location.address,
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            if (location == null) {
                 Text(
-                    text = "위도: ${String.format("%.4f", location.latitude)}",
-                    fontSize = 11.sp,
-                    color = MaterialTheme.colorScheme.primary
+                    text = "위치 정보 로딩 중...",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
                 )
-                Text(
-                    text = "경도: ${String.format("%.4f", location.longitude)}",
-                    fontSize = 11.sp,
-                    color = MaterialTheme.colorScheme.primary
-                )
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "위도: ${String.format("%.4f", location.latitude)}",
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "경도: ${String.format("%.4f", location.longitude)}",
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
     }
