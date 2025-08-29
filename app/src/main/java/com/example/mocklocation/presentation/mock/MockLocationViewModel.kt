@@ -10,18 +10,23 @@ import javax.inject.Inject
 @HiltViewModel
 class MockLocationViewModel @Inject constructor(
     private val mockLocationServiceLauncher: MockLocationServiceLauncher,
+    private val mockLocationHandler: MockLocationHandler
 ) : ViewModel() {
-    private val _isMockingStarted = MutableStateFlow(false)
-    private val isMockingStarted: StateFlow<Boolean> = _isMockingStarted
+    val mockingState: StateFlow<MockingState> = mockLocationHandler.mockingState
 
-    fun startMocking(gpsPoints: List<GpsPoint>) {
-        if (gpsPoints.isEmpty()) return
-        if (isMockingStarted.value) {
-            mockLocationServiceLauncher.resumeMocking()
-        } else {
-            mockLocationServiceLauncher.startMocking(gpsPoints)
+    fun startOrResumeMocking(gpsPoints: List<GpsPoint>) {
+        when (mockingState.value) {
+            MockingState.IDLE -> {
+                if (gpsPoints.isNotEmpty()) {
+                    mockLocationServiceLauncher.startMocking(gpsPoints)
+                }
+            }
+            MockingState.PAUSED -> {
+                mockLocationServiceLauncher.resumeMocking()
+            }
+            MockingState.RUNNING -> {
+            }
         }
-        _isMockingStarted.value = true
     }
 
     fun stopMocking() {
