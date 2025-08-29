@@ -10,9 +10,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.DoNotDisturbOn
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -23,9 +23,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mocklocation.presentation.mock.MockingState
 
 @Composable
 fun MockGpsButton(
@@ -61,31 +63,53 @@ fun MockGpsButton(
     }
 }
 
+data class GpsStatusProps(
+    val containerColor: Color,
+    val icon: ImageVector,
+    val tintColor: Color,
+    val statusText: String,
+    val textColor: Color
+)
+
 @Composable
-fun MockGpsStatus(isEnabled: Boolean) {
+fun MockGpsStatus(mockingState: MockingState) {
+    val statusProps = when (mockingState) {
+        MockingState.RUNNING -> GpsStatusProps(
+            containerColor = Color(0xFFE8F5E8),
+            icon = Icons.Default.PlayCircle,
+            tintColor = Color(0xFF4CAF50),
+            statusText = "Mock GPS 주행 중",
+            textColor = Color(0xFF4CAF50)
+        )
+        MockingState.PAUSED -> GpsStatusProps(
+            containerColor = Color(0xFFFFF3E0),
+            icon = Icons.Default.Stop,
+            tintColor = Color(0xFFF57F17),
+            statusText = "Mock GPS 일시 정지",
+            textColor = Color(0xFFF57F17)
+        )
+        MockingState.IDLE -> GpsStatusProps(
+            containerColor = Color(0xFFE0E0E0),
+            icon = Icons.Default.DoNotDisturbOn,
+            tintColor = Color(0xFF616161),
+            statusText = "Mock GPS 주행 전",
+            textColor = Color(0xFF616161)
+        )
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isEnabled) Color(0xFFE8F5E8) else Color(0xFFFFEBEE)
+            containerColor = statusProps.containerColor
         )
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Icon(
-                if (isEnabled) Icons.Default.CheckCircle else Icons.Default.Cancel,
-                contentDescription = null,
-                tint = if (isEnabled) Color(0xFF4CAF50) else Color(0xFFF44336),
-                modifier = Modifier.size(24.dp)
-            )
+            Icon(statusProps.icon, contentDescription = null, tint = statusProps.tintColor, modifier = Modifier.size(24.dp))
             Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = if (isEnabled) "Mock GPS 주행 중" else "Mock GPS 주행 중지",
-                fontWeight = FontWeight.Medium,
-                fontSize = 14.sp,
-                color = if (isEnabled) Color(0xFF4CAF50) else Color(0xFFF44336)
-            )
+            Text(text = statusProps.statusText, fontWeight = FontWeight.Medium, fontSize = 14.sp, color = statusProps.textColor)
         }
     }
 }

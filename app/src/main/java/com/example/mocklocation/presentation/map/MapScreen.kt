@@ -6,16 +6,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.mocklocation.presentation.map.component.ExpandableGpsMockCard
 import com.example.mocklocation.presentation.map.component.FloatingButtons
+import com.example.mocklocation.presentation.mock.MockLocationViewModel
 import com.example.mocklocation.presentation.ui.theme.MapTheme
 
 @Composable
 fun MapScreen(
     mapViewModel: MapViewModel,
+    mockViewModel: MockLocationViewModel,
     permissionGranted: Boolean,
     onRequestPermission: () -> Unit,
     onClickMyLocation: () -> Unit,
@@ -24,6 +28,7 @@ fun MapScreen(
     onClickStopMockSend: () -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
+    val mockingState by mockViewModel.mockingState.collectAsState()
 
     LaunchedEffect(permissionGranted) {
         if (!permissionGranted) {
@@ -48,7 +53,11 @@ fun MapScreen(
                     modifier = Modifier.fillMaxSize()
                 )
                 MapLifecycleHandler(lifecycleOwner, mapViewModel)
-                ExpandableGpsMockCard(onClickStartMockSend, onClickStopMockSend)
+                ExpandableGpsMockCard(
+                    mockingState = mockingState,
+                    onStartMock = onClickStartMockSend,
+                    onStopMock = onClickStopMockSend
+                )
             }
         }
     }
