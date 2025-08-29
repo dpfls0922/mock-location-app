@@ -19,10 +19,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.mocklocation.presentation.mock.MockingState
 
 @Composable
 fun GPSMockCard(
     modifier: Modifier = Modifier,
+    mockingState: MockingState,
     onStartMock: () -> Unit,
     onStopMock: () -> Unit
 ) {
@@ -61,7 +63,7 @@ fun GPSMockCard(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                MockGpsStatus(isEnabled = isGpsEnabled)
+                MockGpsStatus(mockingState = mockingState)
                 SearchBar(
                     value = searchQuery,
                     onValueChange = { searchQuery = it }
@@ -105,6 +107,7 @@ fun GPSMockCard(
 @Composable
 fun GPSMockCardPreview() {
     GPSMockCard(
+        mockingState = MockingState.IDLE,
         onStartMock = { },
         onStopMock = { }
     )
