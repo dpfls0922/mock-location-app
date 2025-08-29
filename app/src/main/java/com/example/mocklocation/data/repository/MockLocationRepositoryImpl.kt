@@ -80,7 +80,7 @@ class MockLocationRepositoryImpl @Inject constructor(
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createMockLocation(gpsPoint: GpsPoint): Location {
-        return Location(PROVIDER_NAME).apply {
+        return Location(gpsPoint.provider).apply {
             latitude = gpsPoint.latitude
             longitude = gpsPoint.longitude
             time = gpsPoint.timestamp
