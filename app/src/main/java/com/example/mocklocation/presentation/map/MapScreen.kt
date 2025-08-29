@@ -28,6 +28,7 @@ fun MapScreen(
     onClickStopMockSend: () -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
+    val gpsPoints by mockViewModel.gpsPoints.collectAsState()
     val mockingState by mockViewModel.mockingState.collectAsState()
     val currentLocationUiModel by mapViewModel.currentLocationUiModel.collectAsState()
 
@@ -56,6 +57,7 @@ fun MapScreen(
                 MapLifecycleHandler(lifecycleOwner, mapViewModel)
                 ExpandableGpsMockCard(
                     mockingState = mockingState,
+                    gpsPoints = gpsPoints,
                     currentLocationUiModel = currentLocationUiModel,
                     onStartMock = onClickStartMockSend,
                     onStopMock = onClickStopMockSend
