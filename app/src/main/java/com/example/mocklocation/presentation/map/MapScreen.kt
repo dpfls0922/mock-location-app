@@ -31,6 +31,8 @@ fun MapScreen(
     val gpsPoints by mockViewModel.gpsPoints.collectAsState()
     val mockingState by mockViewModel.mockingState.collectAsState()
     val currentLocationUiModel by mapViewModel.currentLocationUiModel.collectAsState()
+    val repeatMode by mockViewModel.repeatMode.collectAsState()
+    val repeatCount by mockViewModel.repeatCount.collectAsState()
 
     LaunchedEffect(permissionGranted) {
         if (!permissionGranted) {
@@ -59,6 +61,10 @@ fun MapScreen(
                     mockingState = mockingState,
                     gpsPoints = gpsPoints,
                     currentLocationUiModel = currentLocationUiModel,
+                    repeatMode = repeatMode,
+                    repeatCount = repeatCount,
+                    onRepeatModeChanged = { newMode -> mockViewModel.updateRepeatSettings(mode = newMode, count = repeatCount) },
+                    onRepeatCountChanged = { count -> mockViewModel.updateRepeatSettings(mode = repeatMode, count = count) },
                     onStartMock = onClickStartMockSend,
                     onStopMock = onClickStopMockSend
                 )

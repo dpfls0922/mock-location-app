@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import com.example.mocklocation.data.dto.toParcelable
 import com.example.mocklocation.domain.entity.GpsPoint
+import com.example.mocklocation.presentation.map.component.RepeatMode
 import com.example.mocklocation.service.MockLocationSenderService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -11,7 +12,11 @@ import javax.inject.Inject
 class MockLocationServiceLauncher @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
-    fun startMocking(gpsPoints: List<GpsPoint>) {
+    fun startMocking(
+        gpsPoints: List<GpsPoint>,
+        repeatMode: RepeatMode,
+        repeatCount: Int
+    ) {
         if (gpsPoints.isEmpty()) return
 
         val intent = Intent(context, MockLocationSenderService::class.java).apply {
@@ -20,6 +25,8 @@ class MockLocationServiceLauncher @Inject constructor(
                 MockLocationSenderService.EXTRA_GPS_POINTS,
                 ArrayList(gpsPoints.map { it.toParcelable() })
             )
+            putExtra(MockLocationSenderService.EXTRA_REPEAT_MODE, repeatMode.name)
+            putExtra(MockLocationSenderService.EXTRA_REPEAT_COUNT, repeatCount)
         }
         context.startService(intent)
     }

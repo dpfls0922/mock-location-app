@@ -19,6 +19,7 @@ class SendMockLocationUseCase @Inject constructor(
         Timber.d("🗺️ Mocking Flow 전송 시작: (${startIndex}/${gpsPoints.size})")
         try {
             for (i in startIndex until gpsPoints.size) {
+                Timber.d("🔄 전송 인덱스: ${i}")
                 val point = gpsPoints[i]
                 emit(point)
 
