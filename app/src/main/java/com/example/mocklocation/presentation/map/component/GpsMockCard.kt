@@ -12,7 +12,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -28,13 +27,15 @@ fun GPSMockCard(
     mockingState: MockingState,
     gpsPoints: List<GpsPoint>,
     currentLocationUiModel: MockLocationUiModel?,
+    repeatMode: RepeatMode,
+    repeatCount: Int,
+    onRepeatModeChanged: (RepeatMode) -> Unit,
+    onRepeatCountChanged: (Int) -> Unit,
     onStartMock: () -> Unit,
     onStopMock: () -> Unit
 ) {
     var selectedSpeed by remember { mutableStateOf("60km/h") }
     var selectedMode by remember { mutableStateOf(GpsMode.GPS) }
-    var repeatMode by remember { mutableStateOf(RepeatMode.INFINITE) }
-    var repeatCount by remember { mutableIntStateOf(3) }
     var isGpsEnabled by remember { mutableStateOf(true) }
     var searchQuery by remember { mutableStateOf("") }
 
@@ -68,12 +69,11 @@ fun GPSMockCard(
                     selectedMode = selectedMode,
                     onModeSelected = { selectedMode = it }
                 )
-
                 RepeatMode(
                     repeatMode = repeatMode,
                     repeatCount = repeatCount,
-                    onRepeatModeChanged = { repeatMode = it },
-                    onRepeatCountChanged = { repeatCount = it }
+                    onRepeatModeChanged = onRepeatModeChanged,
+                    onRepeatCountChanged = onRepeatCountChanged
                 )
 
                 SpeedSection(
@@ -105,6 +105,10 @@ fun GPSMockCardPreview() {
         mockingState = MockingState.IDLE,
         gpsPoints = listOf(),
         currentLocationUiModel = MockLocationUiModel(37.5665, 126.9780),
+        repeatMode = RepeatMode.INFINITE,
+        repeatCount = 0,
+        onRepeatModeChanged = { },
+        onRepeatCountChanged = { },
         onStartMock = { },
         onStopMock = { }
     )
