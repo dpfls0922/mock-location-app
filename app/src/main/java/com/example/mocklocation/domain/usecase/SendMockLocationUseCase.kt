@@ -2,11 +2,13 @@ package com.example.mocklocation.domain.usecase
 
 import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.domain.repository.MockLocationRepository
+import com.example.mocklocation.presentation.map.component.GpsMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
@@ -27,6 +29,7 @@ class SendMockLocationUseCase @Inject constructor(
         gpsPoints: List<GpsPoint>,
         startIndex: Int,
         speedFlow: Flow<Double>,
+        gpsModeFlow: StateFlow<GpsMode>,
         scope: CoroutineScope
     ) = flow {
         repository.startMocking()
@@ -39,7 +42,7 @@ class SendMockLocationUseCase @Inject constructor(
             val totalDistance = gpsPoints.zipWithNext { a, b -> calculateDistance(a, b) }.sum()
             var emittedVertices = 0
 
-            emit(currentPoint)
+            emit(applyGpsMode(currentPoint, gpsModeFlow.value))
             emittedVertices++
 
             val speedState = MutableStateFlow(0.0)
@@ -50,9 +53,10 @@ class SendMockLocationUseCase @Inject constructor(
             }
 
             while (accumulatedDistance < totalDistance) {
+                val gpsMode = gpsModeFlow.value
                 val distancePerSecond = minOf(speedState.value, totalDistance - accumulatedDistance)
 
-                val result = processDistance(
+                val (updatedPoint, updatedIndex, updatedVertices) = processDistance(
                     gpsPoints,
                     currentPoint,
                     nextIndex,
@@ -60,19 +64,19 @@ class SendMockLocationUseCase @Inject constructor(
                     accumulatedDistance,
                     emittedVertices,
                     speedState.value,
-                    ::emit
-                )
+                    gpsMode
+                ) { emit(applyGpsMode(it, gpsMode)) }
 
-                currentPoint = result.first
-                nextIndex = result.second
-                emittedVertices = result.third
+                currentPoint = updatedPoint
+                nextIndex = updatedIndex
+                emittedVertices = updatedVertices
                 accumulatedDistance += distancePerSecond
 
                 delay(DEFAULT_UPDATE_INTERVAL_MS)
             }
 
             if (currentPoint != gpsPoints.last()) {
-                emit(gpsPoints.last())
+                emit(applyGpsMode(gpsPoints.last(), gpsModeFlow.value))
                 emittedVertices++
             }
 
@@ -94,6 +98,7 @@ class SendMockLocationUseCase @Inject constructor(
         startAccumulated: Double,
         startVertices: Int,
         speed: Double,
+        gpsMode: GpsMode,
         emit: suspend (GpsPoint) -> Unit
     ): Triple<GpsPoint, Int, Int> {
         var currentPoint = startPoint
@@ -108,7 +113,7 @@ class SendMockLocationUseCase @Inject constructor(
 
             if (distanceToNext >= remainingDistance) {
                 val virtualPoint = interpolate(currentPoint, nextPoint, remainingDistance)
-                emit(virtualPoint)
+                emit(applyGpsMode(virtualPoint, gpsMode))
 
                 val (newAccumulated, newVertices) = updateAfterEmit(
                     virtualPoint,
@@ -117,7 +122,6 @@ class SendMockLocationUseCase @Inject constructor(
                     emittedVertices,
                     speed
                 )
-
                 currentPoint = virtualPoint
                 accumulatedDistance = newAccumulated
                 emittedVertices = newVertices
@@ -138,22 +142,27 @@ class SendMockLocationUseCase @Inject constructor(
         return Triple(currentPoint, nextIndex, emittedVertices)
     }
 
+    private fun applyGpsMode(point: GpsPoint, gpsMode: GpsMode): GpsPoint {
+        val satellites = when (gpsMode) {
+            GpsMode.GPS -> maxOf(point.satellites, 15)
+            GpsMode.DR -> 0
+        }
+        return point.copy(satellites = satellites)
+    }
+
     private fun updateAfterEmit(
         virtualPoint: GpsPoint,
         accumulatedDistance: Double,
-        remainingDistance: Double,
+        movedDistance: Double,
         emittedVertices: Int,
         speed: Double
     ): Pair<Double, Int> {
-        val newAccumulated = accumulatedDistance + remainingDistance
+        val newAccumulated = accumulatedDistance + movedDistance
         val newVertices = emittedVertices + 1
 
         Timber.v(
-            "⏱ 1초 전송 | 이동거리: ${"%.2f".format(remainingDistance)} m | " +
-                    "누적거리: ${"%.2f".format(newAccumulated)} m | " +
-                    "위도: ${virtualPoint.latitude}, 경도: ${virtualPoint.longitude} | " +
-                    "속도: ${"%.2f".format(speed)} m/s | " +
-                    "버택스: $emittedVertices"
+            "⏱ 위치 전송 | 이동: %.2f m | 누적: %.2f m | 속도: %.2f m/s | 위도: %.6f, 경도: %.6f | 버택스: %d"
+                .format(movedDistance, newAccumulated, speed, virtualPoint.latitude, virtualPoint.longitude, emittedVertices)
         )
         return newAccumulated to newVertices
     }
@@ -169,10 +178,8 @@ class SendMockLocationUseCase @Inject constructor(
         val newAccumulated = accumulatedDistance + distanceToNext
 
         Timber.v(
-            "⏱ Segment 이동 | 이동거리: ${"%.2f".format(distanceToNext)} m | " +
-                    "남은거리: ${"%.2f".format(newRemaining)} m | " +
-                    "누적거리: ${"%.2f".format(newAccumulated)} m | " +
-                    "위도: ${nextPoint.latitude}, 경도: ${nextPoint.longitude}"
+            "⏱ 세그먼트 이동 | 이동: %.2f m | 남음: %.2f m | 누적: %.2f m | 위도: %.6f, 경도: %.6f "
+                .format(distanceToNext, newRemaining, newAccumulated, nextPoint.latitude, nextPoint.longitude)
         )
         return Pair(newRemaining, newAccumulated)
     }

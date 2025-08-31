@@ -30,13 +30,15 @@ class MockLocationHandler @Inject constructor(
     private val _speedFlow = MutableStateFlow(60.0)
     val speedFlow: StateFlow<Double> = _speedFlow.asStateFlow()
 
+    private val _gpsModeFlow = MutableStateFlow(GpsMode.GPS)
+    val gpsModeFlow: StateFlow<GpsMode> = _gpsModeFlow.asStateFlow()
+
     private var mockJob: Job? = null
     private var allGpsPoints: List<GpsPoint> = emptyList()
     private var lastSentIndex: Int = 0
     private var repeatMode: RepeatMode = RepeatMode.INFINITE
     private var repeatCount: Int = 0
     private var currentRepeat: Int = 0
-    private var gpsMode: GpsMode = GpsMode.GPS
 
     fun startSending(
         gpsPoints: List<GpsPoint>,
@@ -100,7 +102,7 @@ class MockLocationHandler @Inject constructor(
     }
 
     fun updateGpsMode(mode: GpsMode) {
-        gpsMode = mode
+        _gpsModeFlow.value = mode
         Timber.i("[UPDATE] GPS 모드 업데이트: ${mode} 모드")
     }
 
@@ -125,6 +127,7 @@ class MockLocationHandler @Inject constructor(
                         allGpsPoints,
                         lastSentIndex,
                         _speedFlow,
+                        gpsModeFlow,
                         scope
                     ).collect { point ->
                         val result = sendMockLocationUseCase.sendLocation(point)
