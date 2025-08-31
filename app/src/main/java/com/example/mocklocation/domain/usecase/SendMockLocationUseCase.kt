@@ -14,9 +14,13 @@ class SendMockLocationUseCase @Inject constructor(
         private const val MIN_DELAY_MS = 1L
     }
 
-    fun createMockLocationFlow(gpsPoints: List<GpsPoint>, startIndex: Int) = flow {
+    fun createMockLocationFlow(
+        gpsPoints: List<GpsPoint>,
+        startIndex: Int,
+        speedKmh: Int
+    ) = flow {
         repository.startMocking()
-        Timber.d("🗺️ Mocking Flow 전송 시작: (${startIndex}/${gpsPoints.size})")
+        Timber.d("🗺️ Mocking Flow 전송 시작: ${speedKmh} km/h (${startIndex}/${gpsPoints.size})")
         try {
             for (i in startIndex until gpsPoints.size) {
                 Timber.d("🔄 전송 인덱스: ${i}")

@@ -29,12 +29,13 @@ fun GPSMockCard(
     currentLocationUiModel: MockLocationUiModel?,
     repeatMode: RepeatMode,
     repeatCount: Int,
+    speed: Int,
     onRepeatModeChanged: (RepeatMode) -> Unit,
     onRepeatCountChanged: (Int) -> Unit,
+    onSpeedChanged: (Int) -> Unit,
     onStartMock: () -> Unit,
     onStopMock: () -> Unit
 ) {
-    var selectedSpeed by remember { mutableStateOf(60) }
     var selectedMode by remember { mutableStateOf(GpsMode.GPS) }
     var isGpsEnabled by remember { mutableStateOf(true) }
     var searchQuery by remember { mutableStateOf("") }
@@ -77,8 +78,8 @@ fun GPSMockCard(
                 )
 
                 SpeedSection(
-                    speed = selectedSpeed,
-                    onSpeedChanged = { selectedSpeed = it }
+                    speed = speed,
+                    onSpeedChanged = onSpeedChanged
                 )
 
                 MockGpsButton(
@@ -107,8 +108,10 @@ fun GPSMockCardPreview() {
         currentLocationUiModel = MockLocationUiModel(37.5665, 126.9780),
         repeatMode = RepeatMode.INFINITE,
         repeatCount = 0,
+        speed = 60,
         onRepeatModeChanged = { },
         onRepeatCountChanged = { },
+        onSpeedChanged = { },
         onStartMock = { },
         onStopMock = { }
     )
