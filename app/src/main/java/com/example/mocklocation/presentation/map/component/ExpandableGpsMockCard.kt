@@ -3,8 +3,8 @@ package com.example.mocklocation.presentation.map.component
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -56,7 +56,7 @@ fun ExpandableGpsMockCard(
             GPSMockCard(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .fillMaxWidth(0.3f)
+                    .width(400.dp)
                     .align(Alignment.TopStart)
                     .padding(8.dp),
                 mockingState = mockingState,
