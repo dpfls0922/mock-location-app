@@ -17,7 +17,7 @@ import com.example.mocklocation.presentation.ui.common.rememberPermissionLaunche
 @Composable
 fun MapRoute(
     mapViewModel: MapViewModel = hiltViewModel(),
-    mockLocationViewModel: MockLocationViewModel = hiltViewModel(),
+    mockViewModel: MockLocationViewModel = hiltViewModel(),
     uploadViewModel: FileUploadViewModel = hiltViewModel(),
 ) {
     val permissionGranted by mapViewModel.locationPermissionGranted.collectAsState()
@@ -28,18 +28,17 @@ fun MapRoute(
         uploadViewModel.uploadFile(uri, uri.lastPathSegment ?: DEFAULT_FILE_NAME)
     }
 
-    val gpsPoints = mapViewModel.gpsPoints.collectAsState().value
-
     FileUploadStatusHandler(uploadViewModel = uploadViewModel)
 
     MapScreen(
         mapViewModel = mapViewModel,
+        mockViewModel = mockViewModel,
         permissionGranted = permissionGranted,
         onRequestPermission = { permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION) },
         onClickMyLocation = { },
         onClickSelectCsvFile = { fileSelectorLauncher.launch(MIME_TYPE_TEXT) },
-        onClickStartMockSend = { mockLocationViewModel.startMocking(gpsPoints) },
-        onClickStopMockSend = { mockLocationViewModel.stopMocking() }
+        onClickStartMockSend = { mockViewModel.startOrResumeMocking() },
+        onClickStopMockSend = { mockViewModel.stopMocking() }
     )
 }
 

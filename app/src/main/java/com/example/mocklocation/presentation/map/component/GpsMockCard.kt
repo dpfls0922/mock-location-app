@@ -12,36 +12,35 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.mocklocation.domain.entity.GpsPoint
+import com.example.mocklocation.presentation.mock.MockingState
 
 @Composable
 fun GPSMockCard(
     modifier: Modifier = Modifier,
+    mockingState: MockingState,
+    gpsPoints: List<GpsPoint>,
+    currentLocationUiModel: MockLocationUiModel?,
+    repeatMode: RepeatMode,
+    repeatCount: Int,
+    speed: Int,
+    gpsMode: GpsMode,
+    onRepeatModeChanged: (RepeatMode) -> Unit,
+    onRepeatCountChanged: (Int) -> Unit,
+    onSpeedChanged: (Int) -> Unit,
+    onGpsModeChanged: (GpsMode) -> Unit,
     onStartMock: () -> Unit,
     onStopMock: () -> Unit
 ) {
-    var selectedSpeed by remember { mutableStateOf("60km/h") }
     var selectedMode by remember { mutableStateOf(GpsMode.GPS) }
-    var repeatMode by remember { mutableStateOf(RepeatMode.INFINITE) }
-    var repeatCount by remember { mutableIntStateOf(3) }
     var isGpsEnabled by remember { mutableStateOf(true) }
     var searchQuery by remember { mutableStateOf("") }
-    var currentLocation by remember {
-        mutableStateOf(
-            MockLocationUiModel(
-                "한통빌딩",
-                37.5665,
-                126.9780,
-                "서울특별시 용산구 원효로"
-            )
-        )
-    }
 
     Column(
         modifier = modifier
@@ -61,32 +60,33 @@ fun GPSMockCard(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                MockGpsStatus(isEnabled = isGpsEnabled)
+                MockGpsStatus(mockingState = mockingState)
                 SearchBar(
                     value = searchQuery,
                     onValueChange = { searchQuery = it }
                 )
 
-                CurrentLocation(location = currentLocation)
+                CurrentLocation(location = currentLocationUiModel)
 
                 GPSMode(
-                    selectedMode = selectedMode,
-                    onModeSelected = { selectedMode = it }
+                    gpsMode = gpsMode,
+                    onGpsModeChanged = onGpsModeChanged
                 )
-
                 RepeatMode(
                     repeatMode = repeatMode,
                     repeatCount = repeatCount,
-                    onRepeatModeChanged = { repeatMode = it },
-                    onRepeatCountChanged = { repeatCount = it }
+                    onRepeatModeChanged = onRepeatModeChanged,
+                    onRepeatCountChanged = onRepeatCountChanged
                 )
 
                 SpeedSection(
-                    selectedSpeed = selectedSpeed,
-                    onSpeedSelected = { selectedSpeed = it }
+                    speed = speed,
+                    onSpeedChanged = onSpeedChanged
                 )
 
                 MockGpsButton(
+                    mockingState = mockingState,
+                    gpsPoints = gpsPoints,
                     onStartMock = {
                         isGpsEnabled = true
                         onStartMock()
@@ -105,6 +105,17 @@ fun GPSMockCard(
 @Composable
 fun GPSMockCardPreview() {
     GPSMockCard(
+        mockingState = MockingState.IDLE,
+        gpsPoints = listOf(),
+        currentLocationUiModel = MockLocationUiModel(37.5665, 126.9780),
+        repeatMode = RepeatMode.INFINITE,
+        repeatCount = 0,
+        speed = 60,
+        gpsMode = GpsMode.GPS,
+        onRepeatModeChanged = { },
+        onRepeatCountChanged = { },
+        onSpeedChanged = { },
+        onGpsModeChanged = { },
         onStartMock = { },
         onStopMock = { }
     )

@@ -41,7 +41,6 @@ class MockLocationRepositoryImpl @Inject constructor(
                 ProviderProperties.ACCURACY_FINE
             )
             locationManager.setTestProviderEnabled(PROVIDER_NAME, true)
-            Timber.d("✅ Mock GPS 전송 시작")
         }.onFailure {
             Timber.e(it, "Mock GPS 전송 시작 실패")
         }
@@ -50,7 +49,6 @@ class MockLocationRepositoryImpl @Inject constructor(
     override fun stopMocking() {
         runCatching {
             removeTestProvider()
-            Timber.d("✅ Mock GPS 전송 종료")
         }.onFailure {
             Timber.e(it, "Mock GPS 전송 종료 실패")
         }
@@ -82,7 +80,9 @@ class MockLocationRepositoryImpl @Inject constructor(
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createMockLocation(gpsPoint: GpsPoint): Location {
-        return Location(PROVIDER_NAME).apply {
+        val provider = if (gpsPoint.satellites < 3) "dr_gps" else "gps"
+        Timber.i("[provider] $provider")
+        return Location(provider).apply {
             latitude = gpsPoint.latitude
             longitude = gpsPoint.longitude
             time = gpsPoint.timestamp

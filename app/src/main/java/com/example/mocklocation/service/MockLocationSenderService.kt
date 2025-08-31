@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.IBinder
 import com.example.mocklocation.data.dto.GpsPointParcelable
 import com.example.mocklocation.data.dto.toDomainModel
+import com.example.mocklocation.presentation.map.component.RepeatMode
 import com.example.mocklocation.presentation.mock.MockLocationHandler
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -22,15 +23,20 @@ class MockLocationSenderService : Service() {
         const val ACTION_START_MOCKING = "com.example.mocklocation.action.START_MOCKING"
         const val ACTION_RESUME_MOCKING = "com.example.mocklocation.action.RESUME_MOCKING"
         const val EXTRA_GPS_POINTS = "com.example.mocklocation.extra.GPS_POINTS"
+        const val EXTRA_REPEAT_MODE = "com.example.mocklocation.extra.REPEAT_MODE"
+        const val EXTRA_REPEAT_COUNT = "com.example.mocklocation.extra.REPEAT_COUNT"
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_START_MOCKING -> {
                 val parcelableList = getGpsPointParcelableFromIntent(intent)
+                val repeatMode = intent.getStringExtra(EXTRA_REPEAT_MODE) ?: RepeatMode.INFINITE.name
+                val repeatCount = intent.getIntExtra(EXTRA_REPEAT_COUNT, 0)
+
                 parcelableList?.let {
                     val domainGpsPoints = it.map { p -> p.toDomainModel() }
-                    mockLocationHandler.startSending(domainGpsPoints)
+                    mockLocationHandler.startSending(domainGpsPoints, RepeatMode.valueOf(repeatMode), repeatCount)
                 }
             }
             ACTION_RESUME_MOCKING -> {

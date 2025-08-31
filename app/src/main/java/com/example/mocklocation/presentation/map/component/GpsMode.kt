@@ -17,8 +17,8 @@ enum class GpsMode { GPS, DR }
 
 @Composable
 fun GPSMode(
-    selectedMode: GpsMode,
-    onModeSelected: (GpsMode) -> Unit
+    gpsMode: GpsMode,
+    onGpsModeChanged: (GpsMode) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
@@ -30,9 +30,9 @@ fun GPSMode(
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FilterChip(
-                onClick = { onModeSelected(GpsMode.GPS) },
+                onClick = { onGpsModeChanged(GpsMode.GPS) },
                 label = { Text("GPS 모드") },
-                selected = selectedMode == GpsMode.GPS,
+                selected = gpsMode == GpsMode.GPS,
                 colors = FilterChipDefaults.filterChipColors(
                     containerColor = Color.Gray.copy(alpha = 0.1f),
                     selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
@@ -40,9 +40,9 @@ fun GPSMode(
                 )
             )
             FilterChip(
-                onClick = { onModeSelected(GpsMode.DR) },
+                onClick = { onGpsModeChanged(GpsMode.DR) },
                 label = { Text("DR 모드") },
-                selected = selectedMode == GpsMode.DR,
+                selected = gpsMode == GpsMode.DR,
                 colors = FilterChipDefaults.filterChipColors(
                     containerColor = Color.Gray.copy(alpha = 0.1f),
                     selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),

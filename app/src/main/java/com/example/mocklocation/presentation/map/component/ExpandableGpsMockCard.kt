@@ -1,18 +1,40 @@
 package com.example.mocklocation.presentation.map.component
 
-import androidx.compose.runtime.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.example.mocklocation.domain.entity.GpsPoint
+import com.example.mocklocation.presentation.mock.MockingState
 
 @Composable
 fun ExpandableGpsMockCard(
+    mockingState: MockingState,
+    gpsPoints: List<GpsPoint>,
+    currentLocationUiModel: MockLocationUiModel?,
+    repeatMode: RepeatMode,
+    repeatCount: Int,
+    speed: Int,
+    gpsMode: GpsMode,
+    onRepeatModeChanged: (RepeatMode) -> Unit,
+    onRepeatCountChanged: (Int) -> Unit,
+    onSpeedChanged: (Int) -> Unit,
+    onGpsModeChanged: (GpsMode) -> Unit,
     onStartMock: () -> Unit,
     onStopMock: () -> Unit
 ) {
@@ -36,9 +58,20 @@ fun ExpandableGpsMockCard(
             GPSMockCard(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .fillMaxWidth(0.3f)
+                    .width(400.dp)
                     .align(Alignment.TopStart)
                     .padding(8.dp),
+                mockingState = mockingState,
+                gpsPoints = gpsPoints,
+                currentLocationUiModel = currentLocationUiModel,
+                repeatMode = repeatMode,
+                repeatCount = repeatCount,
+                speed = speed,
+                gpsMode = gpsMode,
+                onRepeatModeChanged = onRepeatModeChanged,
+                onRepeatCountChanged = onRepeatCountChanged,
+                onSpeedChanged = onSpeedChanged,
+                onGpsModeChanged = onGpsModeChanged,
                 onStartMock,
                 onStopMock
             )
