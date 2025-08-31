@@ -80,7 +80,9 @@ class MockLocationRepositoryImpl @Inject constructor(
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createMockLocation(gpsPoint: GpsPoint): Location {
-        return Location(gpsPoint.provider).apply {
+        val provider = if (gpsPoint.satellites < 3) "dr_gps" else "gps"
+        Timber.i("[provider] $provider")
+        return Location(provider).apply {
             latitude = gpsPoint.latitude
             longitude = gpsPoint.longitude
             time = gpsPoint.timestamp
