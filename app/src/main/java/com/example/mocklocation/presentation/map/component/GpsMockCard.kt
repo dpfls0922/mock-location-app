@@ -34,7 +34,7 @@ fun GPSMockCard(
     onStartMock: () -> Unit,
     onStopMock: () -> Unit
 ) {
-    var selectedSpeed by remember { mutableStateOf("60km/h") }
+    var selectedSpeed by remember { mutableStateOf(60) }
     var selectedMode by remember { mutableStateOf(GpsMode.GPS) }
     var isGpsEnabled by remember { mutableStateOf(true) }
     var searchQuery by remember { mutableStateOf("") }
@@ -77,8 +77,8 @@ fun GPSMockCard(
                 )
 
                 SpeedSection(
-                    selectedSpeed = selectedSpeed,
-                    onSpeedSelected = { selectedSpeed = it }
+                    speed = selectedSpeed,
+                    onSpeedChanged = { selectedSpeed = it }
                 )
 
                 MockGpsButton(
