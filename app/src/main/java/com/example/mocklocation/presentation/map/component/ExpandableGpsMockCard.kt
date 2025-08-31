@@ -30,9 +30,11 @@ fun ExpandableGpsMockCard(
     repeatMode: RepeatMode,
     repeatCount: Int,
     speed: Int,
+    gpsMode: GpsMode,
     onRepeatModeChanged: (RepeatMode) -> Unit,
     onRepeatCountChanged: (Int) -> Unit,
     onSpeedChanged: (Int) -> Unit,
+    onGpsModeChanged: (GpsMode) -> Unit,
     onStartMock: () -> Unit,
     onStopMock: () -> Unit
 ) {
@@ -65,9 +67,11 @@ fun ExpandableGpsMockCard(
                 repeatMode = repeatMode,
                 repeatCount = repeatCount,
                 speed = speed,
+                gpsMode = gpsMode,
                 onRepeatModeChanged = onRepeatModeChanged,
                 onRepeatCountChanged = onRepeatCountChanged,
                 onSpeedChanged = onSpeedChanged,
+                onGpsModeChanged = onGpsModeChanged,
                 onStartMock,
                 onStopMock
             )

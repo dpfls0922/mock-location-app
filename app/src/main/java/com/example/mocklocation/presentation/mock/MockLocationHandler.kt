@@ -3,6 +3,7 @@ package com.example.mocklocation.presentation.mock
 import com.example.mocklocation.di.ApplicationScope
 import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.domain.usecase.SendMockLocationUseCase
+import com.example.mocklocation.presentation.map.component.GpsMode
 import com.example.mocklocation.presentation.map.component.RepeatMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,6 +36,7 @@ class MockLocationHandler @Inject constructor(
     private var repeatMode: RepeatMode = RepeatMode.INFINITE
     private var repeatCount: Int = 0
     private var currentRepeat: Int = 0
+    private var gpsMode: GpsMode = GpsMode.GPS
 
     fun startSending(
         gpsPoints: List<GpsPoint>,
@@ -97,6 +99,11 @@ class MockLocationHandler @Inject constructor(
         Timber.i("[UPDATE] 전송 속도 업데이트: ${speed} km/h")
     }
 
+    fun updateGpsMode(mode: GpsMode) {
+        gpsMode = mode
+        Timber.i("[UPDATE] GPS 모드 업데이트: ${mode} 모드")
+    }
+
     private fun startMockingFromIndex() {
         if (mockingState.value == MockingState.RUNNING) {
             Timber.w("[WARN] Mocking 작업이 이미 활성화되어 있습니다. (${mockingState.value})")
@@ -132,7 +139,7 @@ class MockLocationHandler @Inject constructor(
                     Timber.d("🔁 [${repeatMode.name} 모드] ${currentRepeat} 회차 전송 완료")
                 }
             } finally {
-                if (mockJob?.isCancelled == false) {
+                if (mockJob != null && mockJob?.isCancelled == false) {
                     Timber.i("[FINISH] 작업 정상 완료")
                     resetState()
                 }

@@ -30,9 +30,11 @@ fun GPSMockCard(
     repeatMode: RepeatMode,
     repeatCount: Int,
     speed: Int,
+    gpsMode: GpsMode,
     onRepeatModeChanged: (RepeatMode) -> Unit,
     onRepeatCountChanged: (Int) -> Unit,
     onSpeedChanged: (Int) -> Unit,
+    onGpsModeChanged: (GpsMode) -> Unit,
     onStartMock: () -> Unit,
     onStopMock: () -> Unit
 ) {
@@ -67,8 +69,8 @@ fun GPSMockCard(
                 CurrentLocation(location = currentLocationUiModel)
 
                 GPSMode(
-                    selectedMode = selectedMode,
-                    onModeSelected = { selectedMode = it }
+                    gpsMode = gpsMode,
+                    onGpsModeChanged = onGpsModeChanged
                 )
                 RepeatMode(
                     repeatMode = repeatMode,
@@ -109,9 +111,11 @@ fun GPSMockCardPreview() {
         repeatMode = RepeatMode.INFINITE,
         repeatCount = 0,
         speed = 60,
+        gpsMode = GpsMode.GPS,
         onRepeatModeChanged = { },
         onRepeatCountChanged = { },
         onSpeedChanged = { },
+        onGpsModeChanged = { },
         onStartMock = { },
         onStopMock = { }
     )

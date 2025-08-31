@@ -2,6 +2,7 @@ package com.example.mocklocation.presentation.mock
 
 import androidx.lifecycle.ViewModel
 import com.example.mocklocation.domain.entity.GpsPoint
+import com.example.mocklocation.presentation.map.component.GpsMode
 import com.example.mocklocation.presentation.map.component.RepeatMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +28,9 @@ class MockLocationViewModel @Inject constructor(
 
     private val _speed = MutableStateFlow(60)
     val speed: StateFlow<Int> = _speed.asStateFlow()
+
+    private val _gpsMode = MutableStateFlow(GpsMode.GPS)
+    val gpsMode: StateFlow<GpsMode> = _gpsMode
 
     fun startOrResumeMocking() {
         when (mockingState.value) {
@@ -65,5 +69,10 @@ class MockLocationViewModel @Inject constructor(
     fun updateSpeed(newSpeed: Int) {
         _speed.value = newSpeed
         mockLocationHandler.updateSpeed(newSpeed)
+    }
+
+    fun updateGpsMode(mode: GpsMode) {
+        _gpsMode.value = mode
+        mockLocationHandler.updateGpsMode(mode)
     }
 }
