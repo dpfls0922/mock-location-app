@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.presentation.mock.MockingState
+import com.example.mocklocation.presentation.search.AutoCompleteUiModel
 
 @Composable
 fun ExpandableGpsMockCard(
@@ -31,10 +32,13 @@ fun ExpandableGpsMockCard(
     repeatCount: Int,
     speed: Int,
     gpsMode: GpsMode,
+    searchQuery: String,
+    autoSuggestions: List<AutoCompleteUiModel>,
     onRepeatModeChanged: (RepeatMode) -> Unit,
     onRepeatCountChanged: (Int) -> Unit,
     onSpeedChanged: (Int) -> Unit,
     onGpsModeChanged: (GpsMode) -> Unit,
+    onQueryChange: (String) -> Unit,
     onStartMock: () -> Unit,
     onStopMock: () -> Unit
 ) {
@@ -68,10 +72,13 @@ fun ExpandableGpsMockCard(
                 repeatCount = repeatCount,
                 speed = speed,
                 gpsMode = gpsMode,
+                searchQuery = searchQuery,
+                autoSuggestions = autoSuggestions,
                 onRepeatModeChanged = onRepeatModeChanged,
                 onRepeatCountChanged = onRepeatCountChanged,
                 onSpeedChanged = onSpeedChanged,
                 onGpsModeChanged = onGpsModeChanged,
+                onQueryChange = onQueryChange,
                 onStartMock,
                 onStopMock
             )

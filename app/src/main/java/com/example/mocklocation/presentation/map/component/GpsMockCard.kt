@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.presentation.mock.MockingState
+import com.example.mocklocation.presentation.search.AutoCompleteUiModel
 
 @Composable
 fun GPSMockCard(
@@ -31,16 +32,17 @@ fun GPSMockCard(
     repeatCount: Int,
     speed: Int,
     gpsMode: GpsMode,
+    searchQuery: String,
+    autoSuggestions: List<AutoCompleteUiModel>,
     onRepeatModeChanged: (RepeatMode) -> Unit,
     onRepeatCountChanged: (Int) -> Unit,
     onSpeedChanged: (Int) -> Unit,
     onGpsModeChanged: (GpsMode) -> Unit,
+    onQueryChange: (String) -> Unit,
     onStartMock: () -> Unit,
     onStopMock: () -> Unit
 ) {
-    var selectedMode by remember { mutableStateOf(GpsMode.GPS) }
     var isGpsEnabled by remember { mutableStateOf(true) }
-    var searchQuery by remember { mutableStateOf("") }
 
     Column(
         modifier = modifier
@@ -63,8 +65,14 @@ fun GPSMockCard(
                 MockGpsStatus(mockingState = mockingState)
                 SearchBar(
                     value = searchQuery,
-                    onValueChange = { searchQuery = it }
+                    onValueChange = onQueryChange
                 )
+                if (autoSuggestions.isNotEmpty()) {
+                    AutoCompleteList(
+                        autoSuggestions = autoSuggestions,
+                        onItemClick = { }
+                    )
+                }
 
                 CurrentLocation(location = currentLocationUiModel)
 
@@ -112,10 +120,13 @@ fun GPSMockCardPreview() {
         repeatCount = 0,
         speed = 60,
         gpsMode = GpsMode.GPS,
+        searchQuery = "",
+        autoSuggestions = listOf(),
         onRepeatModeChanged = { },
         onRepeatCountChanged = { },
         onSpeedChanged = { },
         onGpsModeChanged = { },
+        onQueryChange = { },
         onStartMock = { },
         onStopMock = { }
     )
