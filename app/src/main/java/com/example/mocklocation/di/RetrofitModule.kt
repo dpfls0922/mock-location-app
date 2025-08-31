@@ -35,6 +35,7 @@ import javax.inject.Singleton
 object RetrofitModule {
     @Provides
     @Singleton
+    @Named("TmapAccessKey")
     fun provideAccessKey(): String {
         return BuildConfig.TMAP_ACCESS_KEY
     }
