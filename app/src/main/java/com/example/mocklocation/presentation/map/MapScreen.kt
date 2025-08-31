@@ -14,12 +14,14 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.mocklocation.presentation.map.component.ExpandableGpsMockCard
 import com.example.mocklocation.presentation.map.component.FloatingButtons
 import com.example.mocklocation.presentation.mock.MockLocationViewModel
+import com.example.mocklocation.presentation.search.SearchViewModel
 import com.example.mocklocation.presentation.ui.theme.MapTheme
 
 @Composable
 fun MapScreen(
     mapViewModel: MapViewModel,
     mockViewModel: MockLocationViewModel,
+    searchViewModel: SearchViewModel,
     permissionGranted: Boolean,
     onRequestPermission: () -> Unit,
     onClickMyLocation: () -> Unit,
@@ -35,6 +37,8 @@ fun MapScreen(
     val repeatCount by mockViewModel.repeatCount.collectAsState()
     val speed by mockViewModel.speed.collectAsState()
     val gpsMode by mockViewModel.gpsMode.collectAsState()
+    val searchQuery by searchViewModel.searchQuery.collectAsState()
+    val autoSuggestions by searchViewModel.autoSuggestions.collectAsState()
 
     LaunchedEffect(permissionGranted) {
         if (!permissionGranted) {
@@ -67,10 +71,13 @@ fun MapScreen(
                     repeatCount = repeatCount,
                     speed = speed,
                     gpsMode = gpsMode,
+                    searchQuery = searchQuery,
+                    autoSuggestions = autoSuggestions,
                     onRepeatModeChanged = { newMode -> mockViewModel.updateRepeatSettings(mode = newMode, count = repeatCount) },
                     onRepeatCountChanged = { count -> mockViewModel.updateRepeatSettings(mode = repeatMode, count = count) },
                     onSpeedChanged = { speed -> mockViewModel.updateSpeed(newSpeed = speed) },
                     onGpsModeChanged = { mode -> mockViewModel.updateGpsMode(mode = mode) },
+                    onQueryChange = { query -> searchViewModel.onSearchQueryChanged(query) },
                     onStartMock = onClickStartMockSend,
                     onStopMock = onClickStopMockSend
                 )
