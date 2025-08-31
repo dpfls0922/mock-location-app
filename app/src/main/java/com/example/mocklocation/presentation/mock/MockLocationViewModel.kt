@@ -25,6 +25,9 @@ class MockLocationViewModel @Inject constructor(
     private val _repeatCount = MutableStateFlow(3)
     val repeatCount: StateFlow<Int> = _repeatCount.asStateFlow()
 
+    private val _speed = MutableStateFlow(60)
+    val speed: StateFlow<Int> = _speed.asStateFlow()
+
     fun startOrResumeMocking() {
         when (mockingState.value) {
             MockingState.IDLE -> {
@@ -57,5 +60,10 @@ class MockLocationViewModel @Inject constructor(
         _repeatMode.value = mode
         _repeatCount.value = count
         mockLocationHandler.updateRepeatSettings(mode, count)
+    }
+
+    fun updateSpeed(newSpeed: Int) {
+        _speed.value = newSpeed
+        mockLocationHandler.updateSpeed(newSpeed)
     }
 }

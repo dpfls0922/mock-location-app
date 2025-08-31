@@ -33,6 +33,7 @@ fun MapScreen(
     val currentLocationUiModel by mapViewModel.currentLocationUiModel.collectAsState()
     val repeatMode by mockViewModel.repeatMode.collectAsState()
     val repeatCount by mockViewModel.repeatCount.collectAsState()
+    val speed by mockViewModel.speed.collectAsState()
 
     LaunchedEffect(permissionGranted) {
         if (!permissionGranted) {
@@ -63,8 +64,10 @@ fun MapScreen(
                     currentLocationUiModel = currentLocationUiModel,
                     repeatMode = repeatMode,
                     repeatCount = repeatCount,
+                    speed = speed,
                     onRepeatModeChanged = { newMode -> mockViewModel.updateRepeatSettings(mode = newMode, count = repeatCount) },
                     onRepeatCountChanged = { count -> mockViewModel.updateRepeatSettings(mode = repeatMode, count = count) },
+                    onSpeedChanged = { speed -> mockViewModel.updateSpeed(newSpeed = speed) },
                     onStartMock = onClickStartMockSend,
                     onStopMock = onClickStopMockSend
                 )

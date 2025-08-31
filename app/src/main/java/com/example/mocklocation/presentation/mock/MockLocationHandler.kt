@@ -32,6 +32,7 @@ class MockLocationHandler @Inject constructor(
     private var repeatMode: RepeatMode = RepeatMode.INFINITE
     private var repeatCount: Int = 0
     private var currentRepeat: Int = 0
+    private var speed: Int = 60
 
     fun startSending(
         gpsPoints: List<GpsPoint>,
@@ -89,6 +90,11 @@ class MockLocationHandler @Inject constructor(
         }
     }
 
+    fun updateSpeed(speed: Int) {
+        this.speed = speed
+        Timber.i("[UPDATE] 전송 속도 업데이트: ${speed} km/h")
+    }
+
     private fun startMockingFromIndex() {
         if (mockingState.value == MockingState.RUNNING) {
             Timber.w("[WARN] Mocking 작업이 이미 활성화되어 있습니다. (${mockingState.value})")
@@ -108,7 +114,8 @@ class MockLocationHandler @Inject constructor(
 
                     sendMockLocationUseCase.createMockLocationFlow(
                         allGpsPoints,
-                        lastSentIndex
+                        lastSentIndex,
+                        speed
                     ).collect { point ->
                         val result = sendMockLocationUseCase.sendLocation(point)
                         if (result.isFailure) {
