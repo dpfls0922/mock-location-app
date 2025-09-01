@@ -2,6 +2,7 @@ package com.example.mocklocation.presentation.search
 
 import com.example.mocklocation.BuildConfig
 import com.example.mocklocation.domain.entity.Poi
+import com.example.mocklocation.domain.entity.TouchLocation
 import com.skt.tmap.vsm.coordinates.VSMCoordinates
 import com.skt.tmap.vsm.data.VSMMapPoint
 import kotlin.Int
@@ -36,16 +37,15 @@ fun Poi.toUiModel(): SearchResultUiModel {
     )
 }
 
-fun VSMMapPoint.toUiModel(index: Int): SearchResultUiModel {
+fun VSMMapPoint.toUiModel(location: TouchLocation): SearchResultUiModel {
     val (xPos, yPos) = VSMCoordinates.wgs84ToSK(
         this.longitude,
         this.latitude
     )
-    val nameWithIndex = "선택한 위치 ${index}"
     return SearchResultUiModel(
         pkey = "",
-        name = nameWithIndex,
-        roadAddress = "",
+        name = location.roadName,
+        roadAddress = location.address,
         xPos = xPos.toInt(),
         yPos = yPos.toInt(),
         distanceText = "",

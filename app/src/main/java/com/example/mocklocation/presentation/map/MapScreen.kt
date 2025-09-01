@@ -35,8 +35,6 @@ fun MapScreen(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val touchedLocation by mapViewModel.touchedLocation.collectAsState()
-    val routePoints by routeGuidanceViewModel.routePoints.collectAsState()
-    val nextIndex = routePoints.size + 1
 
     LaunchedEffect(Unit) {
         routeGuidanceViewModel.uiState.collectLatest { state ->
@@ -52,7 +50,7 @@ fun MapScreen(
     LaunchedEffect(touchedLocation) {
         touchedLocation?.let {
             mapViewModel.onTouchedLocationChanged(it)
-            searchViewModel.showRouteSelectionDialogForMapPoint(it, nextIndex)
+            searchViewModel.showRouteSelectionDialogForMapPoint(it)
         }
     }
 
