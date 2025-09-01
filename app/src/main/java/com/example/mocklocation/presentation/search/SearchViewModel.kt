@@ -6,6 +6,8 @@ import com.example.mocklocation.domain.entity.CurrentLocation
 import com.example.mocklocation.domain.usecase.GetAutoCompleteSuggestionsUseCase
 import com.example.mocklocation.domain.usecase.GetCurrentLocationUseCase
 import com.example.mocklocation.domain.usecase.SearchPoiUseCase
+import com.example.mocklocation.presentation.map.component.RoutePoint
+import com.example.mocklocation.presentation.map.component.RoutePointType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,13 +32,22 @@ class SearchViewModel @Inject constructor(
     private val _currentLocation = MutableStateFlow(
         CurrentLocation(0, 0.0, 0.0, null, null)
     )
-    val currentLocation: StateFlow<CurrentLocation> = _currentLocation
+    private val currentLocation: StateFlow<CurrentLocation> = _currentLocation
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
 
     private val _autoSuggestions = MutableStateFlow<List<AutoCompleteUiModel>>(emptyList())
     val autoSuggestions: StateFlow<List<AutoCompleteUiModel>> = _autoSuggestions
+
+    private val _routePoints = MutableStateFlow<List<RoutePoint>>(emptyList())
+    val routePoints: StateFlow<List<RoutePoint>> = _routePoints
+
+    private val _showRouteDialog = MutableStateFlow(false)
+    val showRouteDialog: StateFlow<Boolean> = _showRouteDialog
+
+    private val _selectedLocationForRoute = MutableStateFlow<SearchResultUiModel?>(null)
+    val selectedLocationForRoute: StateFlow<SearchResultUiModel?> = _selectedLocationForRoute
 
     private val _uiState = MutableStateFlow<SearchUiState>(SearchUiState.Idle)
     val uiState: StateFlow<SearchUiState> = _uiState
@@ -120,10 +131,68 @@ class SearchViewModel @Inject constructor(
             .onSuccess { pois ->
                 val results = pois.map { it.toUiModel() }
                 _uiState.value = SearchUiState.Success(results)
+                if (results.isNotEmpty()) {
+                    showRouteSelectionDialog(results.first())
+                }
             }
             .onFailure { e ->
                 Timber.e(e, "POI 검색 실패")
                 _uiState.value = SearchUiState.Error("검색에 실패했습니다.")
             }
+    }
+
+    /**
+     * 경로 선택 다이얼로그 표시
+     */
+    private fun showRouteSelectionDialog(location: SearchResultUiModel) {
+        _selectedLocationForRoute.value = location
+        _showRouteDialog.value = true
+    }
+
+    /**
+     * 경로 선택 다이얼로그 닫기
+     */
+    fun dismissRouteDialog() {
+        _showRouteDialog.value = false
+        _selectedLocationForRoute.value = null
+    }
+
+    /**
+     * 경로 포인트 추가
+     */
+    fun addRoutePoint(routeType: RoutePointType, location: SearchResultUiModel) {
+        val currentPoints = _routePoints.value.toMutableList()
+
+        when (routeType) {
+            RoutePointType.START -> {
+                currentPoints.removeAll { it.type == RoutePointType.START }
+                currentPoints.add(0, RoutePoint(routeType, location))
+            }
+            RoutePointType.END -> {
+                currentPoints.removeAll { it.type == RoutePointType.END }
+                currentPoints.add(RoutePoint(routeType, location))
+            }
+            RoutePointType.WAYPOINT -> {
+                val waypointCount = currentPoints.count { it.type == RoutePointType.WAYPOINT }
+                if (waypointCount < 2) {
+                    val insertIndex = currentPoints.indexOfLast { it.type == RoutePointType.START } + 1
+                    currentPoints.add(insertIndex, RoutePoint(routeType, location))
+                } else {
+                    Timber.w("경유지는 최대 2개까지만 추가할 수 있습니다.")
+                    return
+                }
+            }
+        }
+        _routePoints.value = currentPoints
+        dismissRouteDialog()
+    }
+
+    /**
+     * 경로 포인트 제거
+     */
+    fun removeRoutePoint(routePoint: RoutePoint) {
+        val currentPoints = _routePoints.value.toMutableList()
+        currentPoints.remove(routePoint)
+        _routePoints.value = currentPoints
     }
 }

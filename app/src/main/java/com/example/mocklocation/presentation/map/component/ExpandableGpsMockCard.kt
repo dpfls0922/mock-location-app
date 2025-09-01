@@ -22,6 +22,7 @@ import androidx.compose.ui.zIndex
 import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.presentation.mock.MockingState
 import com.example.mocklocation.presentation.search.AutoCompleteUiModel
+import com.example.mocklocation.presentation.search.SearchResultUiModel
 
 @Composable
 fun ExpandableGpsMockCard(
@@ -34,12 +35,18 @@ fun ExpandableGpsMockCard(
     gpsMode: GpsMode,
     searchQuery: String,
     autoSuggestions: List<AutoCompleteUiModel>,
+    routePoints: List<RoutePoint>,
+    showRouteDialog: Boolean,
+    selectedLocationForRoute: SearchResultUiModel?,
     onRepeatModeChanged: (RepeatMode) -> Unit,
     onRepeatCountChanged: (Int) -> Unit,
     onSpeedChanged: (Int) -> Unit,
     onGpsModeChanged: (GpsMode) -> Unit,
     onAutoCompleteItemClick: (AutoCompleteUiModel) -> Unit,
     onQueryChange: (String) -> Unit,
+    onRouteTypeSelected: (RoutePointType) -> Unit,
+    onRouteDialogDismiss: () -> Unit,
+    onRemoveRoutePoint: (RoutePoint) -> Unit,
     onStartMock: () -> Unit,
     onStopMock: () -> Unit
 ) {
@@ -75,12 +82,18 @@ fun ExpandableGpsMockCard(
                 gpsMode = gpsMode,
                 searchQuery = searchQuery,
                 autoSuggestions = autoSuggestions,
+                routePoints = routePoints,
+                showRouteDialog = showRouteDialog,
+                selectedLocationForRoute = selectedLocationForRoute,
                 onRepeatModeChanged = onRepeatModeChanged,
                 onRepeatCountChanged = onRepeatCountChanged,
                 onSpeedChanged = onSpeedChanged,
                 onGpsModeChanged = onGpsModeChanged,
                 onQueryChange = onQueryChange,
                 onAutoCompleteItemClick = onAutoCompleteItemClick,
+                onRouteTypeSelected = onRouteTypeSelected,
+                onRouteDialogDismiss = onRouteDialogDismiss,
+                onRemoveRoutePoint = onRemoveRoutePoint,
                 onStartMock = onStartMock,
                 onStopMock = onStopMock
             )
