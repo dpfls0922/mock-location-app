@@ -2,6 +2,7 @@ package com.example.mocklocation.data.repository
 
 import com.example.mocklocation.data.datasource.TmapDataSource
 import com.example.mocklocation.data.dto.common.RequestHeaderFactory
+import com.example.mocklocation.data.dto.common.WayPointRequest
 import com.example.mocklocation.data.dto.request.PoiSearchRequest
 import com.example.mocklocation.data.dto.request.RouteGuidanceRequest
 import com.example.mocklocation.data.dto.response.toDomain
@@ -45,14 +46,23 @@ class TmapRepositoryImpl @Inject constructor(
 
     override suspend fun searchRouteGuidance(
         start: Poi,
-        dest: Poi
+        dest: Poi,
+        wayPoints: List<Poi>
     ): RouteGuidance = withContext(Dispatchers.IO) {
+        val waypointRequests = wayPoints.map { poi ->
+            WayPointRequest(
+                x = poi.xPos,
+                y = poi.yPos
+            )
+        }
+
         val requestDto = RouteGuidanceRequest(
             header = RequestHeaderFactory.create(),
             departXPos = start.xPos,
             departYPos = start.yPos,
             destXPos = dest.xPos,
-            destYPos = dest.yPos
+            destYPos = dest.yPos,
+            wayPoints = waypointRequests.takeIf { it.isNotEmpty() }
         )
         val dto = dataSource.searchRouteGuidance(requestDto)
         dto.toDomain()

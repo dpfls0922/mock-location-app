@@ -23,7 +23,7 @@ data class RouteGuidanceRequest(
     val header: RequestHeader,
     val tvas: String = "5.9",
     val resFlag: Byte? = null,
-    val routePlanTypes: List<RoutePlanType>? = listOf(RoutePlanType.TRAFFIC_RECOMMEND, RoutePlanType.TRAFFIC_FREE, RoutePlanType.TRAFFIC_MINTIME, RoutePlanType.SHORTEST_CHARGED_AND_FREE, RoutePlanType.TRAFFIC_HIGHWAY, RoutePlanType.TRAFFIC_AVOID_SCHOOL_ZONE),
+    val routePlanTypes: List<RoutePlanType>? = listOf(RoutePlanType.TRAFFIC_RECOMMEND),
     val usedFavoriteRouteFlags: List<Byte>? = null,
     val detailLocFlag: DetailLocFlag = DetailLocFlag.NotApplied,
     val serviceFlag: ServiceFlag? = ServiceFlag.Realtime,
