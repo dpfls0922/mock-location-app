@@ -62,6 +62,7 @@ class MarkerHelper(
                 addLocationMarker(startPoint.latitude, startPoint.longitude, MarkerType.START)
                 val endPoint = points.last()
                 addLocationMarker(endPoint.latitude, endPoint.longitude, MarkerType.DESTINATION)
+                addLocationMarker(endPoint.latitude, endPoint.longitude, MarkerType.END)
 
                 val strokeColor = 0xFF2979FF.toInt()
                 val fillColor = 0xAA2979FF.toInt()
