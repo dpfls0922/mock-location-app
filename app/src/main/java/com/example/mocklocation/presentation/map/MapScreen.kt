@@ -14,8 +14,10 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.mocklocation.presentation.map.component.ExpandableGpsMockCard
 import com.example.mocklocation.presentation.map.component.FloatingButtons
 import com.example.mocklocation.presentation.mock.MockLocationViewModel
+import com.example.mocklocation.presentation.search.SearchUiState
 import com.example.mocklocation.presentation.search.SearchViewModel
 import com.example.mocklocation.presentation.ui.theme.MapTheme
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun MapScreen(
@@ -43,6 +45,17 @@ fun MapScreen(
     val routePoints by searchViewModel.routePoints.collectAsState()
     val showRouteDialog by searchViewModel.showRouteDialog.collectAsState()
     val selectedLocationForRoute by searchViewModel.selectedLocationForRoute.collectAsState()
+
+    LaunchedEffect(Unit) {
+        searchViewModel.uiState.collectLatest { state ->
+            if (state is SearchUiState.SuccessWithGuidance) {
+                val vsmPoints = state.guidanceData?.vsmPoints
+                if (!vsmPoints.isNullOrEmpty()) {
+                    mapViewModel.drawRouteLine(vsmPoints)
+                }
+            }
+        }
+    }
 
     LaunchedEffect(permissionGranted) {
         if (!permissionGranted) {
