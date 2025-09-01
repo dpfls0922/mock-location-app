@@ -5,11 +5,14 @@ import com.example.mocklocation.data.dto.common.RequestHeaderFactory
 import com.example.mocklocation.data.dto.common.WayPointRequest
 import com.example.mocklocation.data.dto.request.PoiSearchRequest
 import com.example.mocklocation.data.dto.request.RouteGuidanceRequest
+import com.example.mocklocation.data.dto.request.TouchSearchRequest
 import com.example.mocklocation.data.dto.response.toDomain
 import com.example.mocklocation.domain.entity.AutoComplete
 import com.example.mocklocation.domain.entity.CurrentLocation
 import com.example.mocklocation.domain.entity.Poi
 import com.example.mocklocation.domain.entity.RouteGuidance
+import com.example.mocklocation.domain.entity.SKCoord
+import com.example.mocklocation.domain.entity.TouchLocation
 import com.example.mocklocation.domain.repository.TmapRepository
 import com.skt.tmap.vsm.coordinates.VSMCoordinates
 import kotlinx.coroutines.Dispatchers
@@ -65,6 +68,18 @@ class TmapRepositoryImpl @Inject constructor(
             wayPoints = waypointRequests.takeIf { it.isNotEmpty() }
         )
         val dto = dataSource.searchRouteGuidance(requestDto)
+        dto.toDomain()
+    }
+
+    override suspend fun searchRoadName(
+        coord: SKCoord
+    ): TouchLocation = withContext(Dispatchers.IO) {
+        val requestDto = TouchSearchRequest(
+            header = RequestHeaderFactory.create(),
+            noorX = coord.x.toInt().toString(),
+            noorY = coord.y.toInt().toString()
+        )
+        val dto = dataSource.searchRoadName(requestDto)
         dto.toDomain()
     }
 }
