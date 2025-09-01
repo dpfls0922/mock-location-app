@@ -7,8 +7,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import com.example.mocklocation.presentation.mock.MockLocationViewModel
-import com.example.mocklocation.presentation.search.RouteGuidanceState
-import com.example.mocklocation.presentation.search.RouteGuidanceViewModel
 
 @Composable
 fun RouteGuidanceStatusHandler(
