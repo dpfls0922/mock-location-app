@@ -22,10 +22,13 @@ import androidx.compose.ui.zIndex
 import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.presentation.mock.MockingState
 import com.example.mocklocation.presentation.search.AutoCompleteUiModel
-import com.example.mocklocation.presentation.search.SearchResultUiModel
+import com.example.mocklocation.presentation.search.RouteGuidanceViewModel
+import com.example.mocklocation.presentation.search.SearchViewModel
 
 @Composable
 fun ExpandableGpsMockCard(
+    searchViewModel: SearchViewModel,
+    routeGuidanceViewModel: RouteGuidanceViewModel,
     mockingState: MockingState,
     gpsPoints: List<GpsPoint>,
     currentLocationUiModel: MockLocationUiModel?,
@@ -35,9 +38,6 @@ fun ExpandableGpsMockCard(
     gpsMode: GpsMode,
     searchQuery: String,
     autoSuggestions: List<AutoCompleteUiModel>,
-    routePoints: List<RoutePoint>,
-    showRouteDialog: Boolean,
-    selectedLocationForRoute: SearchResultUiModel?,
     onRepeatModeChanged: (RepeatMode) -> Unit,
     onRepeatCountChanged: (Int) -> Unit,
     onSpeedChanged: (Int) -> Unit,
@@ -74,6 +74,8 @@ fun ExpandableGpsMockCard(
                     .width(400.dp)
                     .align(Alignment.TopStart)
                     .padding(8.dp),
+                searchViewModel = searchViewModel,
+                routeGuidanceViewModel = routeGuidanceViewModel,
                 mockingState = mockingState,
                 gpsPoints = gpsPoints,
                 currentLocationUiModel = currentLocationUiModel,
@@ -83,9 +85,6 @@ fun ExpandableGpsMockCard(
                 gpsMode = gpsMode,
                 searchQuery = searchQuery,
                 autoSuggestions = autoSuggestions,
-                routePoints = routePoints,
-                showRouteDialog = showRouteDialog,
-                selectedLocationForRoute = selectedLocationForRoute,
                 onRepeatModeChanged = onRepeatModeChanged,
                 onRepeatCountChanged = onRepeatCountChanged,
                 onSpeedChanged = onSpeedChanged,
