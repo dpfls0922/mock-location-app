@@ -180,6 +180,7 @@ private fun RouteTypeOptionButton(
 fun RoutePointsList(
     routePoints: List<RoutePoint>,
     onRemovePoint: (RoutePoint) -> Unit,
+    onRouteGuidance: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (routePoints.isNotEmpty()) {
@@ -211,7 +212,7 @@ fun RoutePointsList(
                 horizontalArrangement = Arrangement.End
             ) {
                 Button(
-                    onClick = { /* TODO */ },
+                    onClick = onRouteGuidance,
                     enabled = hasStartAndEnd,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,

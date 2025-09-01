@@ -3,8 +3,10 @@ package com.example.mocklocation.presentation.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mocklocation.domain.entity.CurrentLocation
+import com.example.mocklocation.domain.entity.RouteGuidance
 import com.example.mocklocation.domain.usecase.GetAutoCompleteSuggestionsUseCase
 import com.example.mocklocation.domain.usecase.GetCurrentLocationUseCase
+import com.example.mocklocation.domain.usecase.GetRouteGuidanceUseCase
 import com.example.mocklocation.domain.usecase.SearchPoiUseCase
 import com.example.mocklocation.presentation.map.component.RoutePoint
 import com.example.mocklocation.presentation.map.component.RoutePointType
@@ -20,6 +22,9 @@ sealed class SearchUiState {
     object Idle : SearchUiState()
     object Loading : SearchUiState()
     data class Success(val results: List<SearchResultUiModel>) : SearchUiState()
+    data class SuccessWithGuidance(
+        val guidanceData: RouteGuidance
+    ) : SearchUiState()
     data class Error(val message: String) : SearchUiState()
 }
 
@@ -28,6 +33,7 @@ class SearchViewModel @Inject constructor(
     private val getCurrentLocationUseCase: GetCurrentLocationUseCase,
     private val getAutoCompleteUseCase: GetAutoCompleteSuggestionsUseCase,
     private val searchPoisUseCase: SearchPoiUseCase,
+    private val getRouteGuidanceUseCase: GetRouteGuidanceUseCase
 ) : ViewModel() {
     private val _currentLocation = MutableStateFlow(
         CurrentLocation(0, 0.0, 0.0, null, null)
@@ -194,5 +200,35 @@ class SearchViewModel @Inject constructor(
         val currentPoints = _routePoints.value.toMutableList()
         currentPoints.remove(routePoint)
         _routePoints.value = currentPoints
+    }
+
+    fun startGuidance() {
+        val currentPoints = _routePoints.value
+
+        val startPoint = currentPoints.find { it.type == RoutePointType.START }?.location
+        val endPoint = currentPoints.find { it.type == RoutePointType.END }?.location
+        val wayPoints = currentPoints.filter { it.type == RoutePointType.WAYPOINT }.map { it.location }
+
+        if (startPoint == null || endPoint == null) {
+            Timber.w("시작점 또는 도착점이 설정되지 않음")
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.value = SearchUiState.Loading
+
+            getRouteGuidanceUseCase(
+                start = startPoint.toDomain(),
+                dest = endPoint.toDomain(),
+                wayPoints = wayPoints.map { it.toDomain() }
+            ).onSuccess { guidance ->
+                _uiState.value = SearchUiState.SuccessWithGuidance(
+                    guidanceData = guidance
+                )
+            }.onFailure { e ->
+                Timber.e(e, "경로 안내 실패")
+                _uiState.value = SearchUiState.Error("경로 안내에 실패했습니다.")
+            }
+        }
     }
 }
