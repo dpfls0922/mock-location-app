@@ -1,6 +1,7 @@
 package com.example.mocklocation.domain.service
 
 import android.content.Context
+import android.view.MotionEvent
 import com.example.mocklocation.domain.entity.CurrentLocation
 import com.skt.tmap.vsm.data.VSMMapPoint
 import com.skt.tmap.vsm.map.VSMMapView
@@ -10,6 +11,9 @@ import com.skt.tmap.vsm.map.VSMMapView
  */
 interface MapService {
     fun createView(context: Context): VSMMapView
+    fun setMapTouchListener(listener: (MotionEvent) -> VSMMapPoint?)
+    fun addMarkerAt(latitude: Double, longitude: Double)
+    fun removeExistingMarker()
     fun updateCurrentLocationMarker(location: CurrentLocation)
     fun drawRouteLine(vsmPoints: List<VSMMapPoint>)
     fun cleanupMap()

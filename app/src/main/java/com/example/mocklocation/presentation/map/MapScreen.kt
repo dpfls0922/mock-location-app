@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -32,6 +34,7 @@ fun MapScreen(
     onClickStopMockSend: () -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
+    val touchedLocation by mapViewModel.touchedLocation.collectAsState()
 
     LaunchedEffect(Unit) {
         routeGuidanceViewModel.uiState.collectLatest { state ->
@@ -41,6 +44,12 @@ fun MapScreen(
                     mapViewModel.drawRouteLine(vsmPoints)
                 }
             }
+        }
+    }
+
+    LaunchedEffect(touchedLocation) {
+        touchedLocation?.let {
+            mapViewModel.onTouchedLocationChanged(it)
         }
     }
 

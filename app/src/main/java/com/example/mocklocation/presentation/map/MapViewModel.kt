@@ -3,15 +3,18 @@ package com.example.mocklocation.presentation.map
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mocklocation.data.service.MapServiceImpl
 import com.example.mocklocation.domain.entity.CurrentLocation
 import com.example.mocklocation.domain.service.MapService
 import com.example.mocklocation.domain.usecase.CheckLocationPermissionUseCase
 import com.example.mocklocation.domain.usecase.GetCurrentLocationUseCase
 import com.example.mocklocation.presentation.map.component.MockLocationUiModel
 import com.skt.tmap.vsm.data.VSMMapPoint
+import com.skt.tmap.vsm.map.VSMMapView
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
@@ -32,7 +35,24 @@ class MapViewModel @Inject constructor(
     private val _currentLocationUiModel = MutableStateFlow<MockLocationUiModel?>(null)
     val currentLocationUiModel: StateFlow<MockLocationUiModel?> = _currentLocationUiModel
 
-    fun createMapView(context: Context) = mapService.createView(context)
+    private val _touchedLocation = MutableStateFlow<VSMMapPoint?>(null)
+    val touchedLocation: StateFlow<VSMMapPoint?> = _touchedLocation.asStateFlow()
+
+    fun createMapView(context: Context): VSMMapView {
+        val mapView = mapService.createView(context)
+        (mapService as MapServiceImpl).setMapTouchListener { event ->
+            val mapPoint = mapView.mapEngine().screenToWgs84(event.x.toInt(), event.y.toInt())
+            if (mapPoint != null && mapPoint.isValid) {
+                _touchedLocation.value = mapPoint
+            }
+            mapPoint
+        }
+        return mapView
+    }
+
+    fun onTouchedLocationChanged(location: VSMMapPoint) {
+        mapService.addMarkerAt(location.latitude, location.longitude)
+    }
 
     suspend fun checkAndFetchInitialLocation() {
         val granted = checkPermissionUseCase()
