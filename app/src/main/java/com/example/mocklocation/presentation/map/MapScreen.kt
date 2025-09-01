@@ -14,8 +14,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.mocklocation.presentation.map.component.ExpandableGpsMockCard
 import com.example.mocklocation.presentation.map.component.FloatingButtons
 import com.example.mocklocation.presentation.mock.MockLocationViewModel
-import com.example.mocklocation.presentation.search.RouteGuidanceState
-import com.example.mocklocation.presentation.search.RouteGuidanceViewModel
+import com.example.mocklocation.presentation.route.RouteGuidanceState
+import com.example.mocklocation.presentation.route.RouteGuidanceViewModel
 import com.example.mocklocation.presentation.search.SearchViewModel
 import com.example.mocklocation.presentation.ui.theme.MapTheme
 import kotlinx.coroutines.flow.collectLatest
@@ -35,6 +35,8 @@ fun MapScreen(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val touchedLocation by mapViewModel.touchedLocation.collectAsState()
+    val routePoints by routeGuidanceViewModel.routePoints.collectAsState()
+    val nextIndex = routePoints.size + 1
 
     LaunchedEffect(Unit) {
         routeGuidanceViewModel.uiState.collectLatest { state ->
@@ -50,6 +52,7 @@ fun MapScreen(
     LaunchedEffect(touchedLocation) {
         touchedLocation?.let {
             mapViewModel.onTouchedLocationChanged(it)
+            searchViewModel.showRouteSelectionDialogForMapPoint(it, nextIndex)
         }
     }
 
