@@ -11,6 +11,9 @@ import com.example.mocklocation.presentation.file.FileUploadViewModel
 import com.example.mocklocation.presentation.map.MapRouteConstants.DEFAULT_FILE_NAME
 import com.example.mocklocation.presentation.map.MapRouteConstants.MIME_TYPE_TEXT
 import com.example.mocklocation.presentation.mock.MockLocationViewModel
+import com.example.mocklocation.presentation.route.RouteGuidanceStatusHandler
+import com.example.mocklocation.presentation.search.RouteGuidanceViewModel
+import com.example.mocklocation.presentation.search.SearchViewModel
 import com.example.mocklocation.presentation.ui.common.rememberFileSelectorLauncher
 import com.example.mocklocation.presentation.ui.common.rememberPermissionLauncher
 
@@ -19,6 +22,8 @@ fun MapRoute(
     mapViewModel: MapViewModel = hiltViewModel(),
     mockViewModel: MockLocationViewModel = hiltViewModel(),
     uploadViewModel: FileUploadViewModel = hiltViewModel(),
+    routeGuidanceViewModel: RouteGuidanceViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel = hiltViewModel()
 ) {
     val permissionGranted by mapViewModel.locationPermissionGranted.collectAsState()
     val permissionLauncher = rememberPermissionLauncher(mapViewModel::onPermissionResult)
@@ -30,9 +35,16 @@ fun MapRoute(
 
     FileUploadStatusHandler(uploadViewModel = uploadViewModel)
 
+    RouteGuidanceStatusHandler(
+        routeGuidanceViewModel = routeGuidanceViewModel,
+        mockLocationViewModel = mockViewModel
+    )
+
     MapScreen(
         mapViewModel = mapViewModel,
         mockViewModel = mockViewModel,
+        searchViewModel = searchViewModel,
+        routeGuidanceViewModel = routeGuidanceViewModel,
         permissionGranted = permissionGranted,
         onRequestPermission = { permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION) },
         onClickMyLocation = { },

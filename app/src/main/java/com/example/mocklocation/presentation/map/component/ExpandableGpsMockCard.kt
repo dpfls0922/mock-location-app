@@ -19,22 +19,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.example.mocklocation.domain.entity.GpsPoint
-import com.example.mocklocation.presentation.mock.MockingState
+import com.example.mocklocation.presentation.map.MapViewModel
+import com.example.mocklocation.presentation.mock.MockLocationViewModel
+import com.example.mocklocation.presentation.search.RouteGuidanceViewModel
+import com.example.mocklocation.presentation.search.SearchViewModel
 
 @Composable
 fun ExpandableGpsMockCard(
-    mockingState: MockingState,
-    gpsPoints: List<GpsPoint>,
-    currentLocationUiModel: MockLocationUiModel?,
-    repeatMode: RepeatMode,
-    repeatCount: Int,
-    speed: Int,
-    gpsMode: GpsMode,
-    onRepeatModeChanged: (RepeatMode) -> Unit,
-    onRepeatCountChanged: (Int) -> Unit,
-    onSpeedChanged: (Int) -> Unit,
-    onGpsModeChanged: (GpsMode) -> Unit,
+    mockViewModel: MockLocationViewModel,
+    searchViewModel: SearchViewModel,
+    routeGuidanceViewModel: RouteGuidanceViewModel,
+    mapViewModel: MapViewModel,
     onStartMock: () -> Unit,
     onStopMock: () -> Unit
 ) {
@@ -61,19 +56,12 @@ fun ExpandableGpsMockCard(
                     .width(400.dp)
                     .align(Alignment.TopStart)
                     .padding(8.dp),
-                mockingState = mockingState,
-                gpsPoints = gpsPoints,
-                currentLocationUiModel = currentLocationUiModel,
-                repeatMode = repeatMode,
-                repeatCount = repeatCount,
-                speed = speed,
-                gpsMode = gpsMode,
-                onRepeatModeChanged = onRepeatModeChanged,
-                onRepeatCountChanged = onRepeatCountChanged,
-                onSpeedChanged = onSpeedChanged,
-                onGpsModeChanged = onGpsModeChanged,
-                onStartMock,
-                onStopMock
+                mockViewModel = mockViewModel,
+                searchViewModel = searchViewModel,
+                routeGuidanceViewModel = routeGuidanceViewModel,
+                mapViewModel = mapViewModel,
+                onStartMock = onStartMock,
+                onStopMock = onStopMock
             )
         }
     }

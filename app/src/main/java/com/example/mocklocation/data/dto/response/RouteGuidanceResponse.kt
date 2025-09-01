@@ -1,6 +1,5 @@
 package com.example.mocklocation.data.dto.response
 
-import android.util.Base64
 import com.example.mocklocation.data.dto.common.ResponseHeader
 import com.example.mocklocation.domain.entity.Destination
 import com.example.mocklocation.domain.entity.RouteGuidance
@@ -53,13 +52,11 @@ data class UsedFavoriteRouteDto(
 )
 
 fun RouteGuidanceResponse.toDomain(): RouteGuidance {
-    val tvasData = tvases?.let { Base64.decode(it, Base64.NO_WRAP) }
-
     val destinationDomain = this.destination.toDomain()
     return RouteGuidance(
         routeCount = this.routeCount.toInt(),
         destination = destinationDomain,
-        tvasData = tvasData
+        tvases = tvases
     )
 }
 
