@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
@@ -43,6 +44,17 @@ fun SearchBar(
         placeholder = { Text("위치 검색") },
         leadingIcon = {
             Icon(Icons.Default.Search, contentDescription = "검색")
+        },
+        trailingIcon = {
+            if (value.isNotEmpty()) {
+                Icon(
+                    imageVector = Icons.Default.Cancel,
+                    contentDescription = "검색어 지우기",
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable { onValueChange("") }
+                )
+            }
         },
         modifier = Modifier
             .fillMaxWidth(),
