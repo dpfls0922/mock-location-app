@@ -5,6 +5,7 @@ import com.example.mocklocation.core.helper.MarkerHelper
 import com.example.mocklocation.core.helper.MarkerType
 import com.example.mocklocation.domain.entity.CurrentLocation
 import com.example.mocklocation.domain.service.MapService
+import com.skt.tmap.vsm.data.VSMMapPoint
 import com.skt.tmap.vsm.map.MapEngine
 import com.skt.tmap.vsm.map.VSMMapView
 import com.skt.tmap.vsm.map.marker.VSMMarkerBase
@@ -40,6 +41,10 @@ class MapServiceImpl @Inject constructor() : MapService {
             MarkerType.CURRENT
         )
         markerHelper?.setCenter(location.latitude, location.longitude)
+    }
+
+    override fun drawRouteLine(vsmPoints: List<VSMMapPoint>) {
+        markerHelper?.drawPolyline(vsmPoints)
     }
 
     override fun cleanupMap() {

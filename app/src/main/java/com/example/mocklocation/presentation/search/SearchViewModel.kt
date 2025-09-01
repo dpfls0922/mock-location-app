@@ -3,7 +3,7 @@ package com.example.mocklocation.presentation.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mocklocation.domain.entity.CurrentLocation
-import com.example.mocklocation.domain.entity.RouteGuidance
+import com.example.mocklocation.domain.entity.RouteGuidanceData
 import com.example.mocklocation.domain.usecase.GetAutoCompleteSuggestionsUseCase
 import com.example.mocklocation.domain.usecase.GetCurrentLocationUseCase
 import com.example.mocklocation.domain.usecase.GetRouteGuidanceUseCase
@@ -23,7 +23,7 @@ sealed class SearchUiState {
     object Loading : SearchUiState()
     data class Success(val results: List<SearchResultUiModel>) : SearchUiState()
     data class SuccessWithGuidance(
-        val guidanceData: RouteGuidance
+        val guidanceData: RouteGuidanceData?
     ) : SearchUiState()
     data class Error(val message: String) : SearchUiState()
 }
@@ -222,6 +222,7 @@ class SearchViewModel @Inject constructor(
                 dest = endPoint.toDomain(),
                 wayPoints = wayPoints.map { it.toDomain() }
             ).onSuccess { guidance ->
+                Timber.i("경로 안내 성공: GPS ${guidance?.gpsPoints!!.size}개, VSM ${guidance?.vsmPoints?.size}개")
                 _uiState.value = SearchUiState.SuccessWithGuidance(
                     guidanceData = guidance
                 )
