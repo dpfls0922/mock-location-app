@@ -40,6 +40,10 @@ fun MapScreen(
     val searchQuery by searchViewModel.searchQuery.collectAsState()
     val autoSuggestions by searchViewModel.autoSuggestions.collectAsState()
 
+    val routePoints by searchViewModel.routePoints.collectAsState()
+    val showRouteDialog by searchViewModel.showRouteDialog.collectAsState()
+    val selectedLocationForRoute by searchViewModel.selectedLocationForRoute.collectAsState()
+
     LaunchedEffect(permissionGranted) {
         if (!permissionGranted) {
             onRequestPermission()
@@ -73,12 +77,22 @@ fun MapScreen(
                     gpsMode = gpsMode,
                     searchQuery = searchQuery,
                     autoSuggestions = autoSuggestions,
+                    routePoints = routePoints,
+                    showRouteDialog = showRouteDialog,
+                    selectedLocationForRoute = selectedLocationForRoute,
                     onRepeatModeChanged = { newMode -> mockViewModel.updateRepeatSettings(mode = newMode, count = repeatCount) },
                     onRepeatCountChanged = { count -> mockViewModel.updateRepeatSettings(mode = repeatMode, count = count) },
                     onSpeedChanged = { speed -> mockViewModel.updateSpeed(newSpeed = speed) },
                     onGpsModeChanged = { mode -> mockViewModel.updateGpsMode(mode = mode) },
                     onAutoCompleteItemClick = { autoComplete -> searchViewModel.onAutoCompleteItemClick(autoComplete) },
                     onQueryChange = { query -> searchViewModel.onSearchQueryChanged(query) },
+                    onRouteTypeSelected = { routeType ->
+                        selectedLocationForRoute?.let { location ->
+                            searchViewModel.addRoutePoint(routeType, location)
+                        }
+                    },
+                    onRouteDialogDismiss = { searchViewModel.dismissRouteDialog() },
+                    onRemoveRoutePoint = { routePoint -> searchViewModel.removeRoutePoint(routePoint) },
                     onStartMock = onClickStartMockSend,
                     onStopMock = onClickStopMockSend
                 )

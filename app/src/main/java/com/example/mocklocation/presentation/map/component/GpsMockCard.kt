@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.presentation.mock.MockingState
 import com.example.mocklocation.presentation.search.AutoCompleteUiModel
+import com.example.mocklocation.presentation.search.SearchResultUiModel
 
 @Composable
 fun GPSMockCard(
@@ -34,12 +35,18 @@ fun GPSMockCard(
     gpsMode: GpsMode,
     searchQuery: String,
     autoSuggestions: List<AutoCompleteUiModel>,
+    routePoints: List<RoutePoint>,
+    showRouteDialog: Boolean,
+    selectedLocationForRoute: SearchResultUiModel?,
     onRepeatModeChanged: (RepeatMode) -> Unit,
     onRepeatCountChanged: (Int) -> Unit,
     onSpeedChanged: (Int) -> Unit,
     onGpsModeChanged: (GpsMode) -> Unit,
     onQueryChange: (String) -> Unit,
     onAutoCompleteItemClick: (AutoCompleteUiModel) -> Unit,
+    onRouteTypeSelected: (RoutePointType) -> Unit,
+    onRouteDialogDismiss: () -> Unit,
+    onRemoveRoutePoint: (RoutePoint) -> Unit,
     onStartMock: () -> Unit,
     onStopMock: () -> Unit
 ) {
@@ -63,14 +70,23 @@ fun GPSMockCard(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 MockGpsStatus(mockingState = mockingState)
+
                 SearchBar(
                     value = searchQuery,
                     onValueChange = onQueryChange
                 )
+
                 if (autoSuggestions.isNotEmpty()) {
                     AutoCompleteList(
                         autoSuggestions = autoSuggestions,
                         onItemClick = onAutoCompleteItemClick
+                    )
+                }
+
+                if (routePoints.isNotEmpty()) {
+                    RoutePointsList(
+                        routePoints = routePoints,
+                        onRemovePoint = onRemoveRoutePoint
                     )
                 }
 
@@ -80,6 +96,7 @@ fun GPSMockCard(
                     gpsMode = gpsMode,
                     onGpsModeChanged = onGpsModeChanged
                 )
+
                 RepeatMode(
                     repeatMode = repeatMode,
                     repeatCount = repeatCount,
@@ -107,6 +124,14 @@ fun GPSMockCard(
             }
         }
     }
+
+    if (showRouteDialog && selectedLocationForRoute != null) {
+        RouteSelectionDialog(
+            selectedLocation = selectedLocationForRoute,
+            onDismiss = onRouteDialogDismiss,
+            onRouteTypeSelected = onRouteTypeSelected
+        )
+    }
 }
 
 @Preview(showBackground = true)
@@ -122,12 +147,18 @@ fun GPSMockCardPreview() {
         gpsMode = GpsMode.GPS,
         searchQuery = "",
         autoSuggestions = listOf(),
+        routePoints = listOf(),
+        showRouteDialog = false,
+        selectedLocationForRoute = null,
         onRepeatModeChanged = { },
         onRepeatCountChanged = { },
         onSpeedChanged = { },
         onGpsModeChanged = { },
         onQueryChange = { },
         onAutoCompleteItemClick = { },
+        onRouteTypeSelected = { },
+        onRouteDialogDismiss = { },
+        onRemoveRoutePoint = { },
         onStartMock = { },
         onStopMock = { }
     )
