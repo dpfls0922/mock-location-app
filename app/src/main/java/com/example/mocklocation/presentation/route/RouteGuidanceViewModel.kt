@@ -1,4 +1,4 @@
-package com.example.mocklocation.presentation.search
+package com.example.mocklocation.presentation.route
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -6,6 +6,8 @@ import com.example.mocklocation.domain.entity.RouteGuidanceData
 import com.example.mocklocation.domain.usecase.GetRouteGuidanceUseCase
 import com.example.mocklocation.presentation.map.component.RoutePoint
 import com.example.mocklocation.presentation.map.component.RoutePointType
+import com.example.mocklocation.presentation.search.SearchResultUiModel
+import com.example.mocklocation.presentation.search.toDomain
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
