@@ -38,6 +38,7 @@ fun ExpandableGpsMockCard(
     onRepeatCountChanged: (Int) -> Unit,
     onSpeedChanged: (Int) -> Unit,
     onGpsModeChanged: (GpsMode) -> Unit,
+    onAutoCompleteItemClick: (AutoCompleteUiModel) -> Unit,
     onQueryChange: (String) -> Unit,
     onStartMock: () -> Unit,
     onStopMock: () -> Unit
@@ -79,8 +80,9 @@ fun ExpandableGpsMockCard(
                 onSpeedChanged = onSpeedChanged,
                 onGpsModeChanged = onGpsModeChanged,
                 onQueryChange = onQueryChange,
-                onStartMock,
-                onStopMock
+                onAutoCompleteItemClick = onAutoCompleteItemClick,
+                onStartMock = onStartMock,
+                onStopMock = onStopMock
             )
         }
     }
