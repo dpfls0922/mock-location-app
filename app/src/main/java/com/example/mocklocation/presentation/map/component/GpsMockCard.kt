@@ -19,40 +19,31 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.mocklocation.domain.entity.GpsPoint
-import com.example.mocklocation.presentation.mock.MockingState
-import com.example.mocklocation.presentation.search.AutoCompleteUiModel
+import com.example.mocklocation.presentation.map.MapViewModel
+import com.example.mocklocation.presentation.mock.MockLocationViewModel
 import com.example.mocklocation.presentation.search.RouteGuidanceViewModel
 import com.example.mocklocation.presentation.search.SearchViewModel
 
 @Composable
 fun GPSMockCard(
     modifier: Modifier = Modifier,
+    mockViewModel: MockLocationViewModel,
     searchViewModel: SearchViewModel,
     routeGuidanceViewModel: RouteGuidanceViewModel,
-    mockingState: MockingState,
-    gpsPoints: List<GpsPoint>,
-    currentLocationUiModel: MockLocationUiModel?,
-    repeatMode: RepeatMode,
-    repeatCount: Int,
-    speed: Int,
-    gpsMode: GpsMode,
-    searchQuery: String,
-    autoSuggestions: List<AutoCompleteUiModel>,
-    onRepeatModeChanged: (RepeatMode) -> Unit,
-    onRepeatCountChanged: (Int) -> Unit,
-    onSpeedChanged: (Int) -> Unit,
-    onGpsModeChanged: (GpsMode) -> Unit,
-    onQueryChange: (String) -> Unit,
-    onAutoCompleteItemClick: (AutoCompleteUiModel) -> Unit,
-    onRouteTypeSelected: (RoutePointType) -> Unit,
-    onRouteGuidance: () -> Unit,
-    onRouteDialogDismiss: () -> Unit,
-    onRemoveRoutePoint: (RoutePoint) -> Unit,
+    mapViewModel: MapViewModel,
     onStartMock: () -> Unit,
     onStopMock: () -> Unit
 ) {
     var isGpsEnabled by remember { mutableStateOf(true) }
+    val gpsPoints by mockViewModel.gpsPoints.collectAsState()
+    val mockingState by mockViewModel.mockingState.collectAsState()
+    val currentLocationUiModel by mapViewModel.currentLocationUiModel.collectAsState()
+    val repeatMode by mockViewModel.repeatMode.collectAsState()
+    val repeatCount by mockViewModel.repeatCount.collectAsState()
+    val speed by mockViewModel.speed.collectAsState()
+    val gpsMode by mockViewModel.gpsMode.collectAsState()
+    val searchQuery by searchViewModel.searchQuery.collectAsState()
+    val autoSuggestions by searchViewModel.autoSuggestions.collectAsState()
     val showRouteDialog by searchViewModel.showRouteDialog.collectAsState()
     val selectedLocationForRoute by searchViewModel.selectedLocationForRoute.collectAsState()
     val routePoints by routeGuidanceViewModel.routePoints.collectAsState()
@@ -86,21 +77,25 @@ fun GPSMockCard(
 
                 SearchBar(
                     value = searchQuery,
-                    onValueChange = onQueryChange
+                    onValueChange = { query -> searchViewModel.onSearchQueryChanged(query) }
                 )
 
                 if (autoSuggestions.isNotEmpty()) {
                     AutoCompleteList(
                         autoSuggestions = autoSuggestions,
-                        onItemClick = onAutoCompleteItemClick
+                        onItemClick = { autoComplete ->
+                            searchViewModel.onAutoCompleteItemClick(autoComplete)
+                        }
                     )
                 }
 
                 if (routePoints.isNotEmpty()) {
                     RoutePointsList(
                         routePoints = routePoints,
-                        onRemovePoint = onRemoveRoutePoint,
-                        onRouteGuidance = onRouteGuidance
+                        onRemovePoint = { routePoint ->
+                            routeGuidanceViewModel.removeRoutePoint(routePoint)
+                        },
+                        onRouteGuidance = { routeGuidanceViewModel.startGuidance() }
                     )
                 }
 
@@ -108,19 +103,29 @@ fun GPSMockCard(
 
                 GPSMode(
                     gpsMode = gpsMode,
-                    onGpsModeChanged = onGpsModeChanged
+                    onGpsModeChanged = { mode -> mockViewModel.updateGpsMode(mode = mode) }
                 )
 
                 RepeatMode(
                     repeatMode = repeatMode,
                     repeatCount = repeatCount,
-                    onRepeatModeChanged = onRepeatModeChanged,
-                    onRepeatCountChanged = onRepeatCountChanged
+                    onRepeatModeChanged = { newMode ->
+                        mockViewModel.updateRepeatSettings(
+                            mode = newMode,
+                            count = repeatCount
+                        )
+                    },
+                    onRepeatCountChanged = { count ->
+                        mockViewModel.updateRepeatSettings(
+                            mode = repeatMode,
+                            count = count
+                        )
+                    }
                 )
 
                 SpeedSection(
                     speed = speed,
-                    onSpeedChanged = onSpeedChanged
+                    onSpeedChanged = { newSpeed -> mockViewModel.updateSpeed(newSpeed = newSpeed) }
                 )
 
                 MockGpsButton(
@@ -142,8 +147,12 @@ fun GPSMockCard(
     if (showRouteDialog && selectedLocationForRoute != null) {
         RouteSelectionDialog(
             selectedLocation = selectedLocationForRoute!!,
-            onDismiss = onRouteDialogDismiss,
-            onRouteTypeSelected = onRouteTypeSelected
+            onDismiss = { searchViewModel.dismissRouteDialog() },
+            onRouteTypeSelected = { routeType ->
+                selectedLocationForRoute?.let { location ->
+                    routeGuidanceViewModel.addRoutePoint(routeType, location)
+                }
+            }
         )
     }
 }
