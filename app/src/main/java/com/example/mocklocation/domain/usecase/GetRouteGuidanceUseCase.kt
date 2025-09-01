@@ -10,8 +10,9 @@ class GetRouteGuidanceUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(
         start: Poi,
-        dest: Poi
+        dest: Poi,
+        wayPoints: List<Poi> = emptyList()
     ): Result<RouteGuidance> = runCatching {
-        tmapRepository.searchRouteGuidance(start, dest)
+        tmapRepository.searchRouteGuidance(start, dest, wayPoints)
     }
 }

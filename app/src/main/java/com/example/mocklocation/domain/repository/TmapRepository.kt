@@ -8,5 +8,5 @@ import com.example.mocklocation.domain.entity.RouteGuidance
 interface TmapRepository {
     suspend fun getAutoCompleteSuggestions(keyword: String): List<AutoComplete>
     suspend fun searchPoi(searchTypCd: String, keyword: String, currentLocation: CurrentLocation): List<Poi>
-    suspend fun searchRouteGuidance(start: Poi, dest: Poi): RouteGuidance
+    suspend fun searchRouteGuidance(start: Poi, dest: Poi, wayPoints: List<Poi> = emptyList()): RouteGuidance
 }
