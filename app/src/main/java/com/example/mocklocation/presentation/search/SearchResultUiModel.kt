@@ -2,6 +2,9 @@ package com.example.mocklocation.presentation.search
 
 import com.example.mocklocation.BuildConfig
 import com.example.mocklocation.domain.entity.Poi
+import com.example.mocklocation.domain.entity.TouchLocation
+import com.skt.tmap.vsm.coordinates.VSMCoordinates
+import com.skt.tmap.vsm.data.VSMMapPoint
 import kotlin.Int
 
 data class SearchResultUiModel(
@@ -31,6 +34,24 @@ fun Poi.toUiModel(): SearchResultUiModel {
         hasParking = feature?.hasParking ?: false,
         imgUrl = feature?.imgUrl,
         detailUrl = "${BuildConfig.POI_DETAIL_URL}poi-detail?pkey=$pkey"
+    )
+}
+
+fun VSMMapPoint.toUiModel(location: TouchLocation): SearchResultUiModel {
+    val (xPos, yPos) = VSMCoordinates.wgs84ToSK(
+        this.longitude,
+        this.latitude
+    )
+    return SearchResultUiModel(
+        pkey = "",
+        name = location.roadName,
+        roadAddress = location.address,
+        xPos = xPos.toInt(),
+        yPos = yPos.toInt(),
+        distanceText = "",
+        hasParking = false,
+        imgUrl = "",
+        detailUrl = ""
     )
 }
 

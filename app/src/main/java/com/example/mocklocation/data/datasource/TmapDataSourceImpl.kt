@@ -2,9 +2,11 @@ package com.example.mocklocation.data.datasource
 
 import com.example.mocklocation.data.dto.request.PoiSearchRequest
 import com.example.mocklocation.data.dto.request.RouteGuidanceRequest
+import com.example.mocklocation.data.dto.request.TouchSearchRequest
 import com.example.mocklocation.data.dto.response.AutoCompleteResponse
 import com.example.mocklocation.data.dto.response.PoiSearchResponse
 import com.example.mocklocation.data.dto.response.RouteGuidanceResponse
+import com.example.mocklocation.data.dto.response.TouchSearchResponse
 import com.example.mocklocation.data.service.TmapService
 import javax.inject.Inject
 import javax.inject.Named
@@ -21,4 +23,7 @@ class TmapDataSourceImpl @Inject constructor(
 
     override suspend fun searchRouteGuidance(request: RouteGuidanceRequest): RouteGuidanceResponse =
         tmapService.searchRouteGuidance(request)
+
+    override suspend fun searchRoadName(request: TouchSearchRequest): TouchSearchResponse =
+        tmapService.searchRoadName(request)
 }

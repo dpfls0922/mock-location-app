@@ -11,6 +11,8 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.example.mocklocation.presentation.map.MapViewModel
 import com.example.mocklocation.presentation.mock.MockLocationViewModel
-import com.example.mocklocation.presentation.search.RouteGuidanceViewModel
+import com.example.mocklocation.presentation.route.RouteGuidanceViewModel
 import com.example.mocklocation.presentation.search.SearchViewModel
 
 @Composable
@@ -34,6 +36,13 @@ fun ExpandableGpsMockCard(
     onStopMock: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val selectedLocationForRoute by searchViewModel.selectedLocationForRoute.collectAsState()
+
+    LaunchedEffect(selectedLocationForRoute) {
+        if (selectedLocationForRoute != null) {
+            expanded = true
+        }
+    }
 
     Box(Modifier.fillMaxSize()) {
         IconButton(

@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.mocklocation.domain.entity.CurrentLocation
 import com.example.mocklocation.domain.usecase.GetAutoCompleteSuggestionsUseCase
 import com.example.mocklocation.domain.usecase.GetCurrentLocationUseCase
+import com.example.mocklocation.domain.usecase.GetRoadNameUseCase
 import com.example.mocklocation.domain.usecase.SearchPoiUseCase
+import com.skt.tmap.vsm.data.VSMMapPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,7 +27,8 @@ sealed class SearchUiState {
 class SearchViewModel @Inject constructor(
     private val getCurrentLocationUseCase: GetCurrentLocationUseCase,
     private val getAutoCompleteUseCase: GetAutoCompleteSuggestionsUseCase,
-    private val searchPoisUseCase: SearchPoiUseCase
+    private val searchPoisUseCase: SearchPoiUseCase,
+    private val getRoadNameUseCase: GetRoadNameUseCase
 ) : ViewModel() {
     private val _currentLocation = MutableStateFlow(CurrentLocation(0, 0.0, 0.0, null, null))
     val currentLocation: StateFlow<CurrentLocation> = _currentLocation
@@ -124,6 +127,21 @@ class SearchViewModel @Inject constructor(
             .onFailure { e ->
                 _uiState.value = SearchUiState.Error("검색에 실패했습니다.")
             }
+    }
+
+    /**
+     * 지도 터치 지점을 경로 선택 다이얼로그에 표시
+     */
+    fun showRouteSelectionDialogForMapPoint(location: VSMMapPoint) {
+        viewModelScope.launch {
+            getRoadNameUseCase(location.longitude, location.latitude)
+                .onSuccess { touchLocation ->
+                    val resultUiModel = location.toUiModel(touchLocation)
+                    showRouteSelectionDialog(resultUiModel)
+                }
+                .onFailure {
+                }
+        }
     }
 
     /**
