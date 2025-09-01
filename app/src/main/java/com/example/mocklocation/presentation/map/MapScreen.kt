@@ -91,6 +91,7 @@ fun MapScreen(
                             searchViewModel.addRoutePoint(routeType, location)
                         }
                     },
+                    onRouteGuidance = { searchViewModel.startGuidance() },
                     onRouteDialogDismiss = { searchViewModel.dismissRouteDialog() },
                     onRemoveRoutePoint = { routePoint -> searchViewModel.removeRoutePoint(routePoint) },
                     onStartMock = onClickStartMockSend,

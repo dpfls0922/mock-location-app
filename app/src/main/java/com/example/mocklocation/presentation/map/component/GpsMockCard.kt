@@ -45,6 +45,7 @@ fun GPSMockCard(
     onQueryChange: (String) -> Unit,
     onAutoCompleteItemClick: (AutoCompleteUiModel) -> Unit,
     onRouteTypeSelected: (RoutePointType) -> Unit,
+    onRouteGuidance: () -> Unit,
     onRouteDialogDismiss: () -> Unit,
     onRemoveRoutePoint: (RoutePoint) -> Unit,
     onStartMock: () -> Unit,
@@ -86,7 +87,8 @@ fun GPSMockCard(
                 if (routePoints.isNotEmpty()) {
                     RoutePointsList(
                         routePoints = routePoints,
-                        onRemovePoint = onRemoveRoutePoint
+                        onRemovePoint = onRemoveRoutePoint,
+                        onRouteGuidance = onRouteGuidance
                     )
                 }
 
@@ -157,6 +159,7 @@ fun GPSMockCardPreview() {
         onQueryChange = { },
         onAutoCompleteItemClick = { },
         onRouteTypeSelected = { },
+        onRouteGuidance = { },
         onRouteDialogDismiss = { },
         onRemoveRoutePoint = { },
         onStartMock = { },
