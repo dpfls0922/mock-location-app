@@ -6,6 +6,7 @@ import com.example.mocklocation.domain.entity.CurrentLocation
 import com.example.mocklocation.domain.usecase.GetAutoCompleteSuggestionsUseCase
 import com.example.mocklocation.domain.usecase.GetCurrentLocationUseCase
 import com.example.mocklocation.domain.usecase.SearchPoiUseCase
+import com.skt.tmap.vsm.data.VSMMapPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -124,6 +125,14 @@ class SearchViewModel @Inject constructor(
             .onFailure { e ->
                 _uiState.value = SearchUiState.Error("검색에 실패했습니다.")
             }
+    }
+
+    /**
+     * 지도 터치 지점을 경로 선택 다이얼로그에 표시
+     */
+    fun showRouteSelectionDialogForMapPoint(location: VSMMapPoint, index: Int) {
+        val resultUiModel = location.toUiModel(index)
+        showRouteSelectionDialog(resultUiModel)
     }
 
     /**
