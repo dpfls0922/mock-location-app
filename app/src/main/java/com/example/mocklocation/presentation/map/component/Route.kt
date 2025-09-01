@@ -100,15 +100,6 @@ private fun SelectedPoiCard(poi: SearchResultUiModel) {
                 )
                 Spacer(Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    poi.distanceText?.let {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Spacer(Modifier.width(6.dp))
-                    }
-                    Text("|", style = MaterialTheme.typography.bodySmall)
-                    Spacer(Modifier.width(6.dp))
                     Text(
                         text = poi.roadAddress,
                         style = MaterialTheme.typography.bodySmall,
