@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -34,16 +32,6 @@ fun MapScreen(
     onClickStopMockSend: () -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
-    val gpsPoints by mockViewModel.gpsPoints.collectAsState()
-    val mockingState by mockViewModel.mockingState.collectAsState()
-    val currentLocationUiModel by mapViewModel.currentLocationUiModel.collectAsState()
-    val repeatMode by mockViewModel.repeatMode.collectAsState()
-    val repeatCount by mockViewModel.repeatCount.collectAsState()
-    val speed by mockViewModel.speed.collectAsState()
-    val gpsMode by mockViewModel.gpsMode.collectAsState()
-    val searchQuery by searchViewModel.searchQuery.collectAsState()
-    val autoSuggestions by searchViewModel.autoSuggestions.collectAsState()
-    val selectedLocationForRoute by searchViewModel.selectedLocationForRoute.collectAsState()
 
     LaunchedEffect(Unit) {
         routeGuidanceViewModel.uiState.collectLatest { state ->
@@ -80,49 +68,10 @@ fun MapScreen(
                 )
                 MapLifecycleHandler(lifecycleOwner, mapViewModel)
                 ExpandableGpsMockCard(
-                    mockingState = mockingState,
+                    mockViewModel = mockViewModel,
                     searchViewModel = searchViewModel,
                     routeGuidanceViewModel = routeGuidanceViewModel,
-                    gpsPoints = gpsPoints,
-                    currentLocationUiModel = currentLocationUiModel,
-                    repeatMode = repeatMode,
-                    repeatCount = repeatCount,
-                    speed = speed,
-                    gpsMode = gpsMode,
-                    searchQuery = searchQuery,
-                    autoSuggestions = autoSuggestions,
-                    onRepeatModeChanged = { newMode ->
-                        mockViewModel.updateRepeatSettings(
-                            mode = newMode,
-                            count = repeatCount
-                        )
-                    },
-                    onRepeatCountChanged = { count ->
-                        mockViewModel.updateRepeatSettings(
-                            mode = repeatMode,
-                            count = count
-                        )
-                    },
-                    onSpeedChanged = { speed -> mockViewModel.updateSpeed(newSpeed = speed) },
-                    onGpsModeChanged = { mode -> mockViewModel.updateGpsMode(mode = mode) },
-                    onAutoCompleteItemClick = { autoComplete ->
-                        searchViewModel.onAutoCompleteItemClick(
-                            autoComplete
-                        )
-                    },
-                    onQueryChange = { query -> searchViewModel.onSearchQueryChanged(query) },
-                    onRouteTypeSelected = { routeType ->
-                        selectedLocationForRoute?.let { location ->
-                            routeGuidanceViewModel.addRoutePoint(routeType, location)
-                        }
-                    },
-                    onRouteGuidance = { routeGuidanceViewModel.startGuidance() },
-                    onRouteDialogDismiss = { searchViewModel.dismissRouteDialog() },
-                    onRemoveRoutePoint = { routePoint ->
-                        routeGuidanceViewModel.removeRoutePoint(
-                            routePoint
-                        )
-                    },
+                    mapViewModel = mapViewModel,
                     onStartMock = onClickStartMockSend,
                     onStopMock = onClickStopMockSend
                 )
