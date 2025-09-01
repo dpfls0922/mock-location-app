@@ -14,7 +14,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.mocklocation.presentation.map.component.ExpandableGpsMockCard
 import com.example.mocklocation.presentation.map.component.FloatingButtons
 import com.example.mocklocation.presentation.mock.MockLocationViewModel
-import com.example.mocklocation.presentation.search.SearchUiState
+import com.example.mocklocation.presentation.search.RouteGuidanceState
+import com.example.mocklocation.presentation.search.RouteGuidanceViewModel
 import com.example.mocklocation.presentation.search.SearchViewModel
 import com.example.mocklocation.presentation.ui.theme.MapTheme
 import kotlinx.coroutines.flow.collectLatest
@@ -24,6 +25,7 @@ fun MapScreen(
     mapViewModel: MapViewModel,
     mockViewModel: MockLocationViewModel,
     searchViewModel: SearchViewModel,
+    routeGuidanceViewModel: RouteGuidanceViewModel,
     permissionGranted: Boolean,
     onRequestPermission: () -> Unit,
     onClickMyLocation: () -> Unit,
@@ -41,16 +43,13 @@ fun MapScreen(
     val gpsMode by mockViewModel.gpsMode.collectAsState()
     val searchQuery by searchViewModel.searchQuery.collectAsState()
     val autoSuggestions by searchViewModel.autoSuggestions.collectAsState()
-
-    val routePoints by searchViewModel.routePoints.collectAsState()
-    val showRouteDialog by searchViewModel.showRouteDialog.collectAsState()
     val selectedLocationForRoute by searchViewModel.selectedLocationForRoute.collectAsState()
 
     LaunchedEffect(Unit) {
-        searchViewModel.uiState.collectLatest { state ->
-            if (state is SearchUiState.SuccessWithGuidance) {
-                val vsmPoints = state.guidanceData?.vsmPoints
-                if (!vsmPoints.isNullOrEmpty()) {
+        routeGuidanceViewModel.uiState.collectLatest { state ->
+            if (state is RouteGuidanceState.Success) {
+                val vsmPoints = state.routeData.vsmPoints
+                if (vsmPoints.isNotEmpty()) {
                     mapViewModel.drawRouteLine(vsmPoints)
                 }
             }
@@ -82,6 +81,8 @@ fun MapScreen(
                 MapLifecycleHandler(lifecycleOwner, mapViewModel)
                 ExpandableGpsMockCard(
                     mockingState = mockingState,
+                    searchViewModel = searchViewModel,
+                    routeGuidanceViewModel = routeGuidanceViewModel,
                     gpsPoints = gpsPoints,
                     currentLocationUiModel = currentLocationUiModel,
                     repeatMode = repeatMode,
@@ -90,23 +91,38 @@ fun MapScreen(
                     gpsMode = gpsMode,
                     searchQuery = searchQuery,
                     autoSuggestions = autoSuggestions,
-                    routePoints = routePoints,
-                    showRouteDialog = showRouteDialog,
-                    selectedLocationForRoute = selectedLocationForRoute,
-                    onRepeatModeChanged = { newMode -> mockViewModel.updateRepeatSettings(mode = newMode, count = repeatCount) },
-                    onRepeatCountChanged = { count -> mockViewModel.updateRepeatSettings(mode = repeatMode, count = count) },
+                    onRepeatModeChanged = { newMode ->
+                        mockViewModel.updateRepeatSettings(
+                            mode = newMode,
+                            count = repeatCount
+                        )
+                    },
+                    onRepeatCountChanged = { count ->
+                        mockViewModel.updateRepeatSettings(
+                            mode = repeatMode,
+                            count = count
+                        )
+                    },
                     onSpeedChanged = { speed -> mockViewModel.updateSpeed(newSpeed = speed) },
                     onGpsModeChanged = { mode -> mockViewModel.updateGpsMode(mode = mode) },
-                    onAutoCompleteItemClick = { autoComplete -> searchViewModel.onAutoCompleteItemClick(autoComplete) },
+                    onAutoCompleteItemClick = { autoComplete ->
+                        searchViewModel.onAutoCompleteItemClick(
+                            autoComplete
+                        )
+                    },
                     onQueryChange = { query -> searchViewModel.onSearchQueryChanged(query) },
                     onRouteTypeSelected = { routeType ->
                         selectedLocationForRoute?.let { location ->
-                            searchViewModel.addRoutePoint(routeType, location)
+                            routeGuidanceViewModel.addRoutePoint(routeType, location)
                         }
                     },
-                    onRouteGuidance = { searchViewModel.startGuidance() },
+                    onRouteGuidance = { routeGuidanceViewModel.startGuidance() },
                     onRouteDialogDismiss = { searchViewModel.dismissRouteDialog() },
-                    onRemoveRoutePoint = { routePoint -> searchViewModel.removeRoutePoint(routePoint) },
+                    onRemoveRoutePoint = { routePoint ->
+                        routeGuidanceViewModel.removeRoutePoint(
+                            routePoint
+                        )
+                    },
                     onStartMock = onClickStartMockSend,
                     onStopMock = onClickStopMockSend
                 )
