@@ -1,7 +1,9 @@
 package com.example.mocklocation.data.datasource
 
+import com.example.mocklocation.data.dto.request.PoiSearchRequest
 import com.example.mocklocation.data.dto.request.RouteGuidanceRequest
 import com.example.mocklocation.data.dto.response.AutoCompleteResponse
+import com.example.mocklocation.data.dto.response.PoiSearchResponse
 import com.example.mocklocation.data.dto.response.RouteGuidanceResponse
 import com.example.mocklocation.data.service.TmapService
 import javax.inject.Inject
@@ -13,6 +15,9 @@ class TmapDataSourceImpl @Inject constructor(
 ) : TmapDataSource {
     override suspend fun getAutoCompleteSuggestions(keyword: String): AutoCompleteResponse =
         autoService.getAutoCompleteSuggestions(keyword, "TMC_V1", "autoComplete")
+
+    override suspend fun searchPoi(request: PoiSearchRequest): PoiSearchResponse =
+        tmapService.searchPoi(request)
 
     override suspend fun searchRouteGuidance(request: RouteGuidanceRequest): RouteGuidanceResponse =
         tmapService.searchRouteGuidance(request)

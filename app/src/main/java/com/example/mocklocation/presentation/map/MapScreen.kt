@@ -77,6 +77,7 @@ fun MapScreen(
                     onRepeatCountChanged = { count -> mockViewModel.updateRepeatSettings(mode = repeatMode, count = count) },
                     onSpeedChanged = { speed -> mockViewModel.updateSpeed(newSpeed = speed) },
                     onGpsModeChanged = { mode -> mockViewModel.updateGpsMode(mode = mode) },
+                    onAutoCompleteItemClick = { autoComplete -> searchViewModel.onAutoCompleteItemClick(autoComplete) },
                     onQueryChange = { query -> searchViewModel.onSearchQueryChanged(query) },
                     onStartMock = onClickStartMockSend,
                     onStopMock = onClickStopMockSend

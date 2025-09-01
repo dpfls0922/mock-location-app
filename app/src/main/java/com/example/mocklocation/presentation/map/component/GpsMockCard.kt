@@ -39,14 +39,14 @@ fun GPSMockCard(
     onSpeedChanged: (Int) -> Unit,
     onGpsModeChanged: (GpsMode) -> Unit,
     onQueryChange: (String) -> Unit,
+    onAutoCompleteItemClick: (AutoCompleteUiModel) -> Unit,
     onStartMock: () -> Unit,
     onStopMock: () -> Unit
 ) {
     var isGpsEnabled by remember { mutableStateOf(true) }
 
     Column(
-        modifier = modifier
-            .padding(8.dp)
+        modifier = modifier.padding(8.dp)
     ) {
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -70,7 +70,7 @@ fun GPSMockCard(
                 if (autoSuggestions.isNotEmpty()) {
                     AutoCompleteList(
                         autoSuggestions = autoSuggestions,
-                        onItemClick = { }
+                        onItemClick = onAutoCompleteItemClick
                     )
                 }
 
@@ -127,6 +127,7 @@ fun GPSMockCardPreview() {
         onSpeedChanged = { },
         onGpsModeChanged = { },
         onQueryChange = { },
+        onAutoCompleteItemClick = { },
         onStartMock = { },
         onStopMock = { }
     )
