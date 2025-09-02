@@ -32,10 +32,7 @@ fun MapScreen(
     drawViewModel: DrawViewModel,
     permissionGranted: Boolean,
     onRequestPermission: () -> Unit,
-    onClickMyLocation: () -> Unit,
-    onClickSelectCsvFile: () -> Unit,
-    onClickStartMockSend: () -> Unit,
-    onClickStopMockSend: () -> Unit
+    onClickSelectCsvFile: () -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val touchedLocation by mapViewModel.touchedLocation.collectAsState()
@@ -71,7 +68,7 @@ fun MapScreen(
         Scaffold(
             floatingActionButton = {
                 FloatingButtons(
-                    onClickMyLocation = onClickMyLocation,
+                    onClickMyLocation = { mapViewModel.setCurrentLocation() },
                     onClickSelectCsvFile = onClickSelectCsvFile,
                     onClickDrawRoute = { drawViewModel.toggleDrawingMode() }
                 )
@@ -99,8 +96,8 @@ fun MapScreen(
                     searchViewModel = searchViewModel,
                     routeGuidanceViewModel = routeGuidanceViewModel,
                     mapViewModel = mapViewModel,
-                    onStartMock = onClickStartMockSend,
-                    onStopMock = onClickStopMockSend
+                    onStartMock =  { mockViewModel.startOrResumeMocking() },
+                    onStopMock =  { mockViewModel.stopMocking() }
                 )
             }
         }
