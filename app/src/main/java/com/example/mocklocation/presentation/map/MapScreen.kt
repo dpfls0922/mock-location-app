@@ -90,8 +90,7 @@ fun MapScreen(
                 ) {
                     DrawRouteControls(
                         isDrawingMode = isDrawingMode,
-                        onCancel = { drawViewModel.cancelDrawing() },
-                        onSend = { drawViewModel.sendDrawing() }
+                        onCancel = { drawViewModel.cancelDrawing() }
                     )
                 }
 

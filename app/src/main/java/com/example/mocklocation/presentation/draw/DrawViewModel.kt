@@ -3,7 +3,6 @@ package com.example.mocklocation.presentation.draw
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mocklocation.data.dto.toGpsPoint
-import com.example.mocklocation.data.service.MapServiceImpl
 import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.domain.service.MapService
 import com.skt.tmap.vsm.data.VSMMapPoint
@@ -32,7 +31,7 @@ class DrawViewModel @Inject constructor(
     val uiState: StateFlow<DrawUiState> = _uiState.asStateFlow()
 
     init {
-        (mapService as MapServiceImpl).setDrawingPointListener { finishedPoints ->
+        mapService.setDrawingPointListener { finishedPoints ->
             viewModelScope.launch {
                 val gpsPoints = finishedPoints.map { it.toGpsPoint() }
                 _uiState.value = DrawUiState.Success(gpsPoints)
@@ -43,21 +42,15 @@ class DrawViewModel @Inject constructor(
     fun toggleDrawingMode() {
         val newMode = !_isDrawingMode.value
         _isDrawingMode.value = newMode
-        if (!newMode)  mapService.removeDrawingMarker()
-        (mapService as MapServiceImpl).enableDrawingMode(newMode)
+        mapService.enableDrawingMode(newMode)
     }
 
     fun cancelDrawing() {
         _uiState.value = DrawUiState.Idle
         _isDrawingMode.value = false
         mapService.removeDrawingMarker()
-        (mapService as MapServiceImpl).enableDrawingMode(false)
-    }
-
-    fun sendDrawing() {
-        _uiState.value = DrawUiState.Idle
-        _isDrawingMode.value = false
-        (mapService as MapServiceImpl).enableDrawingMode(false)
+        mapService.clearDrawingPoints()
+        mapService.enableDrawingMode(false)
     }
 
     fun drawRouteLine(vsmPoints: List<VSMMapPoint>) {
