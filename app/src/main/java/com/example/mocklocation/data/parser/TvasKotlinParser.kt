@@ -13,7 +13,7 @@ import timber.log.Timber
 import java.nio.ByteBuffer
 import javax.inject.Inject
 import android.util.Base64
-import com.google.android.gms.security.ProviderInstaller.PROVIDER_NAME
+import com.example.mocklocation.data.dto.toGpsPoint
 
 /**
  * TVAS(ByteArray) → GpsPoint 리스트 파싱기
@@ -30,24 +30,7 @@ class TvasKotlinParser @Inject constructor(
         val wgsPoints = converter.convert(tvas)
         Timber.d(tvas.detailInfo())
 
-        return wgsPoints.map { wgs ->
-            GpsPoint(
-                provider = PROVIDER_NAME,
-                timestamp = System.currentTimeMillis(),
-                latitude = wgs.latitude,
-                longitude = wgs.longitude,
-                altitude = 5.0,
-                hAcc = 5f,
-                vAcc = 5f,
-                sAcc = 5f,
-                speed = 5f,
-                bearing = 5f,
-                bAcc = 5f,
-                satellites = 3,
-                maxCn0 = 3,
-                meanCn0 = 3
-            )
-        }
+        return wgsPoints.map { it.toGpsPoint() }
     }
 }
 
