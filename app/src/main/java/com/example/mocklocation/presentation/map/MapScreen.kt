@@ -8,9 +8,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.example.mocklocation.presentation.draw.DrawViewModel
+import com.example.mocklocation.presentation.map.component.DrawRouteControls
 import com.example.mocklocation.presentation.map.component.ExpandableGpsMockCard
 import com.example.mocklocation.presentation.map.component.FloatingButtons
 import com.example.mocklocation.presentation.mock.MockLocationViewModel
@@ -26,6 +29,7 @@ fun MapScreen(
     mockViewModel: MockLocationViewModel,
     searchViewModel: SearchViewModel,
     routeGuidanceViewModel: RouteGuidanceViewModel,
+    drawViewModel: DrawViewModel,
     permissionGranted: Boolean,
     onRequestPermission: () -> Unit,
     onClickMyLocation: () -> Unit,
@@ -35,13 +39,14 @@ fun MapScreen(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val touchedLocation by mapViewModel.touchedLocation.collectAsState()
+    val isDrawingMode by drawViewModel.isDrawingMode.collectAsState()
 
     LaunchedEffect(Unit) {
         routeGuidanceViewModel.uiState.collectLatest { state ->
             if (state is RouteGuidanceState.Success) {
                 val vsmPoints = state.routeData.vsmPoints
                 if (vsmPoints.isNotEmpty()) {
-                    mapViewModel.drawRouteLine(vsmPoints)
+                    drawViewModel.drawRouteLine(vsmPoints)
                 }
             }
         }
@@ -67,7 +72,8 @@ fun MapScreen(
             floatingActionButton = {
                 FloatingButtons(
                     onClickMyLocation = onClickMyLocation,
-                    onClickSelectCsvFile = onClickSelectCsvFile
+                    onClickSelectCsvFile = onClickSelectCsvFile,
+                    onClickDrawRoute = { drawViewModel.toggleDrawingMode() }
                 )
             }
         ) { innerPadding ->
@@ -77,6 +83,17 @@ fun MapScreen(
                     modifier = Modifier.fillMaxSize()
                 )
                 MapLifecycleHandler(lifecycleOwner, mapViewModel)
+
+                Box (
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    DrawRouteControls(
+                        isDrawingMode = isDrawingMode,
+                        onCancel = { drawViewModel.cancelDrawing() }
+                    )
+                }
+
                 ExpandableGpsMockCard(
                     mockViewModel = mockViewModel,
                     searchViewModel = searchViewModel,

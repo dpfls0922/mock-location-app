@@ -2,6 +2,7 @@ package com.example.mocklocation.data.service
 
 import android.content.Context
 import android.view.MotionEvent
+import android.view.View
 import com.example.mocklocation.core.helper.MarkerHelper
 import com.example.mocklocation.core.helper.MarkerType
 import com.example.mocklocation.domain.entity.CurrentLocation
@@ -24,10 +25,14 @@ class MapServiceImpl @Inject constructor() : MapService {
     private var mapTouchListener: ((MotionEvent) -> VSMMapPoint?)? = null
     private var mapTouchEventHandler: MapTouchEventHandler? = null
     private var lastTouchedMarker: VSMMarkerBase? = null
+    private var drawingPoints = mutableListOf<VSMMapPoint>()
+    private var onDrawingPointListener: ((List<VSMMapPoint>) -> Unit)? = null
+    private var drawingTouchListener: View.OnTouchListener? = null
 
     override fun createView(context: Context): VSMMapView {
         val view = VSMMapView(context)
         initializeMap(view)
+        enableDrawingMode(false)
         return view
     }
 
@@ -37,42 +42,17 @@ class MapServiceImpl @Inject constructor() : MapService {
         markerHelper = MarkerHelper(mapView.context, mapView.mapEngine())
         mapEngine?.let {
             mapTouchEventHandler = MapTouchEventHandler(it)
-            setupMapTouchEventHandler()
+            setupMapTouchEventListener(mapView)
         }
         Timber.d("Map initialized")
     }
 
-    override fun setMapTouchListener(listener: (MotionEvent) -> VSMMapPoint?) {
-        this.mapTouchListener = listener
-    }
-
-    private fun setupMapTouchEventHandler() {
-        val handler = mapView?.touchEventHandler()
-        handler?.setOnGestureListener(object : MapTouchEventHandler.OnGestureListener {
-            override fun onSingleTap(e: MotionEvent): Boolean {
-                val mapPoint = mapTouchListener?.invoke(e)
-                if (mapPoint != null) {
-                    Timber.d("단일 탭 감지: 위도=${mapPoint.latitude}, 경도=${mapPoint.longitude}")
-                }
-                return true
-            }
-
-            override fun onLongPress(e: MotionEvent): Boolean {
-                val mapPoint = mapTouchListener?.invoke(e)
-                if (mapPoint != null) {
-                    Timber.d("길게 누르기 감지: 위도=${mapPoint.latitude}, 경도=${mapPoint.longitude}")
-                }
-                return true
-            }
-
-            override fun onDown(e: MotionEvent): Boolean = false
-            override fun onDoubleTap(e: MotionEvent): Boolean = false
-            override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean = false
-        })
+    override fun screenToWgs84(x: Int, y: Int): VSMMapPoint? {
+        return mapEngine?.screenToWgs84(x, y)
     }
 
     override fun addMarkerAt(latitude: Double, longitude: Double) {
-        removeExistingMarker()
+        removeLocationMarker()
         lastTouchedMarker = markerHelper?.addLocationMarker(
             latitude,
             longitude,
@@ -80,9 +60,13 @@ class MapServiceImpl @Inject constructor() : MapService {
         )
     }
 
-    override fun removeExistingMarker() {
+    override fun removeLocationMarker() {
         lastTouchedMarker?.let { markerHelper?.removeMarker(it) }
         lastTouchedMarker = null
+    }
+
+    override fun removeDrawingMarker() {
+        markerHelper?.removeMarkerAll()
     }
 
     override fun updateCurrentLocationMarker(location: CurrentLocation) {
@@ -97,6 +81,10 @@ class MapServiceImpl @Inject constructor() : MapService {
 
     override fun drawRouteLine(vsmPoints: List<VSMMapPoint>) {
         markerHelper?.drawPolyline(vsmPoints)
+    }
+
+    override fun clearDrawingPoints() {
+        drawingPoints.clear()
     }
 
     override fun cleanupMap() {
@@ -114,5 +102,86 @@ class MapServiceImpl @Inject constructor() : MapService {
 
     override fun onPause() {
         mapView?.onPause()
+    }
+
+    override fun setMapTouchListener(listener: (MotionEvent) -> VSMMapPoint?) {
+        this.mapTouchListener = listener
+    }
+
+    override fun setDrawingPointListener(listener: (List<VSMMapPoint>) -> Unit) {
+        this.onDrawingPointListener = listener
+    }
+
+    override fun enableDrawingMode(isEnable: Boolean) {
+        mapView?.let { view ->
+            if (isEnable) {
+                /**
+                 * 기존 터치 리스너 제거 후 경로 그리기 터치 리스너 설정
+                */
+                view.touchEventHandler()?.setOnGestureListener(null)
+                setupDrawingTouchListener(view)
+            } else {
+                /**
+                 * 경로 그리기 터치 리스너 제거 후 기존 터치 리스너 복구
+                 */
+                view.setOnTouchListener(null)
+                setupMapTouchEventListener(view)
+            }
+        }
+    }
+
+    private fun setupDrawingTouchListener(mapView: VSMMapView) {
+        mapView.setOnClickListener { }
+
+        drawingTouchListener = View.OnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    drawingPoints.clear()
+                    removeDrawingMarker()
+                    Timber.i("경로 그리기 시작")
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val mapPoint = mapEngine?.screenToWgs84(event.x.toInt(), event.y.toInt())
+                    if (mapPoint != null && mapPoint.isValid) {
+                        drawingPoints.add(mapPoint)
+                        markerHelper?.drawPolyline(drawingPoints)
+                        Timber.i("경로 그리기 중: 위도=${mapPoint.latitude}, 경도=${mapPoint.longitude}")
+                    }
+                }
+                MotionEvent.ACTION_UP -> {
+                    v.performClick()
+                    onDrawingPointListener?.invoke(drawingPoints)
+                    Timber.i("경로 그리기 종료: 총 ${drawingPoints.size}개 좌표 수집")
+                }
+            }
+            true
+        }
+        mapView.setOnTouchListener(drawingTouchListener)
+    }
+
+    private fun setupMapTouchEventListener(mapView: VSMMapView) {
+        mapView.touchEventHandler().setOnGestureListener(
+            object : MapTouchEventHandler.OnGestureListener {
+                override fun onSingleTap(e: MotionEvent): Boolean {
+                    val mapPoint = mapTouchListener?.invoke(e)
+                    if (mapPoint != null) {
+                        Timber.d("단일 탭 감지: 위도=${mapPoint.latitude}, 경도=${mapPoint.longitude}")
+                    }
+                    return true
+                }
+
+                override fun onLongPress(e: MotionEvent): Boolean {
+                    val mapPoint = mapTouchListener?.invoke(e)
+                    if (mapPoint != null) {
+                        Timber.d("길게 누르기 감지: 위도=${mapPoint.latitude}, 경도=${mapPoint.longitude}")
+                    }
+                    return true
+                }
+
+                override fun onDown(e: MotionEvent): Boolean = false
+                override fun onDoubleTap(e: MotionEvent): Boolean = false
+                override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean = false
+            }
+        )
     }
 }

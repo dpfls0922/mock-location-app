@@ -12,10 +12,15 @@ import com.skt.tmap.vsm.map.VSMMapView
 interface MapService {
     fun createView(context: Context): VSMMapView
     fun setMapTouchListener(listener: (MotionEvent) -> VSMMapPoint?)
+    fun setDrawingPointListener(listener: (List<VSMMapPoint>) -> Unit)
+    fun screenToWgs84(x: Int, y: Int): VSMMapPoint?
     fun addMarkerAt(latitude: Double, longitude: Double)
-    fun removeExistingMarker()
+    fun removeLocationMarker()
+    fun removeDrawingMarker()
     fun updateCurrentLocationMarker(location: CurrentLocation)
+    fun enableDrawingMode(isEnable: Boolean)
     fun drawRouteLine(vsmPoints: List<VSMMapPoint>)
+    fun clearDrawingPoints()
     fun cleanupMap()
     fun onResume()
     fun onPause()

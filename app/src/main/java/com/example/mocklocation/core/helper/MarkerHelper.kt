@@ -90,6 +90,10 @@ class MarkerHelper(
         mapEngine.markerManager.removeMarker(marker)
     }
 
+    fun removeMarkerAll() {
+        mapEngine.markerManager.removeMarkerAll()
+    }
+
     fun setCenter(latitude: Double, longitude: Double) {
         val result = mapEngine.setMapCenter(longitude, latitude, true)
         Timber.d("setCenter 호출 결과: $result")
