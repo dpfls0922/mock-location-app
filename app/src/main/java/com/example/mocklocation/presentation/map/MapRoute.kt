@@ -48,7 +48,7 @@ fun MapRoute(
         routeGuidanceViewModel = routeGuidanceViewModel,
         permissionGranted = permissionGranted,
         onRequestPermission = { permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION) },
-        onClickMyLocation = { },
+        onClickMyLocation = { mapViewModel.setCurrentLocation() },
         onClickSelectCsvFile = { fileSelectorLauncher.launch(MIME_TYPE_TEXT) },
         onClickStartMockSend = { mockViewModel.startOrResumeMocking() },
         onClickStopMockSend = { mockViewModel.stopMocking() }
