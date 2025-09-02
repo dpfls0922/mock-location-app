@@ -1,11 +1,24 @@
 package com.example.mocklocation.presentation.map.component
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,14 +31,13 @@ import androidx.compose.ui.unit.sp
 fun DrawRouteControls(
     modifier: Modifier = Modifier,
     isDrawingMode: Boolean,
-    onCancel: () -> Unit,
-    onSend: () -> Unit
+    onCancel: () -> Unit
 ) {
     if (isDrawingMode) {
         Card(
             modifier = modifier
-                .fillMaxWidth(0.5f)
-                .widthIn(max = 400.dp)
+                .fillMaxWidth(0.25f)
+                .widthIn(max = 250.dp)
                 .padding(top = 16.dp),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(
@@ -44,14 +56,12 @@ fun DrawRouteControls(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                     modifier = Modifier.fillMaxWidth()
                 )
-
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.End
                 ) {
                     Button(
                         onClick = onCancel,
-                        modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFFE0E0E0),
                             contentColor = Color(0xFF424242)
@@ -59,34 +69,14 @@ fun DrawRouteControls(
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Icon(
-                            Icons.Default.Cancel,
+                            Icons.Default.Delete,
                             contentDescription = null,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(15.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "취소",
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-
-                    Button(
-                        onClick = onSend,
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = Color.White
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.Send,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "전송",
+                            text = "경로 지우기",
+                            fontSize = 10.sp,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -101,7 +91,6 @@ fun DrawRouteControls(
 fun DrawRouteControlsPreview() {
     DrawRouteControls(
         isDrawingMode = true,
-        onCancel = {},
-        onSend = {}
+        onCancel = {}
     )
 }

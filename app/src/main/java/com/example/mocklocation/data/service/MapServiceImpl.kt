@@ -83,6 +83,10 @@ class MapServiceImpl @Inject constructor() : MapService {
         markerHelper?.drawPolyline(vsmPoints)
     }
 
+    override fun clearDrawingPoints() {
+        drawingPoints.clear()
+    }
+
     override fun cleanupMap() {
         mapEngine?.onDestroy()
         val parent = mapView?.parent as? android.view.ViewGroup
