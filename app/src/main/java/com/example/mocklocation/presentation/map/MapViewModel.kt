@@ -38,9 +38,6 @@ class MapViewModel @Inject constructor(
     private val _touchedLocation = MutableStateFlow<VSMMapPoint?>(null)
     val touchedLocation: StateFlow<VSMMapPoint?> = _touchedLocation.asStateFlow()
 
-    private val _isDrawingMode = MutableStateFlow(false)
-    val isDrawingMode: StateFlow<Boolean> = _isDrawingMode
-
     fun createMapView(context: Context): VSMMapView {
         val mapView = mapService.createView(context)
         (mapService as MapServiceImpl).setMapTouchListener { event ->
@@ -55,19 +52,6 @@ class MapViewModel @Inject constructor(
 
     fun onTouchedLocationChanged(location: VSMMapPoint) {
         mapService.addMarkerAt(location.latitude, location.longitude)
-    }
-
-    fun toggleDrawingMode() {
-        val newMode = !_isDrawingMode.value
-        _isDrawingMode.value = newMode
-        if (!newMode)  mapService.removeDrawingMarker()
-        (mapService as MapServiceImpl).enableDrawingMode(newMode)
-    }
-
-    fun stopDrawingMode() {
-        _isDrawingMode.value = false
-        mapService.removeDrawingMarker()
-        (mapService as MapServiceImpl).enableDrawingMode(false)
     }
 
     suspend fun checkAndFetchInitialLocation() {
@@ -94,10 +78,6 @@ class MapViewModel @Inject constructor(
                 )
             }
             .launchIn(viewModelScope)
-    }
-
-    fun drawRouteLine(vsmPoints: List<VSMMapPoint>) {
-        mapService.drawRouteLine(vsmPoints)
     }
 
     fun onResume() = mapService.onResume()

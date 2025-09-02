@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.example.mocklocation.presentation.draw.DrawViewModel
 import com.example.mocklocation.presentation.map.component.DrawRouteControls
 import com.example.mocklocation.presentation.map.component.ExpandableGpsMockCard
 import com.example.mocklocation.presentation.map.component.FloatingButtons
@@ -28,6 +29,7 @@ fun MapScreen(
     mockViewModel: MockLocationViewModel,
     searchViewModel: SearchViewModel,
     routeGuidanceViewModel: RouteGuidanceViewModel,
+    drawViewModel: DrawViewModel,
     permissionGranted: Boolean,
     onRequestPermission: () -> Unit,
     onClickMyLocation: () -> Unit,
@@ -37,14 +39,14 @@ fun MapScreen(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val touchedLocation by mapViewModel.touchedLocation.collectAsState()
-    val isDrawingMode by mapViewModel.isDrawingMode.collectAsState()
+    val isDrawingMode by drawViewModel.isDrawingMode.collectAsState()
 
     LaunchedEffect(Unit) {
         routeGuidanceViewModel.uiState.collectLatest { state ->
             if (state is RouteGuidanceState.Success) {
                 val vsmPoints = state.routeData.vsmPoints
                 if (vsmPoints.isNotEmpty()) {
-                    mapViewModel.drawRouteLine(vsmPoints)
+                    drawViewModel.drawRouteLine(vsmPoints)
                 }
             }
         }
@@ -71,7 +73,7 @@ fun MapScreen(
                 FloatingButtons(
                     onClickMyLocation = onClickMyLocation,
                     onClickSelectCsvFile = onClickSelectCsvFile,
-                    onClickDrawRoute = { mapViewModel.toggleDrawingMode() }
+                    onClickDrawRoute = { drawViewModel.toggleDrawingMode() }
                 )
             }
         ) { innerPadding ->
@@ -88,8 +90,8 @@ fun MapScreen(
                 ) {
                     DrawRouteControls(
                         isDrawingMode = isDrawingMode,
-                        onCancel = { mapViewModel.stopDrawingMode() },
-                        onSend = { mapViewModel.stopDrawingMode() }
+                        onCancel = { drawViewModel.stopDrawingMode() },
+                        onSend = { drawViewModel.stopDrawingMode() }
                     )
                 }
 
