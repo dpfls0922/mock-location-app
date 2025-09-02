@@ -6,12 +6,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.mocklocation.presentation.mock.MockLocationViewModel
 
 @Composable
 fun RouteGuidanceStatusHandler(
-    routeGuidanceViewModel: RouteGuidanceViewModel,
-    mockLocationViewModel: MockLocationViewModel
+    routeGuidanceViewModel: RouteGuidanceViewModel = hiltViewModel(),
+    mockViewModel: MockLocationViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val uiState by routeGuidanceViewModel.uiState.collectAsState()
@@ -20,7 +21,7 @@ fun RouteGuidanceStatusHandler(
         when (uiState) {
             is RouteGuidanceState.Success -> {
                 val routeData = (uiState as RouteGuidanceState.Success).routeData
-                routeData.gpsPoints.let { mockLocationViewModel.updateGpsPoints(it) }
+                routeData.gpsPoints.let { mockViewModel.updateGpsPoints(it) }
                 Toast.makeText(context, "tvas 파싱 완료 (${routeData.gpsPoints.size}개)", Toast.LENGTH_SHORT).show()
             }
 
