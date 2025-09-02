@@ -71,6 +71,10 @@ class MapServiceImpl @Inject constructor() : MapService {
         })
     }
 
+    override fun screenToWgs84(x: Int, y: Int): VSMMapPoint? {
+        return mapEngine?.screenToWgs84(x, y)
+    }
+
     override fun addMarkerAt(latitude: Double, longitude: Double) {
         removeExistingMarker()
         lastTouchedMarker = markerHelper?.addLocationMarker(
