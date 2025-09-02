@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.mocklocation.presentation.draw.DrawStatusHandler
 import com.example.mocklocation.presentation.draw.DrawViewModel
 import com.example.mocklocation.presentation.file.FileUploadStatusHandler
 import com.example.mocklocation.presentation.file.FileUploadViewModel
@@ -35,12 +36,9 @@ fun MapRoute(
         uploadViewModel.uploadFile(uri, uri.lastPathSegment ?: DEFAULT_FILE_NAME)
     }
 
-    FileUploadStatusHandler(uploadViewModel = uploadViewModel)
-
-    RouteGuidanceStatusHandler(
-        routeGuidanceViewModel = routeGuidanceViewModel,
-        mockLocationViewModel = mockViewModel
-    )
+    FileUploadStatusHandler()
+    RouteGuidanceStatusHandler()
+    DrawStatusHandler()
 
     MapScreen(
         mapViewModel = mapViewModel,

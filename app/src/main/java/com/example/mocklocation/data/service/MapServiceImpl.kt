@@ -26,7 +26,7 @@ class MapServiceImpl @Inject constructor() : MapService {
     private var mapTouchEventHandler: MapTouchEventHandler? = null
     private var lastTouchedMarker: VSMMarkerBase? = null
     private var drawingPoints = mutableListOf<VSMMapPoint>()
-    private var onDrawingPointListener: ((VSMMapPoint) -> Unit)? = null
+    private var onDrawingPointListener: ((List<VSMMapPoint>) -> Unit)? = null
     private var drawingTouchListener: View.OnTouchListener? = null
 
     override fun createView(context: Context): VSMMapView {
@@ -104,6 +104,10 @@ class MapServiceImpl @Inject constructor() : MapService {
         this.mapTouchListener = listener
     }
 
+    override fun setDrawingPointListener(listener: (List<VSMMapPoint>) -> Unit) {
+        this.onDrawingPointListener = listener
+    }
+
     override fun enableDrawingMode(isEnable: Boolean) {
         mapView?.let { view ->
             if (isEnable) {
@@ -136,13 +140,13 @@ class MapServiceImpl @Inject constructor() : MapService {
                     val mapPoint = mapEngine?.screenToWgs84(event.x.toInt(), event.y.toInt())
                     if (mapPoint != null && mapPoint.isValid) {
                         drawingPoints.add(mapPoint)
-                        onDrawingPointListener?.invoke(mapPoint)
                         markerHelper?.drawPolyline(drawingPoints)
                         Timber.i("경로 그리기 중: 위도=${mapPoint.latitude}, 경도=${mapPoint.longitude}")
                     }
                 }
                 MotionEvent.ACTION_UP -> {
                     v.performClick()
+                    onDrawingPointListener?.invoke(drawingPoints)
                     Timber.i("경로 그리기 종료: 총 ${drawingPoints.size}개 좌표 수집")
                 }
             }
