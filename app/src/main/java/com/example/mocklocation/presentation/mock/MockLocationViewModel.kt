@@ -2,6 +2,7 @@ package com.example.mocklocation.presentation.mock
 
 import androidx.lifecycle.ViewModel
 import com.example.mocklocation.domain.entity.GpsPoint
+import com.example.mocklocation.domain.service.MapService
 import com.example.mocklocation.presentation.map.component.GpsMode
 import com.example.mocklocation.presentation.map.component.RepeatMode
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,7 +14,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MockLocationViewModel @Inject constructor(
     private val mockLocationServiceLauncher: MockLocationServiceLauncher,
-    private val mockLocationHandler: MockLocationHandler
+    private val mockLocationHandler: MockLocationHandler,
+    private val mapService: MapService
 ) : ViewModel() {
     val mockingState: StateFlow<MockingState> = mockLocationHandler.mockingState
 
@@ -53,6 +55,16 @@ class MockLocationViewModel @Inject constructor(
 
     fun stopMocking() {
         mockLocationServiceLauncher.stopMocking()
+    }
+
+    fun resetMocking() {
+        mapService.removeDrawingMarker()
+        mockLocationHandler.reset()
+        resetGpsPoints()
+    }
+
+    private fun resetGpsPoints() {
+        _gpsPoints.value = emptyList()
     }
 
     fun updateGpsPoints(newPoints: List<GpsPoint>) {

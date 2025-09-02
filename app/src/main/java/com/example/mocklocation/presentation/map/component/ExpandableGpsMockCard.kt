@@ -31,9 +31,7 @@ fun ExpandableGpsMockCard(
     mockViewModel: MockLocationViewModel,
     searchViewModel: SearchViewModel,
     routeGuidanceViewModel: RouteGuidanceViewModel,
-    mapViewModel: MapViewModel,
-    onStartMock: () -> Unit,
-    onStopMock: () -> Unit
+    mapViewModel: MapViewModel
 ) {
     var expanded by remember { mutableStateOf(false) }
     val selectedLocationForRoute by searchViewModel.selectedLocationForRoute.collectAsState()
@@ -68,9 +66,7 @@ fun ExpandableGpsMockCard(
                 mockViewModel = mockViewModel,
                 searchViewModel = searchViewModel,
                 routeGuidanceViewModel = routeGuidanceViewModel,
-                mapViewModel = mapViewModel,
-                onStartMock = onStartMock,
-                onStopMock = onStopMock
+                mapViewModel = mapViewModel
             )
         }
     }

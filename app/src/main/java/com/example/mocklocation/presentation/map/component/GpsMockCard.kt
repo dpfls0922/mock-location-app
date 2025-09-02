@@ -14,9 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.mocklocation.presentation.map.MapViewModel
@@ -30,11 +27,8 @@ fun GPSMockCard(
     mockViewModel: MockLocationViewModel,
     searchViewModel: SearchViewModel,
     routeGuidanceViewModel: RouteGuidanceViewModel,
-    mapViewModel: MapViewModel,
-    onStartMock: () -> Unit,
-    onStopMock: () -> Unit
+    mapViewModel: MapViewModel
 ) {
-    var isGpsEnabled by remember { mutableStateOf(true) }
     val gpsPoints by mockViewModel.gpsPoints.collectAsState()
     val mockingState by mockViewModel.mockingState.collectAsState()
     val currentLocationUiModel by mapViewModel.currentLocationUiModel.collectAsState()
@@ -131,14 +125,9 @@ fun GPSMockCard(
                 MockGpsButton(
                     mockingState = mockingState,
                     gpsPoints = gpsPoints,
-                    onStartMock = {
-                        isGpsEnabled = true
-                        onStartMock()
-                    },
-                    onStopMock = {
-                        isGpsEnabled = false
-                        onStopMock()
-                    }
+                    onStartMock = { mockViewModel.startOrResumeMocking() },
+                    onStopMock =  { mockViewModel.stopMocking() },
+                    onResetMock = { mockViewModel.resetMocking() }
                 )
             }
         }

@@ -95,9 +95,7 @@ fun MapScreen(
                     mockViewModel = mockViewModel,
                     searchViewModel = searchViewModel,
                     routeGuidanceViewModel = routeGuidanceViewModel,
-                    mapViewModel = mapViewModel,
-                    onStartMock =  { mockViewModel.startOrResumeMocking() },
-                    onStopMock =  { mockViewModel.stopMocking() }
+                    mapViewModel = mapViewModel
                 )
             }
         }
