@@ -8,9 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
@@ -40,7 +37,7 @@ fun MapScreen(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val touchedLocation by mapViewModel.touchedLocation.collectAsState()
-    var isDrawingMode by remember { mutableStateOf(false) }
+    val isDrawingMode by mapViewModel.isDrawingMode.collectAsState()
 
     LaunchedEffect(Unit) {
         routeGuidanceViewModel.uiState.collectLatest { state ->
@@ -74,7 +71,7 @@ fun MapScreen(
                 FloatingButtons(
                     onClickMyLocation = onClickMyLocation,
                     onClickSelectCsvFile = onClickSelectCsvFile,
-                    onClickDrawRoute = { isDrawingMode = true }
+                    onClickDrawRoute = { mapViewModel.toggleDrawingMode() }
                 )
             }
         ) { innerPadding ->
@@ -91,8 +88,8 @@ fun MapScreen(
                 ) {
                     DrawRouteControls(
                         isDrawingMode = isDrawingMode,
-                        onCancel = {},
-                        onSend = {}
+                        onCancel = { mapViewModel.stopDrawingMode() },
+                        onSend = { mapViewModel.stopDrawingMode() }
                     )
                 }
 
