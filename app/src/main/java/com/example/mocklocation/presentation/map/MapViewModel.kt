@@ -41,7 +41,7 @@ class MapViewModel @Inject constructor(
     fun createMapView(context: Context): VSMMapView {
         val mapView = mapService.createView(context)
         (mapService as MapServiceImpl).setMapTouchListener { event ->
-            val mapPoint = mapView.mapEngine().screenToWgs84(event.x.toInt(), event.y.toInt())
+            val mapPoint = mapService.screenToWgs84(event.x.toInt(), event.y.toInt())
             if (mapPoint != null && mapPoint.isValid) {
                 _touchedLocation.value = mapPoint
             }

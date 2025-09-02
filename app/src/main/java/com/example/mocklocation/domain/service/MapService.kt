@@ -12,6 +12,7 @@ import com.skt.tmap.vsm.map.VSMMapView
 interface MapService {
     fun createView(context: Context): VSMMapView
     fun setMapTouchListener(listener: (MotionEvent) -> VSMMapPoint?)
+    fun screenToWgs84(x: Int, y: Int): VSMMapPoint?
     fun addMarkerAt(latitude: Double, longitude: Double)
     fun removeExistingMarker()
     fun updateCurrentLocationMarker(location: CurrentLocation)
