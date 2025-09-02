@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.mocklocation.presentation.draw.DrawViewModel
 import com.example.mocklocation.presentation.file.FileUploadStatusHandler
 import com.example.mocklocation.presentation.file.FileUploadViewModel
 import com.example.mocklocation.presentation.map.MapRouteConstants.DEFAULT_FILE_NAME
@@ -21,6 +22,7 @@ import com.example.mocklocation.presentation.ui.common.rememberPermissionLaunche
 fun MapRoute(
     mapViewModel: MapViewModel = hiltViewModel(),
     mockViewModel: MockLocationViewModel = hiltViewModel(),
+    drawViewModel: DrawViewModel = hiltViewModel(),
     uploadViewModel: FileUploadViewModel = hiltViewModel(),
     routeGuidanceViewModel: RouteGuidanceViewModel = hiltViewModel(),
     searchViewModel: SearchViewModel = hiltViewModel()
@@ -44,6 +46,7 @@ fun MapRoute(
         mapViewModel = mapViewModel,
         mockViewModel = mockViewModel,
         searchViewModel = searchViewModel,
+        drawViewModel = drawViewModel,
         routeGuidanceViewModel = routeGuidanceViewModel,
         permissionGranted = permissionGranted,
         onRequestPermission = { permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION) },
