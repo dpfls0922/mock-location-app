@@ -29,6 +29,9 @@ fun DrawStatusHandler(
             is DrawUiState.Drawing -> {
                 Toast.makeText(context, "드로잉 경로선 파싱 중", Toast.LENGTH_SHORT).show()
             }
+            is DrawUiState.Idle -> {
+                mockViewModel.updateGpsPoints(emptyList())
+            }
             else -> Unit
         }
     }
