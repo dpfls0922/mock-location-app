@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DoNotDisturbOn
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Stop
@@ -37,7 +38,8 @@ fun MockGpsButton(
     mockingState: MockingState,
     gpsPoints: List<GpsPoint>,
     onStartMock: () -> Unit,
-    onStopMock: () -> Unit
+    onStopMock: () -> Unit,
+    onResetMock: () -> Unit
 ) {
     val isEnabled = when (mockingState) {
         MockingState.IDLE -> gpsPoints.isNotEmpty()
@@ -61,11 +63,26 @@ fun MockGpsButton(
         ) {
             Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Mock GPS 전송 시작")
+            Text("전송")
         }
 
         Button(
             onClick = onStopMock,
+            modifier = Modifier.fillMaxWidth(),
+            enabled = isEnabled,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFFFF9800),
+                disabledContainerColor = Color(0xFFBDBDBD)
+            ),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Icon(Icons.Default.Pause, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("일시정지")
+        }
+
+        Button(
+            onClick = onResetMock,
             modifier = Modifier.fillMaxWidth(),
             enabled = isEnabled,
             colors = ButtonDefaults.buttonColors(
@@ -76,7 +93,7 @@ fun MockGpsButton(
         ) {
             Icon(Icons.Default.Stop, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Mock GPS 전송 중지")
+            Text("초기화")
         }
     }
 }
