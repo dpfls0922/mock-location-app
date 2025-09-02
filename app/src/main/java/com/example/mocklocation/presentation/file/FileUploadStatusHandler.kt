@@ -11,8 +11,8 @@ import com.example.mocklocation.presentation.mock.MockLocationViewModel
 
 @Composable
 fun FileUploadStatusHandler(
-    mockViewModel: MockLocationViewModel = hiltViewModel(),
-    uploadViewModel: FileUploadViewModel = hiltViewModel()
+    uploadViewModel: FileUploadViewModel = hiltViewModel(),
+    mockViewModel: MockLocationViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val uploadState by uploadViewModel.uiState.collectAsState(initial = null)
