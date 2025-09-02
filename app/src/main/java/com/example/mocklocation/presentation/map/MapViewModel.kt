@@ -58,11 +58,16 @@ class MapViewModel @Inject constructor(
     }
 
     fun toggleDrawingMode() {
-        _isDrawingMode.value = !_isDrawingMode.value
+        val newMode = !_isDrawingMode.value
+        _isDrawingMode.value = newMode
+        if (!newMode)  mapService.removeDrawingMarker()
+        (mapService as MapServiceImpl).enableDrawingMode(newMode)
     }
 
     fun stopDrawingMode() {
         _isDrawingMode.value = false
+        mapService.removeDrawingMarker()
+        (mapService as MapServiceImpl).enableDrawingMode(false)
     }
 
     suspend fun checkAndFetchInitialLocation() {

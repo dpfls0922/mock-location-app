@@ -14,8 +14,10 @@ interface MapService {
     fun setMapTouchListener(listener: (MotionEvent) -> VSMMapPoint?)
     fun screenToWgs84(x: Int, y: Int): VSMMapPoint?
     fun addMarkerAt(latitude: Double, longitude: Double)
-    fun removeExistingMarker()
+    fun removeLocationMarker()
+    fun removeDrawingMarker()
     fun updateCurrentLocationMarker(location: CurrentLocation)
+    fun enableDrawingMode(isEnable: Boolean)
     fun drawRouteLine(vsmPoints: List<VSMMapPoint>)
     fun cleanupMap()
     fun onResume()
