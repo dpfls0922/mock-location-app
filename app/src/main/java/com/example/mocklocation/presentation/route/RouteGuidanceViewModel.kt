@@ -19,7 +19,7 @@ import javax.inject.Inject
 sealed class RouteGuidanceState {
     data object Idle : RouteGuidanceState()
     data object Loading : RouteGuidanceState()
-    data class Success(val routeData: RouteGuidanceData) : RouteGuidanceState()
+    data class Success(val routeData: RouteGuidanceData, val wayPoints: List<RoutePoint>) : RouteGuidanceState()
     data class Error(val message: String) : RouteGuidanceState()
 }
 
@@ -101,7 +101,7 @@ class RouteGuidanceViewModel @Inject constructor(
             getRouteGuidanceUseCase(startPoi, endPoi, wayPointPois)
                 .onSuccess { routeData ->
                     if (routeData != null) {
-                        _uiState.value = RouteGuidanceState.Success(routeData)
+                        _uiState.value = RouteGuidanceState.Success(routeData, wayPoints)
                         Timber.d("[ROUTE_GUIDANCE] 경로 안내 성공")
                     } else {
                         _uiState.value = RouteGuidanceState.Error("경로를 찾을 수 없습니다.")

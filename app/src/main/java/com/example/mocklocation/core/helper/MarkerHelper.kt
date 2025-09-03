@@ -9,6 +9,8 @@ import com.skt.tmap.vsm.map.marker.VSMMarkerLocation
 import com.skt.tmap.vsm.map.marker.VSMMarkerPolyline
 import com.example.mocklocation.core.marker.DefaultMarkerIconProvider
 import com.example.mocklocation.core.marker.MarkerIconProvider
+import com.example.mocklocation.presentation.map.component.RoutePoint
+import com.skt.tmap.vsm.coordinates.VSMCoordinates
 import com.skt.tmap.vsm.map.marker.MarkerImage
 import timber.log.Timber
 
@@ -16,11 +18,16 @@ enum class MarkerType(val resId: Int, val iconSize: Pair<Float, Float>) {
     START(R.drawable.marker_start, Pair(30F, 30F)),
     END(R.drawable.marker_end, Pair(30F, 30F)),
     DESTINATION(R.drawable.ic_map_destinationpoint, Pair(30F, 30F)),
-    STOPOVER_1(R.drawable.ic_subtract_01, Pair(30F, 30F)),
-    STOPOVER_2(R.drawable.ic_subtract_02, Pair(30F, 30F)),
+    WAYPOINT_1(R.drawable.ic_subtract_01, Pair(20F, 20F)),
+    WAYPOINT_2(R.drawable.ic_subtract_02, Pair(20F, 20F)),
     CURRENT(R.drawable.marker_current, Pair(30F, 30F)),
     TOUCH(R.drawable.ic_subtract_destination, Pair(30F, 30F))
 }
+
+private val waypointMarkerTypes = mapOf(
+    0 to MarkerType.WAYPOINT_1,
+    1 to MarkerType.WAYPOINT_2
+)
 
 class MarkerHelper(
     private val context: Context,
@@ -56,26 +63,37 @@ class MarkerHelper(
         }.getOrNull()
     }
 
-    fun drawPolyline(points: List<VSMMapPoint>) {
+    fun drawPolyline(
+         points: List<VSMMapPoint>,
+         wayPoints: List<RoutePoint> = emptyList()
+    ) {
         runCatching {
             mapEngine.markerManager.removeMarkerAll()
 
             if (points.size > 1) {
                 val startPoint = points.first()
                 addLocationMarker(startPoint.latitude, startPoint.longitude, MarkerType.START)
+
+                wayPoints.forEachIndexed { index, wayPoint ->
+                    val markerType = waypointMarkerTypes.getOrElse(index) { MarkerType.WAYPOINT_1 }
+                    val (skX, skY) = wayPoint.location.xPos.toDouble() to wayPoint.location.yPos.toDouble()
+                    val location = VSMCoordinates.skToWGS84(skX, skY)
+                    addLocationMarker(location[1], location[0], markerType)
+                }
+
                 val endPoint = points.last()
                 addLocationMarker(endPoint.latitude, endPoint.longitude, MarkerType.DESTINATION)
                 addLocationMarker(endPoint.latitude, endPoint.longitude, MarkerType.END)
 
-                val strokeColor = 0xFF2979FF.toInt()
-                val fillColor = 0xAA2979FF.toInt()
+                val pathColor = 0xFF42A5F5.toInt()
+                val pathStrokeWidth = 4f
+                val dashPattern = intArrayOf(4, 4, 12, 4)
+
                 val polyline = VSMMarkerPolyline.Builder("PolylineMarker")
                     .points(points)
-                    .fillColor(fillColor)
-                    .strokeColor(strokeColor)
-                    .strokeWidth(5f)
-                    .lineWidth(6f)
-                    .lineDashStyle(intArrayOf(strokeColor, fillColor, strokeColor, fillColor))
+                    .strokeColor(pathColor)
+                    .strokeWidth(pathStrokeWidth)
+                    .lineDashStyle(dashPattern)
                     .create()
                 mapEngine.markerManager.addMarker(polyline)
                 Timber.d("Polyline 정상적으로 지도에 표시됨")
