@@ -38,8 +38,7 @@ fun RepeatMode(
         Text(
             text = "반복 모드",
             fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            fontWeight = FontWeight.Medium
         )
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
