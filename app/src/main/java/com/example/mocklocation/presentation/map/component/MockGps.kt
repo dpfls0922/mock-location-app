@@ -1,16 +1,23 @@
 package com.example.mocklocation.presentation.map.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DoNotDisturbOn
+import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PlayCircle
@@ -23,10 +30,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mocklocation.domain.entity.GpsPoint
@@ -146,5 +158,98 @@ fun MockGpsStatus(mockingState: MockingState) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = statusProps.statusText, fontWeight = FontWeight.Medium, fontSize = 14.sp, color = statusProps.textColor)
         }
+    }
+}
+
+@Composable
+fun MockGpsProgressBar(
+    sentCount: Int,
+    totalCount: Int,
+    modifier: Modifier = Modifier
+) {
+    val progress = if (totalCount > 0) sentCount.toFloat() / totalCount else 0f
+    val barHeight = 140.dp
+    val barWidth = 12.dp
+
+    Box(
+        modifier = modifier
+            .width(80.dp)
+            .height(barHeight + 60.dp)
+            .background(
+                Color(0x60000000),
+                shape = RoundedCornerShape(20.dp)
+            )
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            Modifier
+                .width(barWidth)
+                .height(barHeight)
+                .align(Alignment.Center)
+                .background(
+                    Color(0x30FFFFFF),
+                    RoundedCornerShape(6)
+                )
+        )
+
+        Box(
+            Modifier
+                .width(barWidth)
+                .height(barHeight * progress)
+                .align(Alignment.BottomCenter)
+                .background(
+                    Color(0xFF1976D2),
+                    shape = RoundedCornerShape(6)
+                )
+        )
+
+        Box(
+            Modifier
+                .size(40.dp)
+                .offset(y = - barHeight * progress + 20.dp)
+                .background(
+                    Color.White,
+                    shape = CircleShape
+                )
+                .align(Alignment.BottomCenter),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                Icons.Default.Navigation,
+                contentDescription = null,
+                tint = Color(0xFF1976D2),
+                modifier = Modifier.size(23.dp)
+            )
+        }
+
+        val percentText = "${(progress * 100).toInt()}%"
+        Text(
+            text = percentText,
+            color = Color.White,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .background(
+                    Color(0x80000000),
+                    RoundedCornerShape(12.dp)
+                )
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewMockGpsProgressBar() {
+    Box(modifier = Modifier.fillMaxSize()) {
+        MockGpsProgressBar(
+            sentCount = 10,
+            totalCount = 20,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 32.dp, end = 18.dp)
+        )
     }
 }
