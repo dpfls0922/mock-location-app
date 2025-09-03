@@ -88,7 +88,7 @@ class MapServiceImpl @Inject constructor() : MapService {
         markerHelper?.setCenter(latitude, longitude)
     }
 
-    override fun drawRouteLine(vsmPoints: List<VSMMapPoint>, wayPoints: List<RoutePoint>) {
+    override fun drawRouteLine(vsmPoints: List<VSMMapPoint>, wayPoints: List<RoutePoint>?) {
         markerHelper?.drawPolyline(vsmPoints, wayPoints)
     }
 

@@ -21,7 +21,7 @@ interface MapService {
     fun updateCurrentLocationMarker(location: CurrentLocation)
     fun setCenter(latitude: Double, longitude: Double)
     fun enableDrawingMode(isEnable: Boolean)
-    fun drawRouteLine(vsmPoints: List<VSMMapPoint>, wayPoints: List<RoutePoint>)
+    fun drawRouteLine(vsmPoints: List<VSMMapPoint>, wayPoints: List<RoutePoint>?)
     fun clearDrawingPoints()
     fun cleanupMap()
     fun onResume()

@@ -171,6 +171,7 @@ private fun RouteTypeOptionButton(
 fun RoutePointsList(
     routePoints: List<RoutePoint>,
     onRemovePoint: (RoutePoint) -> Unit,
+    onReset: () -> Unit,
     onRouteGuidance: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -202,16 +203,28 @@ fun RoutePointsList(
                     .padding(end = 16.dp, bottom = 12.dp),
                 horizontalArrangement = Arrangement.End
             ) {
-                Button(
-                    onClick = onRouteGuidance,
-                    enabled = hasStartAndEnd,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = Color.White
-                    ),
-                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp)
-                ) {
-                    Text(text = "안내")
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = onReset,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary.copy(0.2f),
+                            contentColor =  MaterialTheme.colorScheme.primary
+                        ),
+                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp)
+                    ) {
+                        Text(text = "초기화")
+                    }
+                    Button(
+                        onClick = onRouteGuidance,
+                        enabled = hasStartAndEnd,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = Color.White
+                        ),
+                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp)
+                    ) {
+                        Text(text = "안내")
+                    }
                 }
             }
         }

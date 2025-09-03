@@ -114,6 +114,12 @@ class RouteGuidanceViewModel @Inject constructor(
         }
     }
 
+    fun resetRoutePoints() {
+        _routePoints.value = emptyList()
+        _uiState.value = RouteGuidanceState.Idle
+        Timber.d("[ROUTE RESET] 경로 초기화")
+    }
+
     fun resetCloseDialogEvent() {
         _closeRouteDialogEvent.value = false
     }

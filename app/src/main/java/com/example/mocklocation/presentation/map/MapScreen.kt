@@ -43,7 +43,7 @@ fun MapScreen(
             if (state is RouteGuidanceState.Success) {
                 val vsmPoints = state.routeData.vsmPoints
                 val wayPoints = state.wayPoints
-                if (vsmPoints.isNotEmpty() && wayPoints.isNotEmpty()) {
+                if (vsmPoints.isNotEmpty()) {
                     drawViewModel.drawRouteLine(vsmPoints, wayPoints)
                 }
             }

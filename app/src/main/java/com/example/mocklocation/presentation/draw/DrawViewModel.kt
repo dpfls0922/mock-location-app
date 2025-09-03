@@ -59,7 +59,7 @@ class DrawViewModel @Inject constructor(
         mapService.enableDrawingMode(false)
     }
 
-    fun drawRouteLine(vsmPoints: List<VSMMapPoint>, wayPoints: List<RoutePoint>) {
+    fun drawRouteLine(vsmPoints: List<VSMMapPoint>, wayPoints: List<RoutePoint>?) {
         mapService.drawRouteLine(vsmPoints, wayPoints)
     }
 }
