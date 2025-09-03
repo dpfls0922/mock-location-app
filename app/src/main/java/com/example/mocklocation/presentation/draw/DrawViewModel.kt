@@ -46,6 +46,11 @@ class DrawViewModel @Inject constructor(
         mapService.enableDrawingMode(newMode)
     }
 
+    fun disableDrawingMode() {
+        _isDrawingMode.value = false
+        mapService.enableDrawingMode(false)
+    }
+
     fun cancelDrawing() {
         _uiState.value = DrawUiState.Idle
         _isDrawingMode.value = false
