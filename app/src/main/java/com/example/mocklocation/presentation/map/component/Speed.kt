@@ -28,9 +28,8 @@ fun SpeedSection(
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
             text = "이동 속도",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium
         )
 
         Row(
@@ -56,11 +55,11 @@ fun SpeedSection(
 
             Text(
                 text = "$speed km/h",
-                modifier = Modifier.width(100.dp),
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
-                color = MaterialTheme.colorScheme.onSurface
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.width(100.dp)
             )
 
             IconButton(
