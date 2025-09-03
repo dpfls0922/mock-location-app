@@ -92,6 +92,7 @@ fun MapScreen(
                 }
 
                 ExpandableGpsMockCard(
+                    drawViewModel = drawViewModel,
                     mockViewModel = mockViewModel,
                     searchViewModel = searchViewModel,
                     routeGuidanceViewModel = routeGuidanceViewModel,

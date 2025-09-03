@@ -16,6 +16,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.mocklocation.presentation.draw.DrawViewModel
 import com.example.mocklocation.presentation.map.MapViewModel
 import com.example.mocklocation.presentation.mock.MockLocationViewModel
 import com.example.mocklocation.presentation.route.RouteGuidanceViewModel
@@ -24,6 +25,7 @@ import com.example.mocklocation.presentation.search.SearchViewModel
 @Composable
 fun GPSMockCard(
     modifier: Modifier = Modifier,
+    drawViewModel: DrawViewModel,
     mockViewModel: MockLocationViewModel,
     searchViewModel: SearchViewModel,
     routeGuidanceViewModel: RouteGuidanceViewModel,
@@ -125,7 +127,10 @@ fun GPSMockCard(
                 MockGpsButton(
                     mockingState = mockingState,
                     gpsPoints = gpsPoints,
-                    onStartMock = { mockViewModel.startOrResumeMocking() },
+                    onStartMock = {
+                        mockViewModel.startOrResumeMocking()
+                        drawViewModel.toggleDrawingMode()
+                    },
                     onStopMock =  { mockViewModel.stopMocking() },
                     onResetMock = { mockViewModel.resetMocking() }
                 )
