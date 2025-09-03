@@ -23,6 +23,7 @@ class SendMockLocationUseCase @Inject constructor(
     companion object {
         private const val DEFAULT_UPDATE_INTERVAL_MS = 1000L
         private const val KMH_TO_MPS = 1000.0 / 3600.0
+        private const val METERS_PER_DEGREE_LATITUDE = 111_000.0
     }
 
     fun createMockLocationFlow(
@@ -35,154 +36,104 @@ class SendMockLocationUseCase @Inject constructor(
         repository.startMocking()
         Timber.d("🗺️ Mocking Flow 전송 시작: (${startIndex}/${gpsPoints.size})")
 
-        try {
-            var currentPoint = gpsPoints[startIndex]
-            var nextIndex = startIndex + 1
-            var accumulatedDistance = 0.0
-            val totalDistance = gpsPoints.zipWithNext { a, b -> calculateDistance(a, b) }.sum()
-            var emittedVertices = 0
+        val totalPathDistance = calculateTotalDistance(gpsPoints)
+        val speedState = MutableStateFlow(0.0)
 
-            emit(applyGpsMode(currentPoint, gpsModeFlow.value))
-            emittedVertices++
-
-            val speedState = MutableStateFlow(0.0)
-            scope.launch(Dispatchers.Default) {
-                speedFlow.collectLatest { speedKmh ->
-                    speedState.value = speedKmh * KMH_TO_MPS
-                }
+        scope.launch(Dispatchers.Default) {
+            speedFlow.collectLatest { speedKmh ->
+                speedState.value = speedKmh * KMH_TO_MPS
             }
+        }
 
-            while (accumulatedDistance < totalDistance) {
-                val gpsMode = gpsModeFlow.value
-                val distancePerSecond = minOf(speedState.value, totalDistance - accumulatedDistance)
+        try {
+            var currentState = NavigationState(
+                currentPoint = gpsPoints[startIndex],
+                nextPointIndex = startIndex + 1,
+                accumulatedDistance = 0.0,
+                emittedVertices = 0
+            )
 
-                val (updatedPoint, updatedIndex, updatedVertices) = processDistance(
+            emit(applyGpsMode(currentState.currentPoint, gpsModeFlow.value))
+            currentState = currentState.copy(emittedVertices = currentState.emittedVertices + 1)
+
+            while (currentState.accumulatedDistance < totalPathDistance) {
+                val speedMps = speedState.value
+                val distanceToMove = minOf(speedMps, totalPathDistance - currentState.accumulatedDistance)
+
+                currentState = moveAlongPath(
+                    currentState,
                     gpsPoints,
-                    currentPoint,
-                    nextIndex,
-                    distancePerSecond,
-                    accumulatedDistance,
-                    emittedVertices,
-                    speedState.value,
-                    gpsMode
-                ) { emit(applyGpsMode(it, gpsMode)) }
-
-                currentPoint = updatedPoint
-                nextIndex = updatedIndex
-                emittedVertices = updatedVertices
-                accumulatedDistance += distancePerSecond
+                    distanceToMove,
+                    speedMps,
+                    gpsModeFlow.value,
+                    ::emit
+                )
 
                 delay(DEFAULT_UPDATE_INTERVAL_MS)
             }
 
-            if (currentPoint != gpsPoints.last()) {
+            if (currentState.currentPoint != gpsPoints.last()) {
                 emit(applyGpsMode(gpsPoints.last(), gpsModeFlow.value))
-                emittedVertices++
+                currentState = currentState.copy(emittedVertices = currentState.emittedVertices + 1)
             }
 
             Timber.i(
-                "✅ Mocking 완료 | 총 버택스: $emittedVertices | " +
-                        "총 주행거리: ${"%.2f".format(accumulatedDistance)} m | " +
-                        "총 경로거리: ${"%.2f".format(totalDistance)} m"
+                "✅ Mocking 완료 | 총 버택스: ${currentState.emittedVertices} | " +
+                        "총 주행거리: ${"%.2f".format(currentState.accumulatedDistance)} m | " +
+                        "총 경로거리: ${"%.2f".format(totalPathDistance)} m"
             )
         } finally {
             repository.stopMocking()
         }
     }
 
-    private suspend fun processDistance(
+    private suspend fun moveAlongPath(
+        currentState: NavigationState,
         gpsPoints: List<GpsPoint>,
-        startPoint: GpsPoint,
-        startIndex: Int,
         distanceToMove: Double,
-        startAccumulated: Double,
-        startVertices: Int,
         speed: Double,
         gpsMode: GpsMode,
         emit: suspend (GpsPoint) -> Unit
-    ): Triple<GpsPoint, Int, Int> {
-        var currentPoint = startPoint
-        var nextIndex = startIndex
+    ): NavigationState {
+        var mutableState = currentState
         var remainingDistance = distanceToMove
-        var accumulatedDistance = startAccumulated
-        var emittedVertices = startVertices
 
-        while (remainingDistance > 0 && nextIndex < gpsPoints.size) {
-            val nextPoint = gpsPoints[nextIndex]
-            val distanceToNext = calculateDistance(currentPoint, nextPoint)
+        while (remainingDistance > 0 && mutableState.nextPointIndex < gpsPoints.size) {
+            val nextPoint = gpsPoints[mutableState.nextPointIndex]
+            val distanceToNext = calculateDistance(mutableState.currentPoint, nextPoint)
 
             if (distanceToNext >= remainingDistance) {
-                val virtualPoint = interpolate(currentPoint, nextPoint, remainingDistance)
+                val virtualPoint = interpolate(mutableState.currentPoint, nextPoint, remainingDistance)
                 emit(applyGpsMode(virtualPoint, gpsMode))
 
-                val (newAccumulated, newVertices) = updateAfterEmit(
-                    virtualPoint,
-                    accumulatedDistance,
-                    remainingDistance,
-                    emittedVertices,
-                    speed
+                logPositionUpdate(remainingDistance, mutableState.accumulatedDistance, speed, virtualPoint, mutableState.emittedVertices)
+
+                mutableState = mutableState.copy(
+                    currentPoint = virtualPoint,
+                    accumulatedDistance = mutableState.accumulatedDistance + remainingDistance,
+                    emittedVertices = mutableState.emittedVertices + 1
                 )
-                currentPoint = virtualPoint
-                accumulatedDistance = newAccumulated
-                emittedVertices = newVertices
                 remainingDistance = 0.0
             } else {
-                val (newRemaining, newAccumulated) = moveToNextSegment(
-                    nextPoint,
-                    currentPoint,
-                    remainingDistance,
-                    accumulatedDistance
+                logSegmentMove(distanceToNext, remainingDistance, mutableState.accumulatedDistance, nextPoint)
+
+                remainingDistance -= distanceToNext
+                mutableState = mutableState.copy(
+                    currentPoint = nextPoint,
+                    accumulatedDistance = mutableState.accumulatedDistance + distanceToNext,
+                    nextPointIndex = mutableState.nextPointIndex + 1
                 )
-                currentPoint = nextPoint
-                remainingDistance = newRemaining
-                accumulatedDistance = newAccumulated
-                nextIndex++
             }
         }
-        return Triple(currentPoint, nextIndex, emittedVertices)
+        return mutableState
     }
 
-    private fun applyGpsMode(point: GpsPoint, gpsMode: GpsMode): GpsPoint {
-        val satellites = when (gpsMode) {
-            GpsMode.GPS -> maxOf(point.satellites, 15)
-            GpsMode.DR -> 0
-        }
-        return point.copy(satellites = satellites)
-    }
-
-    private fun updateAfterEmit(
-        virtualPoint: GpsPoint,
-        accumulatedDistance: Double,
-        movedDistance: Double,
-        emittedVertices: Int,
-        speed: Double
-    ): Pair<Double, Int> {
-        val newAccumulated = accumulatedDistance + movedDistance
-        val newVertices = emittedVertices + 1
-
-        Timber.v(
-            "⏱ 위치 전송 | 이동: %.2f m | 누적: %.2f m | 속도: %.2f m/s | 위도: %.6f, 경도: %.6f | 버택스: %d"
-                .format(movedDistance, newAccumulated, speed, virtualPoint.latitude, virtualPoint.longitude, emittedVertices)
-        )
-        return newAccumulated to newVertices
-    }
-
-    private fun moveToNextSegment(
-        nextPoint: GpsPoint,
-        currentPoint: GpsPoint,
-        remainingDistance: Double,
-        accumulatedDistance: Double
-    ): Pair<Double, Double> {
-        val distanceToNext = calculateDistance(currentPoint, nextPoint)
-        val newRemaining = remainingDistance - distanceToNext
-        val newAccumulated = accumulatedDistance + distanceToNext
-
-        Timber.v(
-            "⏱ 세그먼트 이동 | 이동: %.2f m | 남음: %.2f m | 누적: %.2f m | 위도: %.6f, 경도: %.6f "
-                .format(distanceToNext, newRemaining, newAccumulated, nextPoint.latitude, nextPoint.longitude)
-        )
-        return Pair(newRemaining, newAccumulated)
-    }
+    private data class NavigationState(
+        val currentPoint: GpsPoint,
+        val nextPointIndex: Int,
+        val accumulatedDistance: Double,
+        val emittedVertices: Int
+    )
 
     private fun interpolate(
         start: GpsPoint,
@@ -211,13 +162,39 @@ class SendMockLocationUseCase @Inject constructor(
         )
     }
 
+    private fun applyGpsMode(point: GpsPoint, gpsMode: GpsMode): GpsPoint {
+        val satellites = when (gpsMode) {
+            GpsMode.GPS -> maxOf(point.satellites, 15)
+            GpsMode.DR -> 0
+        }
+        return point.copy(satellites = satellites)
+    }
+
+    private fun calculateTotalDistance(gpsPoints: List<GpsPoint>): Double {
+        return gpsPoints.zipWithNext { a, b -> calculateDistance(a, b) }.sum()
+    }
+
     private fun calculateDistance(p1: GpsPoint, p2: GpsPoint): Double {
-        val dx = (p2.longitude - p1.longitude) * 111_000 * cos(Math.toRadians(p1.latitude))
-        val dy = (p2.latitude - p1.latitude) * 111_000
+        val dx = (p2.longitude - p1.longitude) * METERS_PER_DEGREE_LATITUDE * cos(Math.toRadians(p1.latitude))
+        val dy = (p2.latitude - p1.latitude) * METERS_PER_DEGREE_LATITUDE
         return sqrt(dx * dx + dy * dy)
     }
 
     fun sendLocation(point: GpsPoint): Result<Unit> {
         return repository.sendLocation(point)
+    }
+
+    private fun logPositionUpdate(movedDistance: Double, accumulatedDistance: Double, speed: Double, virtualPoint: GpsPoint, emittedVertices: Int) {
+        Timber.v(
+            "⏱ 위치 전송 | 이동: %.2f m | 누적: %.2f m | 속도: %.2f m/s | 위도: %.6f, 경도: %.6f | 버택스: %d"
+                .format(movedDistance, accumulatedDistance + movedDistance, speed, virtualPoint.latitude, virtualPoint.longitude, emittedVertices)
+        )
+    }
+
+    private fun logSegmentMove(movedDistance: Double, remainingDistance: Double, accumulatedDistance: Double, nextPoint: GpsPoint) {
+        Timber.v(
+            "⏱ 세그먼트 이동 | 이동: %.2f m | 남음: %.2f m | 누적: %.2f m | 위도: %.6f, 경도: %.6f "
+                .format(movedDistance, remainingDistance - movedDistance, accumulatedDistance + movedDistance, nextPoint.latitude, nextPoint.longitude)
+        )
     }
 }
