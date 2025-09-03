@@ -93,7 +93,7 @@ fun GPSMockCard(
                         },
                         onReset = {
                             routeGuidanceViewModel.resetRoutePoints()
-                            drawViewModel.cancelDrawing()
+                            mockViewModel.resetMocking()
                         },
                         onRouteGuidance = { routeGuidanceViewModel.startGuidance() }
                     )
