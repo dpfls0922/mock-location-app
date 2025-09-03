@@ -16,6 +16,8 @@ enum class MarkerType(val resId: Int, val iconSize: Pair<Float, Float>) {
     START(R.drawable.marker_start, Pair(30F, 30F)),
     END(R.drawable.marker_end, Pair(30F, 30F)),
     DESTINATION(R.drawable.ic_map_destinationpoint, Pair(30F, 30F)),
+    STOPOVER_1(R.drawable.ic_subtract_01, Pair(30F, 30F)),
+    STOPOVER_2(R.drawable.ic_subtract_02, Pair(30F, 30F)),
     CURRENT(R.drawable.marker_current, Pair(30F, 30F)),
     TOUCH(R.drawable.ic_subtract_destination, Pair(30F, 30F))
 }
