@@ -65,7 +65,7 @@ class MarkerHelper(
 
     fun drawPolyline(
          points: List<VSMMapPoint>,
-         wayPoints: List<RoutePoint> = emptyList()
+         wayPoints: List<RoutePoint>? = emptyList()
     ) {
         runCatching {
             mapEngine.markerManager.removeMarkerAll()
@@ -74,7 +74,7 @@ class MarkerHelper(
                 val startPoint = points.first()
                 addLocationMarker(startPoint.latitude, startPoint.longitude, MarkerType.START)
 
-                wayPoints.forEachIndexed { index, wayPoint ->
+                wayPoints?.forEachIndexed { index, wayPoint ->
                     val markerType = waypointMarkerTypes.getOrElse(index) { MarkerType.WAYPOINT_1 }
                     val (skX, skY) = wayPoint.location.xPos.toDouble() to wayPoint.location.yPos.toDouble()
                     val location = VSMCoordinates.skToWGS84(skX, skY)

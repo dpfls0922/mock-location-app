@@ -91,6 +91,10 @@ fun GPSMockCard(
                         onRemovePoint = { routePoint ->
                             routeGuidanceViewModel.removeRoutePoint(routePoint)
                         },
+                        onReset = {
+                            routeGuidanceViewModel.resetRoutePoints()
+                            drawViewModel.cancelDrawing()
+                        },
                         onRouteGuidance = { routeGuidanceViewModel.startGuidance() }
                     )
                 }
