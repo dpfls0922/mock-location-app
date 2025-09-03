@@ -129,7 +129,7 @@ fun GPSMockCard(
                     gpsPoints = gpsPoints,
                     onStartMock = {
                         mockViewModel.startOrResumeMocking()
-                        drawViewModel.toggleDrawingMode()
+                        drawViewModel.disableDrawingMode()
                     },
                     onStopMock =  { mockViewModel.stopMocking() },
                     onResetMock = { mockViewModel.resetMocking() }
