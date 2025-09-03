@@ -32,12 +32,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -163,18 +161,21 @@ fun MockGpsStatus(mockingState: MockingState) {
 
 @Composable
 fun MockGpsProgressBar(
-    sentCount: Int,
-    totalCount: Int,
+    progress: Int,
     modifier: Modifier = Modifier
 ) {
-    val progress = if (totalCount > 0) sentCount.toFloat() / totalCount else 0f
     val barHeight = 140.dp
     val barWidth = 12.dp
+    val circleSize = 33.dp
+
+    val progressRatio = progress / 100f
+    val filledBarHeight = barHeight * progressRatio
+    val iconOffsetY = (filledBarHeight - (circleSize / 2))
 
     Box(
         modifier = modifier
             .width(80.dp)
-            .height(barHeight + 60.dp)
+            .height(barHeight + 70.dp)
             .background(
                 Color(0x60000000),
                 shape = RoundedCornerShape(20.dp)
@@ -196,7 +197,7 @@ fun MockGpsProgressBar(
         Box(
             Modifier
                 .width(barWidth)
-                .height(barHeight * progress)
+                .height(filledBarHeight)
                 .align(Alignment.BottomCenter)
                 .background(
                     Color(0xFF1976D2),
@@ -206,8 +207,8 @@ fun MockGpsProgressBar(
 
         Box(
             Modifier
-                .size(40.dp)
-                .offset(y = - barHeight * progress + 20.dp)
+                .size(circleSize)
+                .offset(y = -iconOffsetY)
                 .background(
                     Color.White,
                     shape = CircleShape
@@ -223,19 +224,21 @@ fun MockGpsProgressBar(
             )
         }
 
-        val percentText = "${(progress * 100).toInt()}%"
+        val percentText = "${progress}%"
         Text(
             text = percentText,
             color = Color.White,
-            fontSize = 14.sp,
+            fontSize = 11.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
+                .width(50.dp)
                 .align(Alignment.TopCenter)
                 .background(
                     Color(0x80000000),
                     RoundedCornerShape(12.dp)
                 )
-                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -245,8 +248,7 @@ fun MockGpsProgressBar(
 fun PreviewMockGpsProgressBar() {
     Box(modifier = Modifier.fillMaxSize()) {
         MockGpsProgressBar(
-            sentCount = 10,
-            totalCount = 20,
+            progress = 50,
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(top = 32.dp, end = 18.dp)

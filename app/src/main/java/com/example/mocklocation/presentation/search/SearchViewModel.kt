@@ -17,8 +17,8 @@ import timber.log.Timber
 import javax.inject.Inject
 
 sealed class SearchUiState {
-    object Idle : SearchUiState()
-    object Loading : SearchUiState()
+    data object Idle : SearchUiState()
+    data object Loading : SearchUiState()
     data class Success(val results: List<SearchResultUiModel>) : SearchUiState()
     data class Error(val message: String) : SearchUiState()
 }
