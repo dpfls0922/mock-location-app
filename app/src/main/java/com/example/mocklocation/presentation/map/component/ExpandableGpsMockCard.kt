@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.example.mocklocation.presentation.map.MapViewModel
 import com.example.mocklocation.presentation.mock.MockLocationViewModel
+import com.example.mocklocation.presentation.mock.MockingState
 import com.example.mocklocation.presentation.route.RouteGuidanceViewModel
 import com.example.mocklocation.presentation.search.SearchViewModel
 
@@ -35,6 +36,8 @@ fun ExpandableGpsMockCard(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val selectedLocationForRoute by searchViewModel.selectedLocationForRoute.collectAsState()
+    val mockingState by mockViewModel.mockingState.collectAsState()
+    val progressState by mockViewModel.progressState.collectAsState()
 
     LaunchedEffect(selectedLocationForRoute) {
         if (selectedLocationForRoute != null) {
@@ -68,6 +71,15 @@ fun ExpandableGpsMockCard(
                 routeGuidanceViewModel = routeGuidanceViewModel,
                 mapViewModel = mapViewModel
             )
+
+            if (mockingState == MockingState.RUNNING || mockingState == MockingState.PAUSED) {
+                MockGpsProgressBar(
+                    progress = progressState,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 16.dp, end = 16.dp)
+                )
+            }
         }
     }
 }

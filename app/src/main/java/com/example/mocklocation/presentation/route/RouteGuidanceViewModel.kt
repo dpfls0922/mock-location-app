@@ -17,8 +17,8 @@ import timber.log.Timber
 import javax.inject.Inject
 
 sealed class RouteGuidanceState {
-    object Idle : RouteGuidanceState()
-    object Loading : RouteGuidanceState()
+    data object Idle : RouteGuidanceState()
+    data object Loading : RouteGuidanceState()
     data class Success(val routeData: RouteGuidanceData) : RouteGuidanceState()
     data class Error(val message: String) : RouteGuidanceState()
 }

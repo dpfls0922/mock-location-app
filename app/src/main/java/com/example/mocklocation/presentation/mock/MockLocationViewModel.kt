@@ -1,6 +1,7 @@
 package com.example.mocklocation.presentation.mock
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.domain.service.MapService
 import com.example.mocklocation.presentation.map.component.GpsMode
@@ -9,6 +10,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,6 +25,9 @@ class MockLocationViewModel @Inject constructor(
     private val _gpsPoints = MutableStateFlow<List<GpsPoint>>(emptyList())
     val gpsPoints: StateFlow<List<GpsPoint>> = _gpsPoints.asStateFlow()
 
+    private val _progressState = MutableStateFlow(0)
+    val progressState: StateFlow<Int> = _progressState.asStateFlow()
+
     private val _repeatMode = MutableStateFlow(RepeatMode.INFINITE)
     val repeatMode: StateFlow<RepeatMode> = _repeatMode.asStateFlow()
 
@@ -33,6 +39,14 @@ class MockLocationViewModel @Inject constructor(
 
     private val _gpsMode = MutableStateFlow(GpsMode.GPS)
     val gpsMode: StateFlow<GpsMode> = _gpsMode
+
+    init {
+        mockLocationHandler.progressFlow
+            .onEach { progress ->
+                _progressState.value = progress.toInt()
+            }
+            .launchIn(viewModelScope)
+    }
 
     fun startOrResumeMocking() {
         when (mockingState.value) {
