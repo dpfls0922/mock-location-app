@@ -88,7 +88,10 @@ fun MapScreen(
                 ) {
                     DrawRouteControls(
                         isDrawingMode = isDrawingMode,
-                        onCancel = { drawViewModel.cancelDrawing() }
+                        onCancel = {
+                            drawViewModel.cancelDrawing()
+                            mockViewModel.resetMocking()
+                        }
                     )
                 }
 
