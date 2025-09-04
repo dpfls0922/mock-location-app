@@ -16,6 +16,7 @@ fun RouteGuidanceStatusHandler(
 ) {
     val context = LocalContext.current
     val uiState by routeGuidanceViewModel.uiState.collectAsState()
+    val toastMessage by routeGuidanceViewModel.toastMessage.collectAsState()
 
     LaunchedEffect(uiState) {
         when (uiState) {
@@ -35,6 +36,13 @@ fun RouteGuidanceStatusHandler(
 
             is RouteGuidanceState.Idle -> {
             }
+        }
+    }
+
+    LaunchedEffect(toastMessage) {
+        toastMessage?.let { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            routeGuidanceViewModel.resetToastMessage()
         }
     }
 }

@@ -19,7 +19,8 @@ class FileDataSourceImpl @Inject constructor(
     private val parserFactory: GpsParserAbstractFactory,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : FileDataSource {
-    override suspend fun uploadFile(uri: Uri, fileName: String): CsvFile = withContext(ioDispatcher) {
+    override suspend fun uploadFile(uri: Uri): CsvFile = withContext(ioDispatcher) {
+        val fileName = getFileNameFromUri(uri)
         Timber.d("[파일 업로드 시작] 파일명: $fileName, URI: $uri")
         val inputStream = context.contentResolver.openInputStream(uri) ?: throw IllegalArgumentException("URI를 열 수 없습니다: $uri")
 
@@ -40,5 +41,16 @@ class FileDataSourceImpl @Inject constructor(
 
         Timber.d("[업로드 완료] CsvFile 객체 생성 ID: ${csvFile.id}, 파일명: ${csvFile.name}")
         csvFile
+    }
+
+    private fun getFileNameFromUri(uri: Uri): String {
+        val projection = arrayOf(android.provider.OpenableColumns.DISPLAY_NAME)
+        context.contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val index = cursor.getColumnIndexOrThrow(android.provider.OpenableColumns.DISPLAY_NAME)
+                return cursor.getString(index)
+            }
+        }
+        return uri.lastPathSegment ?: "unknown_file"
     }
 }

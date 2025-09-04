@@ -65,6 +65,10 @@ class MapViewModel @Inject constructor(
         if (granted) startLocationUpdates()
     }
 
+    fun setCurrentLocation() {
+        _currentLocation.value?.let { mapService.setCenter(it.latitude, it.longitude) }
+    }
+
     private fun startLocationUpdates() {
         getCurrentLocationUseCase()
             .onEach { location ->

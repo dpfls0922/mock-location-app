@@ -17,9 +17,9 @@ import timber.log.Timber
 import javax.inject.Inject
 
 sealed class RouteGuidanceState {
-    object Idle : RouteGuidanceState()
-    object Loading : RouteGuidanceState()
-    data class Success(val routeData: RouteGuidanceData) : RouteGuidanceState()
+    data object Idle : RouteGuidanceState()
+    data object Loading : RouteGuidanceState()
+    data class Success(val routeData: RouteGuidanceData, val wayPoints: List<RoutePoint>) : RouteGuidanceState()
     data class Error(val message: String) : RouteGuidanceState()
 }
 
@@ -27,6 +27,8 @@ sealed class RouteGuidanceState {
 class RouteGuidanceViewModel @Inject constructor(
     private val getRouteGuidanceUseCase: GetRouteGuidanceUseCase
 ) : ViewModel() {
+    private val _toastMessage = MutableStateFlow<String?>(null)
+    val toastMessage: StateFlow<String?> = _toastMessage.asStateFlow()
 
     private val _routePoints = MutableStateFlow<List<RoutePoint>>(emptyList())
     val routePoints: StateFlow<List<RoutePoint>> = _routePoints.asStateFlow()
@@ -59,6 +61,7 @@ class RouteGuidanceViewModel @Inject constructor(
                     currentPoints.add(insertIndex, RoutePoint(routeType, location))
                 } else {
                     Timber.w("경유지는 최대 2개까지만 추가할 수 있습니다.")
+                    _toastMessage.value = "경유지는 최대 2개까지만 추가할 수 있습니다."
                     return
                 }
             }
@@ -101,7 +104,7 @@ class RouteGuidanceViewModel @Inject constructor(
             getRouteGuidanceUseCase(startPoi, endPoi, wayPointPois)
                 .onSuccess { routeData ->
                     if (routeData != null) {
-                        _uiState.value = RouteGuidanceState.Success(routeData)
+                        _uiState.value = RouteGuidanceState.Success(routeData, wayPoints)
                         Timber.d("[ROUTE_GUIDANCE] 경로 안내 성공")
                     } else {
                         _uiState.value = RouteGuidanceState.Error("경로를 찾을 수 없습니다.")
@@ -114,7 +117,17 @@ class RouteGuidanceViewModel @Inject constructor(
         }
     }
 
+    fun resetRoutePoints() {
+        _routePoints.value = emptyList()
+        _uiState.value = RouteGuidanceState.Idle
+        Timber.d("[ROUTE RESET] 경로 초기화")
+    }
+
     fun resetCloseDialogEvent() {
         _closeRouteDialogEvent.value = false
+    }
+
+    fun resetToastMessage() {
+        _toastMessage.value = null
     }
 }

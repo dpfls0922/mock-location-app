@@ -2,6 +2,7 @@ package com.example.mocklocation.presentation.mock
 
 import com.example.mocklocation.di.ApplicationScope
 import com.example.mocklocation.domain.entity.GpsPoint
+import com.example.mocklocation.domain.usecase.MockLocationUpdate
 import com.example.mocklocation.domain.usecase.SendMockLocationUseCase
 import com.example.mocklocation.presentation.map.component.GpsMode
 import com.example.mocklocation.presentation.map.component.RepeatMode
@@ -33,6 +34,9 @@ class MockLocationHandler @Inject constructor(
     private val _gpsModeFlow = MutableStateFlow(GpsMode.GPS)
     val gpsModeFlow: StateFlow<GpsMode> = _gpsModeFlow.asStateFlow()
 
+    private val _progressFlow = MutableStateFlow(0.0)
+    val progressFlow: StateFlow<Double> = _progressFlow.asStateFlow()
+
     private var mockJob: Job? = null
     private var allGpsPoints: List<GpsPoint> = emptyList()
     private var lastSentIndex: Int = 0
@@ -51,9 +55,9 @@ class MockLocationHandler @Inject constructor(
         }
         stopSending()
         this.allGpsPoints = gpsPoints
-        this.lastSentIndex = 0
         this.repeatMode = repeatMode
         this.repeatCount = repeatCount
+        this.lastSentIndex = 0
         this.currentRepeat = 0
         Timber.i("[MODE] 설정 적용: $repeatMode / count=$repeatCount / points=${gpsPoints.size}")
         startMockingFromIndex()
@@ -74,6 +78,12 @@ class MockLocationHandler @Inject constructor(
             _mockingState.value = MockingState.PAUSED
             Timber.i("[STOP] 작업 일시 정지 (${mockingState.value})")
         }
+    }
+
+    fun reset() {
+        stopSending()
+        resetState()
+        this.allGpsPoints = emptyList()
     }
 
     fun updateGpsPoints(newPoints: List<GpsPoint>) {
@@ -117,10 +127,8 @@ class MockLocationHandler @Inject constructor(
             try {
                 while (true) {
                     _mockingState.value = MockingState.RUNNING
-                    if (repeatMode == RepeatMode.COUNT && currentRepeat >= repeatCount) {
-                        Timber.i("[COMPLETE] 지정된 반복 횟수 완료: $currentRepeat/$repeatCount")
-                        break
-                    }
+                    if (repeatMode == RepeatMode.COUNT && currentRepeat >= repeatCount) break
+                    if (lastSentIndex >= allGpsPoints.size) lastSentIndex = 0
                     Timber.d("🔁 [${repeatMode.name} 모드] ${currentRepeat + 1} 회차 전송 시작")
 
                     sendMockLocationUseCase.createMockLocationFlow(
@@ -129,21 +137,29 @@ class MockLocationHandler @Inject constructor(
                         _speedFlow,
                         gpsModeFlow,
                         scope
-                    ).collect { point ->
-                        val result = sendMockLocationUseCase.sendLocation(point)
-                        if (result.isFailure) {
-                            Timber.e("[ERROR] 위치 전송 실패: ${point.latitude}, ${point.longitude}")
+                    ).collect { update ->
+                        when (update) {
+                            is MockLocationUpdate.Location -> {
+                                val result = sendMockLocationUseCase.sendLocation(update.gpsPoint)
+                                if (result.isFailure) {
+                                    Timber.e("[ERROR] 위치 전송 실패: ${update.gpsPoint.latitude}, ${update.gpsPoint.longitude}")
+                                }
+                                lastSentIndex++
+                            }
+                            is MockLocationUpdate.Progress -> {
+                                _progressFlow.value = update.progressPercentage
+                            }
                         }
-                        lastSentIndex++
                     }
-
                     currentRepeat++
                     lastSentIndex = 0
                     Timber.d("🔁 [${repeatMode.name} 모드] ${currentRepeat} 회차 전송 완료")
                 }
             } finally {
                 if (mockJob != null && mockJob?.isCancelled == false) {
-                    Timber.i("[FINISH] 작업 정상 완료")
+                    Timber.i("[FINISH] 작업 정상 완료  (${mockingState.value})")
+                    Timber.i("[FINISH] 반복 횟수 ($currentRepeat/$repeatCount)")
+                    _progressFlow.value = 100.0
                     resetState()
                 }
             }
@@ -154,6 +170,7 @@ class MockLocationHandler @Inject constructor(
         this.lastSentIndex = 0
         this.currentRepeat = 0
         _mockingState.value = MockingState.IDLE
+        _progressFlow.value = 0.0
         Timber.i("[RESET] 상태 초기화 (${mockingState.value})")
     }
 }

@@ -14,11 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.mocklocation.presentation.draw.DrawViewModel
+import com.example.mocklocation.presentation.file.FileUploadViewModel
 import com.example.mocklocation.presentation.map.MapViewModel
 import com.example.mocklocation.presentation.mock.MockLocationViewModel
 import com.example.mocklocation.presentation.route.RouteGuidanceViewModel
@@ -27,14 +26,13 @@ import com.example.mocklocation.presentation.search.SearchViewModel
 @Composable
 fun GPSMockCard(
     modifier: Modifier = Modifier,
+    drawViewModel: DrawViewModel,
     mockViewModel: MockLocationViewModel,
     searchViewModel: SearchViewModel,
     routeGuidanceViewModel: RouteGuidanceViewModel,
-    mapViewModel: MapViewModel,
-    onStartMock: () -> Unit,
-    onStopMock: () -> Unit
+    fileUploadViewModel: FileUploadViewModel,
+    mapViewModel: MapViewModel
 ) {
-    var isGpsEnabled by remember { mutableStateOf(true) }
     val gpsPoints by mockViewModel.gpsPoints.collectAsState()
     val mockingState by mockViewModel.mockingState.collectAsState()
     val currentLocationUiModel by mapViewModel.currentLocationUiModel.collectAsState()
@@ -48,6 +46,8 @@ fun GPSMockCard(
     val selectedLocationForRoute by searchViewModel.selectedLocationForRoute.collectAsState()
     val routePoints by routeGuidanceViewModel.routePoints.collectAsState()
     val closeDialogEvent by routeGuidanceViewModel.closeRouteDialogEvent.collectAsState()
+    val currentFileName by fileUploadViewModel.currentFileName.collectAsState()
+    val fileUploaded = currentFileName != null
 
     LaunchedEffect(closeDialogEvent) {
         if (closeDialogEvent) {
@@ -95,6 +95,10 @@ fun GPSMockCard(
                         onRemovePoint = { routePoint ->
                             routeGuidanceViewModel.removeRoutePoint(routePoint)
                         },
+                        onReset = {
+                            routeGuidanceViewModel.resetRoutePoints()
+                            mockViewModel.resetMocking()
+                        },
                         onRouteGuidance = { routeGuidanceViewModel.startGuidance() }
                     )
                 }
@@ -103,7 +107,8 @@ fun GPSMockCard(
 
                 GPSMode(
                     gpsMode = gpsMode,
-                    onGpsModeChanged = { mode -> mockViewModel.updateGpsMode(mode = mode) }
+                    onGpsModeChanged = { mode -> mockViewModel.updateGpsMode(mode = mode) },
+                    fileUploaded = fileUploaded
                 )
 
                 RepeatMode(
@@ -132,12 +137,13 @@ fun GPSMockCard(
                     mockingState = mockingState,
                     gpsPoints = gpsPoints,
                     onStartMock = {
-                        isGpsEnabled = true
-                        onStartMock()
+                        mockViewModel.startOrResumeMocking()
+                        drawViewModel.disableDrawingMode()
                     },
-                    onStopMock = {
-                        isGpsEnabled = false
-                        onStopMock()
+                    onStopMock =  { mockViewModel.stopMocking() },
+                    onResetMock = {
+                        mockViewModel.resetMocking()
+                        fileUploadViewModel.resetFileName()
                     }
                 )
             }

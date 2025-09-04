@@ -10,11 +10,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.mocklocation.presentation.draw.DrawViewModel
+import com.example.mocklocation.presentation.file.FileUploadViewModel
+import com.example.mocklocation.presentation.file.UploadUiState
 import com.example.mocklocation.presentation.map.component.DrawRouteControls
 import com.example.mocklocation.presentation.map.component.ExpandableGpsMockCard
+import com.example.mocklocation.presentation.map.component.FileNameOverlayToastStyle
 import com.example.mocklocation.presentation.map.component.FloatingButtons
 import com.example.mocklocation.presentation.mock.MockLocationViewModel
 import com.example.mocklocation.presentation.route.RouteGuidanceState
@@ -29,22 +34,33 @@ fun MapScreen(
     mockViewModel: MockLocationViewModel,
     searchViewModel: SearchViewModel,
     routeGuidanceViewModel: RouteGuidanceViewModel,
+    fileUploadViewModel: FileUploadViewModel,
     drawViewModel: DrawViewModel,
     permissionGranted: Boolean,
     onRequestPermission: () -> Unit,
-    onClickMyLocation: () -> Unit,
-    onClickSelectCsvFile: () -> Unit,
-    onClickStartMockSend: () -> Unit,
-    onClickStopMockSend: () -> Unit
+    onClickSelectCsvFile: () -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val touchedLocation by mapViewModel.touchedLocation.collectAsState()
     val isDrawingMode by drawViewModel.isDrawingMode.collectAsState()
+    val currentFileName by fileUploadViewModel.currentFileName.collectAsState()
 
     LaunchedEffect(Unit) {
         routeGuidanceViewModel.uiState.collectLatest { state ->
             if (state is RouteGuidanceState.Success) {
                 val vsmPoints = state.routeData.vsmPoints
+                val wayPoints = state.wayPoints
+                if (vsmPoints.isNotEmpty()) {
+                    drawViewModel.drawRouteLine(vsmPoints, wayPoints)
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        fileUploadViewModel.uiState.collectLatest { state ->
+            if (state is UploadUiState.Success) {
+                val vsmPoints = state.vsmPoints
                 if (vsmPoints.isNotEmpty()) {
                     drawViewModel.drawRouteLine(vsmPoints)
                 }
@@ -67,11 +83,38 @@ fun MapScreen(
         }
     }
 
+    MapUI(
+        lifecycleOwner = lifecycleOwner,
+        mapViewModel = mapViewModel,
+        drawViewModel = drawViewModel,
+        mockViewModel = mockViewModel,
+        searchViewModel = searchViewModel,
+        routeGuidanceViewModel = routeGuidanceViewModel,
+        fileUploadViewModel = fileUploadViewModel,
+        currentFileName = currentFileName,
+        isDrawingMode = isDrawingMode,
+        onClickSelectCsvFile = onClickSelectCsvFile
+    )
+}
+
+@Composable
+private fun MapUI(
+    lifecycleOwner: LifecycleOwner,
+    mapViewModel: MapViewModel,
+    drawViewModel: DrawViewModel,
+    mockViewModel: MockLocationViewModel,
+    searchViewModel: SearchViewModel,
+    routeGuidanceViewModel: RouteGuidanceViewModel,
+    fileUploadViewModel: FileUploadViewModel,
+    currentFileName: String?,
+    isDrawingMode: Boolean,
+    onClickSelectCsvFile: () -> Unit
+) {
     MapTheme {
         Scaffold(
             floatingActionButton = {
                 FloatingButtons(
-                    onClickMyLocation = onClickMyLocation,
+                    onClickMyLocation = { mapViewModel.setCurrentLocation() },
                     onClickSelectCsvFile = onClickSelectCsvFile,
                     onClickDrawRoute = { drawViewModel.toggleDrawingMode() }
                 )
@@ -84,23 +127,37 @@ fun MapScreen(
                 )
                 MapLifecycleHandler(lifecycleOwner, mapViewModel)
 
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 28.dp),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    currentFileName?.let { name ->
+                        FileNameOverlayToastStyle(fileName = name)
+                    }
+                }
+
                 Box (
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.TopCenter
                 ) {
                     DrawRouteControls(
                         isDrawingMode = isDrawingMode,
-                        onCancel = { drawViewModel.cancelDrawing() }
+                        onCancel = {
+                            drawViewModel.cancelDrawing()
+                            mockViewModel.resetMocking()
+                        }
                     )
                 }
 
                 ExpandableGpsMockCard(
+                    drawViewModel = drawViewModel,
                     mockViewModel = mockViewModel,
                     searchViewModel = searchViewModel,
                     routeGuidanceViewModel = routeGuidanceViewModel,
-                    mapViewModel = mapViewModel,
-                    onStartMock = onClickStartMockSend,
-                    onStopMock = onClickStopMockSend
+                    fileUploadViewModel = fileUploadViewModel,
+                    mapViewModel = mapViewModel
                 )
             }
         }

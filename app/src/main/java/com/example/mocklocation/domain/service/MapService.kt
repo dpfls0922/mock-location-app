@@ -3,6 +3,7 @@ package com.example.mocklocation.domain.service
 import android.content.Context
 import android.view.MotionEvent
 import com.example.mocklocation.domain.entity.CurrentLocation
+import com.example.mocklocation.presentation.map.component.RoutePoint
 import com.skt.tmap.vsm.data.VSMMapPoint
 import com.skt.tmap.vsm.map.VSMMapView
 
@@ -18,8 +19,9 @@ interface MapService {
     fun removeLocationMarker()
     fun removeDrawingMarker()
     fun updateCurrentLocationMarker(location: CurrentLocation)
+    fun setCenter(latitude: Double, longitude: Double)
     fun enableDrawingMode(isEnable: Boolean)
-    fun drawRouteLine(vsmPoints: List<VSMMapPoint>)
+    fun drawRouteLine(vsmPoints: List<VSMMapPoint>, wayPoints: List<RoutePoint>?)
     fun clearDrawingPoints()
     fun cleanupMap()
     fun onResume()

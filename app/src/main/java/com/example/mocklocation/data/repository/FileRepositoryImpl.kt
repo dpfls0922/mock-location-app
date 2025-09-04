@@ -15,7 +15,7 @@ class FileRepositoryImpl @Inject constructor(
     private val fileDataSource: FileDataSource,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : FileRepository {
-    override suspend fun uploadCsvFile(uri: Uri, fileName: String): CsvFile = withContext(ioDispatcher) {
-        fileDataSource.uploadFile(uri, fileName)
+    override suspend fun uploadCsvFile(uri: Uri): CsvFile = withContext(ioDispatcher) {
+        fileDataSource.uploadFile(uri)
     }
 }
