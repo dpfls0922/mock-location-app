@@ -12,7 +12,7 @@ class UploadCsvFileUseCase @Inject constructor(
     private val fileRepository: FileRepository,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) {
-    suspend fun execute(uri: Uri, fileName: String): CsvFile = withContext(ioDispatcher) {
-        fileRepository.uploadCsvFile(uri, fileName)
+    suspend fun execute(uri: Uri): CsvFile = withContext(ioDispatcher) {
+        fileRepository.uploadCsvFile(uri)
     }
 }
