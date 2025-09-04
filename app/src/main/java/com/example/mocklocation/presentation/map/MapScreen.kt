@@ -10,13 +10,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.mocklocation.presentation.draw.DrawViewModel
 import com.example.mocklocation.presentation.file.FileUploadViewModel
 import com.example.mocklocation.presentation.file.UploadUiState
 import com.example.mocklocation.presentation.map.component.DrawRouteControls
 import com.example.mocklocation.presentation.map.component.ExpandableGpsMockCard
+import com.example.mocklocation.presentation.map.component.FileNameOverlayToastStyle
 import com.example.mocklocation.presentation.map.component.FloatingButtons
 import com.example.mocklocation.presentation.mock.MockLocationViewModel
 import com.example.mocklocation.presentation.route.RouteGuidanceState
@@ -40,6 +43,7 @@ fun MapScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val touchedLocation by mapViewModel.touchedLocation.collectAsState()
     val isDrawingMode by drawViewModel.isDrawingMode.collectAsState()
+    val currentFileName by fileUploadViewModel.currentFileName.collectAsState()
 
     LaunchedEffect(Unit) {
         routeGuidanceViewModel.uiState.collectLatest { state ->
@@ -57,7 +61,6 @@ fun MapScreen(
         fileUploadViewModel.uiState.collectLatest { state ->
             if (state is UploadUiState.Success) {
                 val vsmPoints = state.vsmPoints
-                val fileName = state.file.name
                 if (vsmPoints.isNotEmpty()) {
                     drawViewModel.drawRouteLine(vsmPoints)
                 }
@@ -80,6 +83,33 @@ fun MapScreen(
         }
     }
 
+    MapUI(
+        lifecycleOwner = lifecycleOwner,
+        mapViewModel = mapViewModel,
+        drawViewModel = drawViewModel,
+        mockViewModel = mockViewModel,
+        searchViewModel = searchViewModel,
+        routeGuidanceViewModel = routeGuidanceViewModel,
+        fileUploadViewModel = fileUploadViewModel,
+        currentFileName = currentFileName,
+        isDrawingMode = isDrawingMode,
+        onClickSelectCsvFile = onClickSelectCsvFile
+    )
+}
+
+@Composable
+private fun MapUI(
+    lifecycleOwner: LifecycleOwner,
+    mapViewModel: MapViewModel,
+    drawViewModel: DrawViewModel,
+    mockViewModel: MockLocationViewModel,
+    searchViewModel: SearchViewModel,
+    routeGuidanceViewModel: RouteGuidanceViewModel,
+    fileUploadViewModel: FileUploadViewModel,
+    currentFileName: String?,
+    isDrawingMode: Boolean,
+    onClickSelectCsvFile: () -> Unit
+) {
     MapTheme {
         Scaffold(
             floatingActionButton = {
@@ -96,6 +126,17 @@ fun MapScreen(
                     modifier = Modifier.fillMaxSize()
                 )
                 MapLifecycleHandler(lifecycleOwner, mapViewModel)
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 28.dp),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    currentFileName?.let { name ->
+                        FileNameOverlayToastStyle(fileName = name)
+                    }
+                }
 
                 Box (
                     modifier = Modifier.fillMaxSize(),
@@ -115,6 +156,7 @@ fun MapScreen(
                     mockViewModel = mockViewModel,
                     searchViewModel = searchViewModel,
                     routeGuidanceViewModel = routeGuidanceViewModel,
+                    fileUploadViewModel = fileUploadViewModel,
                     mapViewModel = mapViewModel
                 )
             }

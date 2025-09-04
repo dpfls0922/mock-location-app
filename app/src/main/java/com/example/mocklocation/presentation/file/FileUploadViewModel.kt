@@ -27,6 +27,9 @@ class FileUploadViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<UploadUiState>(UploadUiState.Idle)
     val uiState: StateFlow<UploadUiState> = _uiState
 
+    private val _currentFileName = MutableStateFlow<String?>(null)
+    val currentFileName: StateFlow<String?> = _currentFileName
+
     fun uploadFile(uri: Uri) {
         _uiState.value = UploadUiState.Loading
         viewModelScope.launch {
@@ -37,6 +40,7 @@ class FileUploadViewModel @Inject constructor(
                     VSMMapPoint(gps.longitude, gps.latitude)
                 }
                 _uiState.value = UploadUiState.Success(uploadedFile, gpsPoints, vsmPoints)
+                _currentFileName.value = uploadedFile.name
             } catch (e: Exception) {
                 _uiState.value = UploadUiState.Error(e.localizedMessage ?: "업로드 실패")
             }
@@ -45,5 +49,9 @@ class FileUploadViewModel @Inject constructor(
 
     fun resetState() {
         _uiState.value = UploadUiState.Idle
+    }
+
+    fun resetFileName() {
+        _currentFileName.value = null
     }
 }
