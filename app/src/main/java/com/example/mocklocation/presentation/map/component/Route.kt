@@ -26,9 +26,9 @@ enum class RoutePointType(
     val icon: ImageVector,
     val color: Color
 ) {
-    START("출발", Icons.Default.PlayArrow, Color(0xFF4CAF50)),
-    END("도착", Icons.Default.Flag, Color(0xFFF44336)),
-    WAYPOINT("경유", Icons.Default.LocationOn, Color(0xFF2196F3))
+    START("출발", Icons.Default.PlayArrow, Color(0xFFF44336)),
+    END("도착", Icons.Default.Flag, Color(0xFF2196F3)),
+    WAYPOINT("경유", Icons.Default.LocationOn, Color(0xFF4CAF50))
 }
 
 data class RoutePoint(

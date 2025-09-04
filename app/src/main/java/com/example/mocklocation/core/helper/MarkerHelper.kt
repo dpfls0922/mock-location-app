@@ -18,8 +18,8 @@ enum class MarkerType(val resId: Int, val iconSize: Pair<Float, Float>) {
     START(R.drawable.marker_start, Pair(40F, 40F)),
     END(R.drawable.marker_end, Pair(40F, 40F)),
     DESTINATION(R.drawable.ic_map_destinationpoint, Pair(35F, 35F)),
-    WAYPOINT_1(R.drawable.ic_subtract_01, Pair(20F, 20F)),
-    WAYPOINT_2(R.drawable.ic_subtract_02, Pair(20F, 20F)),
+    WAYPOINT_1(R.drawable.ic_subtract_01, Pair(23F, 23F)),
+    WAYPOINT_2(R.drawable.ic_subtract_02, Pair(23F, 23F)),
     CURRENT(R.drawable.marker_current, Pair(40F, 40F)),
     TOUCH(R.drawable.ic_subtract_destination, Pair(35F, 35F))
 }
@@ -94,7 +94,6 @@ class MarkerHelper(
                     .strokeColor(strokeColor)
                     .strokeWidth(4f)
                     .lineWidth(5f)
-                    .lineDashStyle(intArrayOf(strokeColor, fillColor, strokeColor, fillColor))
                     .create()
                 mapEngine.markerManager.addMarker(polyline)
                 Timber.d("Polyline 정상적으로 지도에 표시됨")
