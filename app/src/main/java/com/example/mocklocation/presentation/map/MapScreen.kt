@@ -13,6 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.mocklocation.presentation.draw.DrawViewModel
+import com.example.mocklocation.presentation.file.FileUploadViewModel
+import com.example.mocklocation.presentation.file.UploadUiState
 import com.example.mocklocation.presentation.map.component.DrawRouteControls
 import com.example.mocklocation.presentation.map.component.ExpandableGpsMockCard
 import com.example.mocklocation.presentation.map.component.FloatingButtons
@@ -29,6 +31,7 @@ fun MapScreen(
     mockViewModel: MockLocationViewModel,
     searchViewModel: SearchViewModel,
     routeGuidanceViewModel: RouteGuidanceViewModel,
+    fileUploadViewModel: FileUploadViewModel,
     drawViewModel: DrawViewModel,
     permissionGranted: Boolean,
     onRequestPermission: () -> Unit,
@@ -45,6 +48,18 @@ fun MapScreen(
                 val wayPoints = state.wayPoints
                 if (vsmPoints.isNotEmpty()) {
                     drawViewModel.drawRouteLine(vsmPoints, wayPoints)
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        fileUploadViewModel.uiState.collectLatest { state ->
+            if (state is UploadUiState.Success) {
+                val vsmPoints = state.vsmPoints
+                val fileName = state.file.name
+                if (vsmPoints.isNotEmpty()) {
+                    drawViewModel.drawRouteLine(vsmPoints)
                 }
             }
         }
