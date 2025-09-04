@@ -74,15 +74,15 @@ fun ExpandableGpsMockCard(
                 routeGuidanceViewModel = routeGuidanceViewModel,
                 mapViewModel = mapViewModel
             )
+        }
 
-            if (mockingState == MockingState.RUNNING || mockingState == MockingState.PAUSED) {
-                MockGpsProgressBar(
-                    progress = progressState,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(top = 16.dp, end = 16.dp)
-                )
-            }
+        if (mockingState == MockingState.RUNNING || mockingState == MockingState.PAUSED) {
+            MockGpsProgressBar(
+                progress = progressState,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 16.dp, end = 16.dp)
+            )
         }
     }
 }
