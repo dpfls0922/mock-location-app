@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.mocklocation.presentation.draw.DrawViewModel
+import com.example.mocklocation.presentation.file.FileUploadViewModel
 import com.example.mocklocation.presentation.map.MapViewModel
 import com.example.mocklocation.presentation.mock.MockLocationViewModel
 import com.example.mocklocation.presentation.route.RouteGuidanceViewModel
@@ -29,6 +30,7 @@ fun GPSMockCard(
     mockViewModel: MockLocationViewModel,
     searchViewModel: SearchViewModel,
     routeGuidanceViewModel: RouteGuidanceViewModel,
+    fileUploadViewModel: FileUploadViewModel,
     mapViewModel: MapViewModel
 ) {
     val gpsPoints by mockViewModel.gpsPoints.collectAsState()
@@ -136,7 +138,10 @@ fun GPSMockCard(
                         drawViewModel.disableDrawingMode()
                     },
                     onStopMock =  { mockViewModel.stopMocking() },
-                    onResetMock = { mockViewModel.resetMocking() }
+                    onResetMock = {
+                        mockViewModel.resetMocking()
+                        fileUploadViewModel.resetFileName()
+                    }
                 )
             }
         }

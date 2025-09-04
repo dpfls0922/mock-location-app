@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.example.mocklocation.presentation.draw.DrawViewModel
+import com.example.mocklocation.presentation.file.FileUploadViewModel
 import com.example.mocklocation.presentation.map.MapViewModel
 import com.example.mocklocation.presentation.mock.MockLocationViewModel
 import com.example.mocklocation.presentation.mock.MockingState
@@ -34,6 +35,7 @@ fun ExpandableGpsMockCard(
     mockViewModel: MockLocationViewModel,
     searchViewModel: SearchViewModel,
     routeGuidanceViewModel: RouteGuidanceViewModel,
+    fileUploadViewModel: FileUploadViewModel,
     mapViewModel: MapViewModel
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -72,6 +74,7 @@ fun ExpandableGpsMockCard(
                 mockViewModel = mockViewModel,
                 searchViewModel = searchViewModel,
                 routeGuidanceViewModel = routeGuidanceViewModel,
+                fileUploadViewModel = fileUploadViewModel,
                 mapViewModel = mapViewModel
             )
         }
