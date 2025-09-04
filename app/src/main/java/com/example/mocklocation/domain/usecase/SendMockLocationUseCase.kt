@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sqrt
 
@@ -151,6 +152,7 @@ class SendMockLocationUseCase @Inject constructor(
         end: GpsPoint,
         distanceToMove: Double
     ): GpsPoint {
+        val bearing = calculateBearing(start, end)
         val segmentDistance = calculateDistance(start, end)
         if (segmentDistance == 0.0) return start
         val ratio = distanceToMove / segmentDistance
@@ -165,7 +167,7 @@ class SendMockLocationUseCase @Inject constructor(
             vAcc = start.vAcc,
             sAcc = start.sAcc,
             speed = start.speed,
-            bearing = start.bearing,
+            bearing = bearing,
             bAcc = start.bAcc,
             satellites = start.satellites,
             maxCn0 = start.maxCn0,
@@ -189,6 +191,12 @@ class SendMockLocationUseCase @Inject constructor(
         val dx = (p2.longitude - p1.longitude) * METERS_PER_DEGREE_LATITUDE * cos(Math.toRadians(p1.latitude))
         val dy = (p2.latitude - p1.latitude) * METERS_PER_DEGREE_LATITUDE
         return sqrt(dx * dx + dy * dy)
+    }
+
+    private fun calculateBearing(p1: GpsPoint, p2: GpsPoint): Float {
+        val dx = (p2.longitude - p1.longitude)
+        val dy = (p2.latitude - p1.latitude)
+        return Math.toDegrees(atan2(dx, dy)).toFloat()
     }
 
     fun sendLocation(point: GpsPoint): Result<Unit> {
