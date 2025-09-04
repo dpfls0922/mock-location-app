@@ -27,6 +27,8 @@ sealed class RouteGuidanceState {
 class RouteGuidanceViewModel @Inject constructor(
     private val getRouteGuidanceUseCase: GetRouteGuidanceUseCase
 ) : ViewModel() {
+    private val _toastMessage = MutableStateFlow<String?>(null)
+    val toastMessage: StateFlow<String?> = _toastMessage.asStateFlow()
 
     private val _routePoints = MutableStateFlow<List<RoutePoint>>(emptyList())
     val routePoints: StateFlow<List<RoutePoint>> = _routePoints.asStateFlow()
@@ -59,6 +61,7 @@ class RouteGuidanceViewModel @Inject constructor(
                     currentPoints.add(insertIndex, RoutePoint(routeType, location))
                 } else {
                     Timber.w("경유지는 최대 2개까지만 추가할 수 있습니다.")
+                    _toastMessage.value = "경유지는 최대 2개까지만 추가할 수 있습니다."
                     return
                 }
             }
@@ -122,5 +125,9 @@ class RouteGuidanceViewModel @Inject constructor(
 
     fun resetCloseDialogEvent() {
         _closeRouteDialogEvent.value = false
+    }
+
+    fun resetToastMessage() {
+        _toastMessage.value = null
     }
 }
