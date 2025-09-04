@@ -30,6 +30,7 @@ class SendMockLocationUseCase @Inject constructor(
         private const val DEFAULT_UPDATE_INTERVAL_MS = 1000L
         private const val KMH_TO_MPS = 1000.0 / 3600.0
         private const val METERS_PER_DEGREE_LATITUDE = 111_000.0
+        private const val FLOATING_POINT_ERROR = 0.01
     }
 
     fun createMockLocationFlow(
@@ -39,6 +40,10 @@ class SendMockLocationUseCase @Inject constructor(
         gpsModeFlow: StateFlow<GpsMode>,
         scope: CoroutineScope
     ): Flow<MockLocationUpdate> = flow {
+        if (gpsPoints.isEmpty()) return@flow
+        if (startIndex !in gpsPoints.indices) return@flow
+
+
         repository.startMocking()
         Timber.d("🗺️ Mocking Flow 전송 시작: (${startIndex}/${gpsPoints.size})")
 
@@ -54,7 +59,7 @@ class SendMockLocationUseCase @Inject constructor(
         try {
             var currentState = NavigationState(
                 currentPoint = gpsPoints[startIndex],
-                nextPointIndex = startIndex + 1,
+                nextPointIndex = (startIndex + 1).coerceAtMost(gpsPoints.lastIndex),
                 accumulatedDistance = 0.0,
                 emittedVertices = 0
             )
@@ -63,7 +68,7 @@ class SendMockLocationUseCase @Inject constructor(
             emit(MockLocationUpdate.Progress(0.0))
             currentState = currentState.copy(emittedVertices = currentState.emittedVertices + 1)
 
-            while (currentState.accumulatedDistance < totalPathDistance) {
+            while (!isNavigationComplete(currentState.accumulatedDistance, totalPathDistance)) {
                 val speedMps = speedState.value
                 val distanceToMove = minOf(speedMps, totalPathDistance - currentState.accumulatedDistance)
 
@@ -137,6 +142,7 @@ class SendMockLocationUseCase @Inject constructor(
                 )
             }
         }
+        Timber.i("[moveAlongPath 루프 종료] 남은 거리: %.10f".format(remainingDistance))
         return mutableState
     }
 
@@ -146,6 +152,11 @@ class SendMockLocationUseCase @Inject constructor(
         val accumulatedDistance: Double,
         val emittedVertices: Int
     )
+
+    private fun isNavigationComplete(accumulatedDistance: Double, totalPathDistance: Double): Boolean {
+        val remaining = totalPathDistance - accumulatedDistance
+        return remaining <= FLOATING_POINT_ERROR
+    }
 
     private fun interpolate(
         start: GpsPoint,
