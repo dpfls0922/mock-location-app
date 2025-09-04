@@ -26,6 +26,7 @@ fun MapRoute(
     drawViewModel: DrawViewModel = hiltViewModel(),
     uploadViewModel: FileUploadViewModel = hiltViewModel(),
     routeGuidanceViewModel: RouteGuidanceViewModel = hiltViewModel(),
+    fileUploadViewModel: FileUploadViewModel = hiltViewModel(),
     searchViewModel: SearchViewModel = hiltViewModel()
 ) {
     val permissionGranted by mapViewModel.locationPermissionGranted.collectAsState()
@@ -46,6 +47,7 @@ fun MapRoute(
         searchViewModel = searchViewModel,
         drawViewModel = drawViewModel,
         routeGuidanceViewModel = routeGuidanceViewModel,
+        fileUploadViewModel = fileUploadViewModel,
         permissionGranted = permissionGranted,
         onRequestPermission = { permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION) },
         onClickSelectCsvFile = { fileSelectorLauncher.launch(MIME_TYPE_TEXT) }

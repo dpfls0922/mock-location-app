@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.mocklocation.domain.entity.CsvFile
 import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.domain.usecase.UploadCsvFileUseCase
+import com.skt.tmap.vsm.data.VSMMapPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +16,7 @@ import javax.inject.Inject
 sealed class UploadUiState {
     data object Idle : UploadUiState()
     data object Loading : UploadUiState()
-    data class Success(val file: CsvFile, val gpsPoints: List<GpsPoint>) : UploadUiState()
+    data class Success(val file: CsvFile, val gpsPoints: List<GpsPoint>, val vsmPoints: List<VSMMapPoint>) : UploadUiState()
     data class Error(val message: String) : UploadUiState()
 }
 
@@ -32,7 +33,10 @@ class FileUploadViewModel @Inject constructor(
             try {
                 val uploadedFile = uploadCsvFileUseCase.execute(uri, name)
                 val gpsPoints = uploadedFile.gpsPoints
-                _uiState.value = UploadUiState.Success(uploadedFile, gpsPoints)
+                val vsmPoints = uploadedFile.gpsPoints.map { gps ->
+                    VSMMapPoint(gps.longitude, gps.latitude)
+                }
+                _uiState.value = UploadUiState.Success(uploadedFile, gpsPoints, vsmPoints)
             } catch (e: Exception) {
                 _uiState.value = UploadUiState.Error(e.localizedMessage ?: "업로드 실패")
             }
