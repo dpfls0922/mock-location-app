@@ -190,6 +190,7 @@ class SendMockLocationUseCase @Inject constructor(
         val satellites = when (gpsMode) {
             GpsMode.GPS -> maxOf(point.satellites, 15)
             GpsMode.DR -> 0
+            GpsMode.ORIGINAL -> point.satellites
         }
         return point.copy(satellites = satellites)
     }

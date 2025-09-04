@@ -13,12 +13,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-enum class GpsMode { GPS, DR }
+enum class GpsMode { GPS, DR, ORIGINAL }
 
 @Composable
 fun GPSMode(
     gpsMode: GpsMode,
-    onGpsModeChanged: (GpsMode) -> Unit
+    onGpsModeChanged: (GpsMode) -> Unit,
+    fileUploaded: Boolean
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
@@ -46,6 +47,18 @@ fun GPSMode(
                     containerColor = Color.Gray.copy(alpha = 0.1f),
                     selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
                     selectedLabelColor = MaterialTheme.colorScheme.primary
+                )
+            )
+            FilterChip(
+                onClick = { if (fileUploaded) onGpsModeChanged(GpsMode.ORIGINAL) },
+                label = { Text("원본 모드") },
+                enabled = fileUploaded,
+                selected = gpsMode == GpsMode.ORIGINAL,
+                colors = FilterChipDefaults.filterChipColors(
+                    containerColor = Color.Gray.copy(alpha = 0.1f),
+                    selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                    selectedLabelColor = MaterialTheme.colorScheme.primary,
+                    disabledLabelColor = Color.Gray.copy(alpha = 0.4f)
                 )
             )
         }

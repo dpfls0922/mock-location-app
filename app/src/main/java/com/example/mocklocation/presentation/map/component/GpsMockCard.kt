@@ -46,6 +46,8 @@ fun GPSMockCard(
     val selectedLocationForRoute by searchViewModel.selectedLocationForRoute.collectAsState()
     val routePoints by routeGuidanceViewModel.routePoints.collectAsState()
     val closeDialogEvent by routeGuidanceViewModel.closeRouteDialogEvent.collectAsState()
+    val currentFileName by fileUploadViewModel.currentFileName.collectAsState()
+    val fileUploaded = currentFileName != null
 
     LaunchedEffect(closeDialogEvent) {
         if (closeDialogEvent) {
@@ -105,7 +107,8 @@ fun GPSMockCard(
 
                 GPSMode(
                     gpsMode = gpsMode,
-                    onGpsModeChanged = { mode -> mockViewModel.updateGpsMode(mode = mode) }
+                    onGpsModeChanged = { mode -> mockViewModel.updateGpsMode(mode = mode) },
+                    fileUploaded = fileUploaded
                 )
 
                 RepeatMode(
