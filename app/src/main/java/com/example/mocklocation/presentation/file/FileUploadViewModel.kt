@@ -27,11 +27,11 @@ class FileUploadViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<UploadUiState>(UploadUiState.Idle)
     val uiState: StateFlow<UploadUiState> = _uiState
 
-    fun uploadFile(uri: Uri, name: String) {
+    fun uploadFile(uri: Uri) {
         _uiState.value = UploadUiState.Loading
         viewModelScope.launch {
             try {
-                val uploadedFile = uploadCsvFileUseCase.execute(uri, name)
+                val uploadedFile = uploadCsvFileUseCase.execute(uri)
                 val gpsPoints = uploadedFile.gpsPoints
                 val vsmPoints = uploadedFile.gpsPoints.map { gps ->
                     VSMMapPoint(gps.longitude, gps.latitude)

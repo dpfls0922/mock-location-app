@@ -10,7 +10,6 @@ import com.example.mocklocation.presentation.draw.DrawStatusHandler
 import com.example.mocklocation.presentation.draw.DrawViewModel
 import com.example.mocklocation.presentation.file.FileUploadStatusHandler
 import com.example.mocklocation.presentation.file.FileUploadViewModel
-import com.example.mocklocation.presentation.map.MapRouteConstants.DEFAULT_FILE_NAME
 import com.example.mocklocation.presentation.map.MapRouteConstants.MIME_TYPE_TEXT
 import com.example.mocklocation.presentation.mock.MockLocationViewModel
 import com.example.mocklocation.presentation.route.RouteGuidanceStatusHandler
@@ -34,7 +33,7 @@ fun MapRoute(
 
     val coroutineScope = rememberCoroutineScope()
     val fileSelectorLauncher = rememberFileSelectorLauncher(coroutineScope = coroutineScope) { uri ->
-        uploadViewModel.uploadFile(uri, uri.lastPathSegment ?: DEFAULT_FILE_NAME)
+        uploadViewModel.uploadFile(uri)
     }
 
     FileUploadStatusHandler()
@@ -55,6 +54,5 @@ fun MapRoute(
 }
 
 private object MapRouteConstants {
-    const val DEFAULT_FILE_NAME = "unknown.csv"
     const val MIME_TYPE_TEXT = "*/*"
 }
