@@ -66,11 +66,10 @@ void testTvasParsing() {
 
 int main() {
     testBase64Decode();
-
     testReadInt();
     testReadString();
     testSetPosition();
-
     testTvasParsing();
+    system("leaks test_app");
     return 0;
 }
