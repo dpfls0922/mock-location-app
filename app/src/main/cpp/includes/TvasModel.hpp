@@ -134,8 +134,8 @@ struct Tvas {
         log << " 총 시간: " << formatTime(header.routeSearchInfo.totalTime) << "\n";
         log << " 예상 택시 요금: " << header.routeSearchInfo.taxiFare << " 원\n";
 
-        log << " 출발지 " << " (좌표: " << header.mapInfo.departX << ", " << header.mapInfo.departY << ")\n";
-        log << " 도착지 " << " (좌표: " << header.mapInfo.destX << ", " << header.mapInfo.destY << ")\n";
+        log << " 출발지 " << "(좌표: " << header.mapInfo.departX << ", " << header.mapInfo.departY << ")\n";
+        log << " 도착지 " << "(좌표: " << header.mapInfo.destX << ", " << header.mapInfo.destY << ")\n";
 
         log << "----------------- 데이터 인덱스 목록 (" << header.infoIndexes.size() << "개) -----------------\n";
         for (size_t i = 0; i < std::min(size_t(2), header.infoIndexes.size()); i++) {
