@@ -1,7 +1,14 @@
 #CXX = g++
 #CXXFLAGS = -std=c++17 -I./includes -Wall -Wextra -Werror
 #
-#SRCS = $(wildcard *.cpp)
+##SRCS = $(wildcard *.cpp)
+#SRCS = ByteReader.cpp \
+#       TvasCoordinateConverter.cpp \
+#       main.cpp \
+#       Base64Decoder.cpp \
+#       TvasParser.cpp \
+#       TvasSectionParser.cpp
+#
 #OBJS = $(SRCS:.cpp=.o)
 #NAME = test_app
 #
