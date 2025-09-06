@@ -2,7 +2,6 @@ package com.example.mocklocation.data.dto
 
 import android.os.Parcelable
 import com.example.mocklocation.domain.entity.GpsPoint
-import com.google.android.gms.security.ProviderInstaller.PROVIDER_NAME
 import com.skt.tmap.vsm.data.VSMMapPoint
 import kotlinx.parcelize.Parcelize
 
@@ -38,7 +37,7 @@ fun GpsPointParcelable.toDomainModel() = GpsPoint(
 
 fun VSMMapPoint.toGpsPoint(): GpsPoint {
     return GpsPoint(
-        provider = PROVIDER_NAME,
+        provider = "gps",
         timestamp = System.currentTimeMillis(),
         latitude = this.latitude,
         longitude = this.longitude,

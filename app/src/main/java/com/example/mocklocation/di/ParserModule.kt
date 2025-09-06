@@ -35,6 +35,11 @@ object ParserModule {
         converter
     )
 
+    @TvasNativeParser
+    @Provides
+    @Singleton
+    fun provideTvasNativeParser(): GpsDataParser<String> = com.example.mocklocation.data.parser.TvasNativeParser()
+
     @Provides
     fun provideTileParser(): TileSectionParser = TileSectionParser
 
@@ -48,8 +53,9 @@ object ParserModule {
     @Singleton
     fun provideGpsParserFactory(
         @CsvParser csvParser: GpsDataParser<InputStream>,
-        @TvasKotlinParser tvasKotlinParser: GpsDataParser<String>
+        @TvasKotlinParser tvasKotlinParser: GpsDataParser<String>,
+        @TvasNativeParser tvasNativeParser:  GpsDataParser<String>
     ): GpsParserAbstractFactory {
-        return GpsParserFactory(csvParser, tvasKotlinParser)
+        return GpsParserFactory(csvParser, tvasKotlinParser, tvasNativeParser)
     }
 }

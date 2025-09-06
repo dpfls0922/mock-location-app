@@ -5,4 +5,5 @@ import java.io.InputStream
 interface GpsParserAbstractFactory {
     fun createCsvParser(): GpsDataParser<InputStream>
     fun createTvasKotlinParser(): GpsDataParser<String>
+    fun createTvasNativeParser(): GpsDataParser<String>
 }
