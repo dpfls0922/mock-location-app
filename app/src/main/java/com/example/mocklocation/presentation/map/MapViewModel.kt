@@ -8,7 +8,7 @@ import com.example.mocklocation.domain.entity.CurrentLocation
 import com.example.mocklocation.domain.service.MapService
 import com.example.mocklocation.domain.usecase.CheckLocationPermissionUseCase
 import com.example.mocklocation.domain.usecase.GetCurrentLocationUseCase
-import com.example.mocklocation.presentation.map.component.MockLocationUiModel
+import com.example.mocklocation.presentation.search.component.MockLocationUiModel
 import com.skt.tmap.vsm.data.VSMMapPoint
 import com.skt.tmap.vsm.map.VSMMapView
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -55,9 +55,16 @@ class MapViewModel @Inject constructor(
     }
 
     suspend fun checkAndFetchInitialLocation() {
-        val granted = checkPermissionUseCase()
-        _locationPermissionGranted.value = granted
-        if (granted) startLocationUpdates()
+        checkPermissionUseCase()
+            .onSuccess { granted ->
+                _locationPermissionGranted.value = granted
+                if (granted) {
+                    startLocationUpdates()
+                }
+            }.onFailure { throwable ->
+                Timber.e(throwable, "권한 얻기 실패")
+                _locationPermissionGranted.value = false
+            }
     }
 
     fun onPermissionResult(granted: Boolean) {

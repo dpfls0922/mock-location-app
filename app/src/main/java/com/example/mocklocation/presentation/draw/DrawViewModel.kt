@@ -5,11 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.example.mocklocation.data.dto.toGpsPoint
 import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.domain.service.MapService
-import com.example.mocklocation.presentation.map.component.RoutePoint
+import com.example.mocklocation.presentation.route.component.RoutePoint
 import com.skt.tmap.vsm.data.VSMMapPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,6 +23,10 @@ sealed class DrawUiState {
     data class Error(val message: String) : DrawUiState()
 }
 
+sealed class UiEvent {
+    data class ShowToast(val message: String): UiEvent()
+}
+
 @HiltViewModel
 class DrawViewModel @Inject constructor(
     private val mapService: MapService
@@ -30,6 +36,9 @@ class DrawViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<DrawUiState>(DrawUiState.Idle)
     val uiState: StateFlow<DrawUiState> = _uiState.asStateFlow()
+
+    private val _uiEvent = MutableSharedFlow<UiEvent>()
+    val uiEvent = _uiEvent.asSharedFlow()
 
     init {
         mapService.setDrawingPointListener { finishedPoints ->
@@ -62,5 +71,17 @@ class DrawViewModel @Inject constructor(
     fun drawRouteLine(vsmPoints: List<VSMMapPoint>, wayPoints: List<RoutePoint>? = null) {
         val safeWayPoints = wayPoints ?: emptyList()
         mapService.drawRouteLine(vsmPoints, safeWayPoints)
+    }
+
+    suspend fun notifySuccess() {
+        _uiEvent.emit(UiEvent.ShowToast("드로잉 경로선 파싱 성공"))
+    }
+
+    suspend fun notifyError() {
+        _uiEvent.emit(UiEvent.ShowToast("드로잉 경로선 파싱 실패"))
+    }
+
+    suspend fun notifyLoading() {
+        _uiEvent.emit(UiEvent.ShowToast("드로잉 경로선 파싱 중"))
     }
 }

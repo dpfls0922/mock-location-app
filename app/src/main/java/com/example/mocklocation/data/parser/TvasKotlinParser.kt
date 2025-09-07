@@ -8,12 +8,26 @@ import com.example.mocklocation.data.dto.TvasHeader
 import com.example.mocklocation.data.dto.TvasVersion
 import com.example.mocklocation.data.dto.detailInfo
 import com.example.mocklocation.domain.entity.GpsPoint
-import com.example.mocklocation.domain.usecase.GpsDataParser
+import com.example.mocklocation.domain.parser.GpsDataParser
 import timber.log.Timber
 import java.nio.ByteBuffer
 import javax.inject.Inject
 import android.util.Base64
+import com.example.mocklocation.data.dto.TileData
+import com.example.mocklocation.data.dto.TileHeader
+import com.example.mocklocation.data.dto.TileList
+import com.example.mocklocation.data.dto.VertexData
+import com.example.mocklocation.data.dto.VertexHeader
+import com.example.mocklocation.data.dto.VertexList
 import com.example.mocklocation.data.dto.toGpsPoint
+import com.example.mocklocation.di.DefaultDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
+
+enum class SectionId(val id: String) {
+    TILE("TI"),
+    VERTEX("VX")
+}
 
 /**
  * TVAS(ByteArray) → GpsPoint 리스트 파싱기
@@ -22,15 +36,15 @@ import com.example.mocklocation.data.dto.toGpsPoint
 class TvasKotlinParser @Inject constructor(
     private val tileParser: TileSectionParser,
     private val vertexParser: VertexSectionParser,
-    private val converter: TvasToWgs84Converter
+    private val converter: TvasToWgs84Converter,
+    @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : GpsDataParser<String> {
-    override fun parse(input: String): List<GpsPoint> {
+    override suspend fun parse(input: String): List<GpsPoint> = withContext(defaultDispatcher) {
         val tvasBytes = Base64.decode(input, Base64.DEFAULT)
-        val tvas = parseTvas(tvasBytes, tileParser, vertexParser) ?: return emptyList()
+        val tvas = parseTvas(tvasBytes, tileParser, vertexParser) ?: return@withContext emptyList()
         val wgsPoints = converter.convert(tvas)
         Timber.d(tvas.detailInfo())
-
-        return wgsPoints.map { it.toGpsPoint() }
+        wgsPoints.map { it.toGpsPoint() }
     }
 }
 
@@ -123,5 +137,52 @@ object HeaderParser {
             )
         }
         return TvasHeader(totalSize, version, routeSearchInfo, mapInfo, infoIndexes)
+    }
+}
+
+object TileSectionParser {
+    val id = SectionId.TILE
+
+    fun parse(reader: ByteReader): TileList {
+        val totalCount = reader.readShort()
+        val infoIndexType = reader.readByte()
+        val reserved = reader.readByte()
+        val infoId = reader.readString(4, Charsets.US_ASCII, true)
+
+        val tiles = List(totalCount.toInt()) {
+            val tileCode = reader.readInt()
+            val lastVertexIdx = reader.readUnsignedShort()
+            val reservedShort = reader.readShort()
+            TileData(tileCode, lastVertexIdx, reservedShort)
+        }
+
+        return TileList(
+            TileHeader(totalCount, infoIndexType, reserved, infoId),
+            tiles
+        )
+    }
+}
+
+object VertexSectionParser {
+    val id = SectionId.VERTEX
+
+    fun parse(reader: ByteReader): VertexList {
+        val totalCount = reader.readShort()
+        val infoIndexType = reader.readByte()
+        val reserved = reader.readByte()
+        val infoId = reader.readString(4, Charsets.US_ASCII, true)
+
+        val vertices = List(totalCount.toInt()) {
+            val x = reader.readUnsignedShort()
+            val y = reader.readUnsignedShort()
+            val distance = reader.readShort()
+            val time = reader.readShort()
+            VertexData(x, y, distance, time)
+        }
+
+        return VertexList(
+            VertexHeader(totalCount, infoIndexType, reserved, infoId),
+            vertices
+        )
     }
 }

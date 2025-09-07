@@ -19,6 +19,10 @@ public:
 
 constexpr std::array<int, 256> Base64Decoder::initLookupTable() {
     std::array<int, 256> table{};
+    for (size_t i = 0; i < table.size(); ++i) {
+        table[i] = -1;
+    }
+
     for (int i = 0; i < 64; ++i) {
         if (i < 26) {
             table['A' + i] = i;

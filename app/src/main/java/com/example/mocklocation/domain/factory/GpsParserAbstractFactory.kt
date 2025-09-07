@@ -1,5 +1,6 @@
-package com.example.mocklocation.domain.usecase
+package com.example.mocklocation.domain.factory
 
+import com.example.mocklocation.domain.parser.GpsDataParser
 import java.io.InputStream
 
 interface GpsParserAbstractFactory {

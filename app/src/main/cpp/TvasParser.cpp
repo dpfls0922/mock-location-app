@@ -1,11 +1,48 @@
 #include "includes/TvasParser.hpp"
 #include "includes/Base64Decoder.hpp"
 #include "includes/TvasModel.hpp"
-#include "includes/TvasSectionParser.hpp"
 #include "includes/TvasCoordinateConverter.hpp"
+#include "includes/Log.hpp"
 
 #include <optional>
-#include <iostream>
+
+#undef LOG_TAG
+#define LOG_TAG "TVAS_PARSER_CORE"
+
+TileList TvasParser::parseTileSection(ByteReader& reader) {
+    TileHeader header;
+    header.totalCount = reader.readShort();
+    header.infoIndexType = reader.readByte();
+    header.reserved = reader.readByte();
+    header.infoId = reader.readString(4);
+    std::vector<TileData> tiles;
+    for (int i = 0; i < header.totalCount; ++i) {
+        TileData tile{};
+        tile.tileCode = reader.readInt();
+        tile.lastVertexIndex = reader.readUnsignedShort();
+        tile.reserved = reader.readShort();
+        tiles.push_back(tile);
+    }
+    return TileList{header, tiles};
+}
+
+VertexList TvasParser::parseVertexSection(ByteReader& reader) {
+    VertexHeader header;
+    header.totalCount = reader.readShort();
+    header.infoIndexType = reader.readByte();
+    header.reserved = reader.readByte();
+    header.infoId = reader.readString(4);
+    std::vector<VertexData> vertices;
+    for (int i = 0; i < header.totalCount; ++i) {
+        VertexData vertex{};
+        vertex.x = reader.readUnsignedShort();
+        vertex.y = reader.readUnsignedShort();
+        vertex.distanceBetweenVertex = reader.readShort();
+        vertex.timeBetweenVertex = reader.readShort();
+        vertices.push_back(vertex);
+    }
+    return VertexList{header, vertices};
+}
 
 TvasHeader TvasParser::parseHeader(ByteReader& reader) {
     TvasHeader header;
@@ -64,56 +101,56 @@ std::optional<InfoIndex> TvasParser::findInfoIndex(const TvasHeader& header, con
 
 Tvas TvasParser::parseTvas(const std::vector<uint8_t>& bytes) {
     if (bytes.empty()) {
+        LOGE("parseTvas: 빈 바이트 배열 입력");
         throw std::invalid_argument("빈 바이트 배열 입력");
     }
 
-    TileSectionParser tileParser;
-    VertexSectionParser vertexParser;
     ByteReader reader(bytes);
-
     try {
         TvasHeader header = parseHeader(reader);
         size_t headerEndPosition = reader.getPosition();
 
-        std::optional<InfoIndex> tileInfoIndex = findInfoIndex(header, to_string(SectionId::TILE));
-        std::optional<InfoIndex> vertexInfoIndex = findInfoIndex(header, to_string(SectionId::VERTEX));
+        std::optional<InfoIndex> tileInfoIndex = findInfoIndex(header, "TI");
+        std::optional<InfoIndex> vertexInfoIndex = findInfoIndex(header, "VX");
 
         TileList tileInfo;
         if (tileInfoIndex.has_value()) {
             reader.setPosition(headerEndPosition + tileInfoIndex->offset);
-            tileInfo = tileParser.parse(reader);
-            std::cout << "타일 섹션 파싱 성공" << std::endl;
+            tileInfo = parseTileSection(reader);
         } else {
-            std::cout << "타일 섹션 없음" << std::endl;
+            LOGI("타일 섹션 없음");
         }
 
         VertexList vertexInfo;
         if (vertexInfoIndex.has_value()) {
             reader.setPosition(headerEndPosition + vertexInfoIndex->offset);
-            vertexInfo = vertexParser.parse(reader);
-            std::cout << "보간점 섹션 파싱 성공" << std::endl;
+            vertexInfo = parseVertexSection(reader);
         } else {
-            std::cout << "보간점 섹션 없음" << std::endl;
+            LOGI("보간점 섹션 없음");
         }
-
-        std::cout << "헤더 파싱 성공. 헤더 종료 위치: " << headerEndPosition << std::endl;
+        LOGI("헤더 파싱 성공. 헤더 종료 위치: %zu", headerEndPosition);
         return Tvas{ header, tileInfo, vertexInfo };
     } catch (const std::exception& e) {
-        std::cerr << "TvasParser 파싱 중 예외 발생: " << e.what() << std::endl;
+        LOGE("TvasParser 파싱 중 예외 발생: %s", e.what());
         throw;
     }
 }
 
 std::vector<GpsPoint> TvasParser::parse(const std::string& input) {
+    LOGD("TvasParser::parse 시작");
     std::vector<uint8_t> tvasBytes = Base64Decoder::decodeBase64(input);
     Tvas tvas = parseTvas(tvasBytes);
     std::vector<VSMMapPoint> wgsPoints = TvasCoordinateConverter::convert(tvas);
-    std::cout << tvas.detailInfo() << std::endl;
 
     std::vector<GpsPoint> gpsPoints;
     gpsPoints.reserve(wgsPoints.size());
+    long currentTimestamp = static_cast<long>(
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::system_clock::now().time_since_epoch()
+            ).count()
+    );
     for (const auto& wgsPoint : wgsPoints) {
-        gpsPoints.push_back(wgsPoint.toGpsPoint());
+        gpsPoints.emplace_back(wgsPoint.toGpsPoint(currentTimestamp));
     }
     return gpsPoints;
 }

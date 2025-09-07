@@ -4,13 +4,14 @@ import com.example.mocklocation.data.parser.CsvGpsParser
 import com.example.mocklocation.data.parser.TileSectionParser
 import com.example.mocklocation.data.parser.TvasToWgs84Converter
 import com.example.mocklocation.data.parser.VertexSectionParser
-import com.example.mocklocation.domain.usecase.GpsDataParser
-import com.example.mocklocation.domain.usecase.GpsParserAbstractFactory
-import com.example.mocklocation.domain.usecase.GpsParserFactory
+import com.example.mocklocation.domain.parser.GpsDataParser
+import com.example.mocklocation.domain.factory.GpsParserAbstractFactory
+import com.example.mocklocation.data.factory.GpsParserFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
 import java.io.InputStream
 import javax.inject.Singleton
 
@@ -20,7 +21,9 @@ object ParserModule {
     @CsvParser
     @Provides
     @Singleton
-    fun provideCsvParser(): GpsDataParser<InputStream> = CsvGpsParser()
+    fun provideCsvParser(
+        @IoDispatcher ioDispatcher: CoroutineDispatcher
+    ): GpsDataParser<InputStream> = CsvGpsParser(ioDispatcher = ioDispatcher)
 
     @TvasKotlinParser
     @Provides
@@ -28,11 +31,13 @@ object ParserModule {
     fun provideTvasParser(
         tileParser: TileSectionParser,
         vertexParser: VertexSectionParser,
-        converter: TvasToWgs84Converter
+        converter: TvasToWgs84Converter,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher
     ): GpsDataParser<String> = com.example.mocklocation.data.parser.TvasKotlinParser(
         tileParser,
         vertexParser,
-        converter
+        converter,
+        ioDispatcher
     )
 
     @TvasNativeParser
@@ -47,14 +52,16 @@ object ParserModule {
     fun provideVertexParser(): VertexSectionParser = VertexSectionParser
 
     @Provides
-    fun provideTvasConverter(): TvasToWgs84Converter = TvasToWgs84Converter()
+    fun provideTvasConverter(
+        @DefaultDispatcher defaultDispatcher: CoroutineDispatcher
+    ): TvasToWgs84Converter = TvasToWgs84Converter(defaultDispatcher)
 
     @Provides
     @Singleton
     fun provideGpsParserFactory(
         @CsvParser csvParser: GpsDataParser<InputStream>,
         @TvasKotlinParser tvasKotlinParser: GpsDataParser<String>,
-        @TvasNativeParser tvasNativeParser:  GpsDataParser<String>
+        @TvasNativeParser tvasNativeParser: GpsDataParser<String>
     ): GpsParserAbstractFactory {
         return GpsParserFactory(csvParser, tvasKotlinParser, tvasNativeParser)
     }

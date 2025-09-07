@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mocklocation.presentation.search.component.MockLocationUiModel
 
 @Composable
 fun CurrentLocation(location: MockLocationUiModel?) {

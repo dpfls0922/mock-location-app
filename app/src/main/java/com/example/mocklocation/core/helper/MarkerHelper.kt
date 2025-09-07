@@ -9,7 +9,7 @@ import com.skt.tmap.vsm.map.marker.VSMMarkerLocation
 import com.skt.tmap.vsm.map.marker.VSMMarkerPolyline
 import com.example.mocklocation.core.marker.DefaultMarkerIconProvider
 import com.example.mocklocation.core.marker.MarkerIconProvider
-import com.example.mocklocation.presentation.map.component.RoutePoint
+import com.example.mocklocation.presentation.route.component.RoutePoint
 import com.skt.tmap.vsm.coordinates.VSMCoordinates
 import com.skt.tmap.vsm.map.marker.MarkerImage
 import timber.log.Timber

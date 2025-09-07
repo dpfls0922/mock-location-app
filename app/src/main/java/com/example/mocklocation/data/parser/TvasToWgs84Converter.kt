@@ -1,40 +1,38 @@
 package com.example.mocklocation.data.parser
 
 import com.example.mocklocation.data.dto.Tvas
+import com.example.mocklocation.di.DefaultDispatcher
 import com.example.mocklocation.domain.entity.SKCoord
 import com.example.mocklocation.domain.entity.TileOrigin
 import com.skt.tmap.vsm.data.VSMMapPoint
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 import kotlin.math.*
 
-class TvasToWgs84Converter @Inject constructor() {
-    fun convert(tvas: Tvas): List<VSMMapPoint> {
-        return try {
-            Timber.d("TVAS 좌표 변환 시작")
+class TvasToWgs84Converter @Inject constructor(
+    @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
+) {
+    suspend fun convert(tvas: Tvas): List<VSMMapPoint> = withContext(defaultDispatcher) {
+        val tiles = tvas.tileInfo?.tiles.orEmpty()
+        val vertices = tvas.vertexInfo?.vertices.orEmpty()
+        val points = mutableListOf<VSMMapPoint>()
 
-            val tiles = tvas.tileInfo?.tiles.orEmpty()
-            val vertices = tvas.vertexInfo?.vertices.orEmpty()
-            val points = mutableListOf<VSMMapPoint>()
-
-            var vxIndex = 0
-            tiles.forEach { tile ->
-                val tileOrigin = TileUtils.decodeTileOrigin(tile.tileCode)
-                while (vxIndex < vertices.size && vxIndex <= tile.lastVertexIndex) {
-                    val vertex = vertices[vxIndex]
-                    val skCoord = SKCoord.fromVertex(vertex.x, vertex.y, tileOrigin)
-                    val wgsPoint = CoordConverter.skToWGS84(skCoord)
-                    points.add(wgsPoint)
-                    Timber.d("Vertex ${vxIndex + 1} 변환 성공: 위도=${wgsPoint.latitude}, 경도=${wgsPoint.longitude}")
-                    vxIndex++
-                }
+        var vxIndex = 0
+        for (tile in tiles) {
+            val tileOrigin = TileUtils.decodeTileOrigin(tile.tileCode)
+            while (vxIndex < vertices.size && vxIndex <= tile.lastVertexIndex) {
+                val vertex = vertices[vxIndex]
+                val skCoord = SKCoord.fromVertex(vertex.x, vertex.y, tileOrigin)
+                val wgsPoint = CoordConverter.skToWGS84(skCoord)
+                points.add(wgsPoint)
+                Timber.d("Vertex ${vxIndex + 1} 변환 성공: 위도=${wgsPoint.latitude}, 경도=${wgsPoint.longitude}")
+                vxIndex++
             }
-            Timber.d("총 ${points.size}개 좌표 변환 완료")
-            points
-        } catch (e: Exception) {
-            Timber.e(e, "좌표 변환 실패: ${e.message}")
-            emptyList()
         }
+        Timber.d("총 ${points.size}개 좌표 변환 완료")
+        points
     }
 
     private object TileUtils {

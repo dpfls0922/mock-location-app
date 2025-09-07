@@ -7,7 +7,7 @@ import com.example.mocklocation.core.helper.MarkerHelper
 import com.example.mocklocation.core.helper.MarkerType
 import com.example.mocklocation.domain.entity.CurrentLocation
 import com.example.mocklocation.domain.service.MapService
-import com.example.mocklocation.presentation.map.component.RoutePoint
+import com.example.mocklocation.presentation.route.component.RoutePoint
 import com.skt.tmap.vsm.data.VSMMapPoint
 import com.skt.tmap.vsm.map.MapEngine
 import com.skt.tmap.vsm.map.MapTouchEventHandler

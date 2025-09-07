@@ -1,4 +1,4 @@
-package com.example.mocklocation.presentation.map.component
+package com.example.mocklocation.presentation.search.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
