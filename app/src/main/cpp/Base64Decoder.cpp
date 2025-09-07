@@ -1,4 +1,8 @@
 #include "includes/Base64Decoder.hpp"
+#include "includes/Log.hpp"
+
+#undef LOG_TAG
+#define LOG_TAG "BASE64_DECODER"
 
 const std::array<int, 256> Base64Decoder::lookupTable = Base64Decoder::initLookupTable();
 
@@ -26,6 +30,7 @@ std::vector<uint8_t> Base64Decoder::decodeQuantum(const std::array<uint8_t, 4>& 
 }
 
 std::vector<uint8_t> Base64Decoder::decodeBase64(const std::string& encoded) {
+    LOGD("Base64 디코딩 시작");
     std::vector<uint8_t> result;
     size_t inputIndex = 0;
     size_t inputLength = encoded.size();
@@ -36,7 +41,7 @@ std::vector<uint8_t> Base64Decoder::decodeBase64(const std::string& encoded) {
 
         while (quantumIndex < 4 && inputIndex < inputLength) {
             char currentChar = encoded[inputIndex++];
-            if (std::isspace(currentChar) || std::isspace(currentChar)) {
+            if (std::isspace(currentChar) || currentChar == '=') {
                 continue;
             }
             quantum[quantumIndex++] = decodeBase64Value(currentChar);
@@ -49,5 +54,6 @@ std::vector<uint8_t> Base64Decoder::decodeBase64(const std::string& encoded) {
         std::vector<uint8_t> decodedQuantum = decodeQuantum(quantum, quantumIndex);
         result.insert(result.end(), decodedQuantum.begin(), decodedQuantum.end());
     }
+    LOGD("Base64 디코딩 완료. 결과 크기: %zu", result.size());
     return result;
 }
