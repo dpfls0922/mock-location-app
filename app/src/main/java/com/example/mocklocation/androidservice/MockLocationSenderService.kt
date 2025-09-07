@@ -1,4 +1,4 @@
-package com.example.mocklocation.service
+package com.example.mocklocation.androidservice
 
 import android.app.Service
 import android.content.Intent
