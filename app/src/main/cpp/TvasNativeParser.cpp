@@ -1,10 +1,14 @@
+#include "includes/Base64Decoder.hpp"
+#include "includes/TvasParser.hpp"
+#include "includes/GpsPoint.hpp"
+#include "includes/Log.hpp"
+
 #include <jni.h>
 #include <string>
 #include <vector>
 
-#include "includes/Base64Decoder.hpp"
-#include "includes/TvasParser.hpp"
-#include "includes/GpsPoint.hpp"
+#undef LOG_TAG
+#define LOG_TAG "JNI_TVAS_PARSER"
 
 extern "C" JNIEXPORT jobjectArray JNICALL
 Java_com_example_mocklocation_data_parser_TvasNativeParser_parseNative(
@@ -21,6 +25,7 @@ Java_com_example_mocklocation_data_parser_TvasNativeParser_parseNative(
     try {
         TvasParser parser;
         gpsPoints = parser.parse(base64Cpp);
+        LOGD("파싱 완료. 총 GPS 포인트 개수: %zu", gpsPoints.size());
     } catch (const std::exception& e) {
         return nullptr;
     }

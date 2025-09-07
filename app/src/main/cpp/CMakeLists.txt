@@ -24,6 +24,7 @@ target_link_libraries(
         tvas_parser
         android
         c++_static
+        log
 )
 
 target_compile_options(tvas_parser PRIVATE -Wall -Wextra -Werror)

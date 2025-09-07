@@ -2,9 +2,12 @@
 #include "includes/Base64Decoder.hpp"
 #include "includes/TvasModel.hpp"
 #include "includes/TvasCoordinateConverter.hpp"
+#include "includes/Log.hpp"
 
 #include <optional>
-#include <iostream>
+
+#undef LOG_TAG
+#define LOG_TAG "TVAS_PARSER_CORE"
 
 TileList TvasParser::parseTileSection(ByteReader& reader) {
     TileHeader header;
@@ -102,7 +105,6 @@ Tvas TvasParser::parseTvas(const std::vector<uint8_t>& bytes) {
     }
 
     ByteReader reader(bytes);
-
     try {
         TvasHeader header = parseHeader(reader);
         size_t headerEndPosition = reader.getPosition();
@@ -114,24 +116,21 @@ Tvas TvasParser::parseTvas(const std::vector<uint8_t>& bytes) {
         if (tileInfoIndex.has_value()) {
             reader.setPosition(headerEndPosition + tileInfoIndex->offset);
             tileInfo = parseTileSection(reader);
-            std::cout << "타일 섹션 파싱 성공" << std::endl;
         } else {
-            std::cout << "타일 섹션 없음" << std::endl;
+            LOGI("타일 섹션 없음");
         }
 
         VertexList vertexInfo;
         if (vertexInfoIndex.has_value()) {
             reader.setPosition(headerEndPosition + vertexInfoIndex->offset);
             vertexInfo = parseVertexSection(reader);
-            std::cout << "보간점 섹션 파싱 성공" << std::endl;
         } else {
-            std::cout << "보간점 섹션 없음" << std::endl;
+            LOGI("보간점 섹션 없음");
         }
-
-        std::cout << "헤더 파싱 성공. 헤더 종료 위치: " << headerEndPosition << std::endl;
+        LOGI("헤더 파싱 성공. 헤더 종료 위치: %zu", headerEndPosition);
         return Tvas{ header, tileInfo, vertexInfo };
     } catch (const std::exception& e) {
-        std::cerr << "TvasParser 파싱 중 예외 발생: " << e.what() << std::endl;
+        LOGE("TvasParser 파싱 중 예외 발생: %s", e.what());
         throw;
     }
 }
@@ -140,7 +139,6 @@ std::vector<GpsPoint> TvasParser::parse(const std::string& input) {
     std::vector<uint8_t> tvasBytes = Base64Decoder::decodeBase64(input);
     Tvas tvas = parseTvas(tvasBytes);
     std::vector<VSMMapPoint> wgsPoints = TvasCoordinateConverter::convert(tvas);
-    std::cout << tvas.detailInfo() << std::endl;
 
     std::vector<GpsPoint> gpsPoints;
     gpsPoints.reserve(wgsPoints.size());
