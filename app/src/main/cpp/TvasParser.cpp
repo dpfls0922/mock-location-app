@@ -101,6 +101,7 @@ std::optional<InfoIndex> TvasParser::findInfoIndex(const TvasHeader& header, con
 
 Tvas TvasParser::parseTvas(const std::vector<uint8_t>& bytes) {
     if (bytes.empty()) {
+        LOGE("parseTvas: 빈 바이트 배열 입력");
         throw std::invalid_argument("빈 바이트 배열 입력");
     }
 
@@ -136,6 +137,7 @@ Tvas TvasParser::parseTvas(const std::vector<uint8_t>& bytes) {
 }
 
 std::vector<GpsPoint> TvasParser::parse(const std::string& input) {
+    LOGD("TvasParser::parse 시작");
     std::vector<uint8_t> tvasBytes = Base64Decoder::decodeBase64(input);
     Tvas tvas = parseTvas(tvasBytes);
     std::vector<VSMMapPoint> wgsPoints = TvasCoordinateConverter::convert(tvas);
