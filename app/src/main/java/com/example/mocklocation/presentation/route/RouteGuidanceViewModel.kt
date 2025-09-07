@@ -9,8 +9,10 @@ import com.example.mocklocation.presentation.route.component.RoutePointType
 import com.example.mocklocation.presentation.search.SearchResultUiModel
 import com.example.mocklocation.presentation.search.toDomain
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -23,13 +25,14 @@ sealed class RouteGuidanceState {
     data class Error(val message: String) : RouteGuidanceState()
 }
 
+sealed class UiEvent {
+    data class ShowToast(val message: String): UiEvent()
+}
+
 @HiltViewModel
 class RouteGuidanceViewModel @Inject constructor(
     private val getRouteGuidanceUseCase: GetRouteGuidanceUseCase
 ) : ViewModel() {
-    private val _toastMessage = MutableStateFlow<String?>(null)
-    val toastMessage: StateFlow<String?> = _toastMessage.asStateFlow()
-
     private val _routePoints = MutableStateFlow<List<RoutePoint>>(emptyList())
     val routePoints: StateFlow<List<RoutePoint>> = _routePoints.asStateFlow()
 
@@ -38,6 +41,9 @@ class RouteGuidanceViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<RouteGuidanceState>(RouteGuidanceState.Idle)
     val uiState: StateFlow<RouteGuidanceState> = _uiState.asStateFlow()
+
+    private val _uiEvent = MutableSharedFlow<UiEvent>()
+    val uiEvent = _uiEvent.asSharedFlow()
 
     /**
      * 경로 포인트 추가
@@ -60,8 +66,9 @@ class RouteGuidanceViewModel @Inject constructor(
                     val insertIndex = currentPoints.indexOfLast { it.type == RoutePointType.START } + 1
                     currentPoints.add(insertIndex, RoutePoint(routeType, location))
                 } else {
-                    Timber.w("경유지는 최대 2개까지만 추가할 수 있습니다.")
-                    _toastMessage.value = "경유지는 최대 2개까지만 추가할 수 있습니다."
+                    viewModelScope.launch {
+                        _uiEvent.emit(UiEvent.ShowToast("경유지는 최대 2개까지만 추가할 수 있습니다."))
+                    }
                     return
                 }
             }
@@ -106,12 +113,15 @@ class RouteGuidanceViewModel @Inject constructor(
                     if (routeData != null) {
                         _uiState.value = RouteGuidanceState.Success(routeData, wayPoints)
                         Timber.d("[ROUTE_GUIDANCE] 경로 안내 성공")
+                        _uiEvent.emit(UiEvent.ShowToast("tvas 파싱 완료 (${routeData.gpsPoints.size}개)"))
                     } else {
                         _uiState.value = RouteGuidanceState.Error("경로를 찾을 수 없습니다.")
+                        _uiEvent.emit(UiEvent.ShowToast("경로를 찾을 수 없습니다."))
                     }
                 }
                 .onFailure { exception ->
                     _uiState.value = RouteGuidanceState.Error("경로 검색 실패: ${exception.message}")
+                    _uiEvent.emit(UiEvent.ShowToast("경로 검색 실패: ${exception.message}"))
                     Timber.e(exception, "[ROUTE_GUIDANCE] 경로 안내 실패")
                 }
         }
@@ -125,9 +135,5 @@ class RouteGuidanceViewModel @Inject constructor(
 
     fun resetCloseDialogEvent() {
         _closeRouteDialogEvent.value = false
-    }
-
-    fun resetToastMessage() {
-        _toastMessage.value = null
     }
 }

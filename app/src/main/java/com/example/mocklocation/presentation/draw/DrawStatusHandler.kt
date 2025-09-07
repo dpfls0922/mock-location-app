@@ -16,23 +16,26 @@ fun DrawStatusHandler(
 ) {
     val context = LocalContext.current
     val drawState by drawViewModel.uiState.collectAsState(initial = null)
+    val uiEvents = drawViewModel.uiEvent
 
     LaunchedEffect(drawState) {
         when (drawState) {
             is DrawUiState.Success -> {
-                Toast.makeText(context, "드로잉 경로선 파싱 성공", Toast.LENGTH_SHORT).show()
                 mockViewModel.updateGpsPoints((drawState as DrawUiState.Success).gpsPoints)
+                drawViewModel.notifySuccess()
             }
-            is DrawUiState.Error -> {
-                Toast.makeText(context, "드로잉 경로선 파싱 실패", Toast.LENGTH_SHORT).show()
-            }
-            is DrawUiState.Drawing -> {
-                Toast.makeText(context, "드로잉 경로선 파싱 중", Toast.LENGTH_SHORT).show()
-            }
-            is DrawUiState.Idle -> {
-                mockViewModel.updateGpsPoints(emptyList())
-            }
+            is DrawUiState.Error -> drawViewModel.notifyError()
+            is DrawUiState.Drawing -> drawViewModel.notifyLoading()
+            is DrawUiState.Idle -> mockViewModel.updateGpsPoints(emptyList())
             else -> Unit
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        uiEvents.collect { event ->
+            when(event){
+                is UiEvent.ShowToast -> Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }
