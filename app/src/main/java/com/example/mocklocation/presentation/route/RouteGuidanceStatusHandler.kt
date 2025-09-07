@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.mocklocation.presentation.mock.MockLocationViewModel
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun RouteGuidanceStatusHandler(
@@ -16,33 +17,24 @@ fun RouteGuidanceStatusHandler(
 ) {
     val context = LocalContext.current
     val uiState by routeGuidanceViewModel.uiState.collectAsState()
-    val toastMessage by routeGuidanceViewModel.toastMessage.collectAsState()
+    val uiEvent = routeGuidanceViewModel.uiEvent
 
     LaunchedEffect(uiState) {
         when (uiState) {
             is RouteGuidanceState.Success -> {
                 val routeData = (uiState as RouteGuidanceState.Success).routeData
                 routeData.gpsPoints.let { mockViewModel.updateGpsPoints(it) }
-                Toast.makeText(context, "tvas 파싱 완료 (${routeData.gpsPoints.size}개)", Toast.LENGTH_SHORT).show()
             }
-
-            is RouteGuidanceState.Error -> {
-                Toast.makeText(context, "tvas 경로 안내 실패", Toast.LENGTH_SHORT).show()
-            }
-
-            is RouteGuidanceState.Loading -> {
-                Toast.makeText(context, "tvas 경로 검색 중", Toast.LENGTH_SHORT).show()
-            }
-
-            is RouteGuidanceState.Idle -> {
-            }
+            else -> Unit
         }
     }
 
-    LaunchedEffect(toastMessage) {
-        toastMessage?.let { message ->
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-            routeGuidanceViewModel.resetToastMessage()
+    LaunchedEffect(Unit) {
+        uiEvent.collectLatest { event ->
+            when (event) {
+                is UiEvent.ShowToast -> Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+            }
+            routeGuidanceViewModel.resetCloseDialogEvent()
         }
     }
 }
