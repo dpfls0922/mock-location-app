@@ -1,14 +1,18 @@
 package com.example.mocklocation.data.parser
 
+import com.example.mocklocation.di.IoDispatcher
 import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.domain.parser.GpsDataParser
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.InputStream
 
 class CsvGpsParser(
-    private val gpsRegex: Regex = DEFAULT_REGEX
+    private val gpsRegex: Regex = DEFAULT_REGEX,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : GpsDataParser<InputStream> {
-    override fun parse(input: InputStream): List<GpsPoint> {
+    override suspend fun parse(input: InputStream): List<GpsPoint> = withContext(ioDispatcher) {
         val result = mutableListOf<GpsPoint>()
         input.bufferedReader().useLines { lines ->
             lines.forEachIndexed { idx, line ->
@@ -16,7 +20,7 @@ class CsvGpsParser(
                 parseLine(line)?.let { result.add(it) }
             }
         }
-        return result
+        result
     }
 
     fun parseLine(line: String): GpsPoint? {

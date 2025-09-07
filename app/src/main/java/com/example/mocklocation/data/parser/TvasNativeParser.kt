@@ -10,7 +10,7 @@ class TvasNativeParser : GpsDataParser<String> {
         }
     }
 
-    override fun parse(input: String): List<GpsPoint> {
+    override suspend fun parse(input: String): List<GpsPoint> {
         return parseNative(input).toList()
     }
 
