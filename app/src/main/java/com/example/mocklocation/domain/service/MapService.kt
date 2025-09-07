@@ -3,7 +3,7 @@ package com.example.mocklocation.domain.service
 import android.content.Context
 import android.view.MotionEvent
 import com.example.mocklocation.domain.entity.CurrentLocation
-import com.example.mocklocation.presentation.map.component.RoutePoint
+import com.example.mocklocation.presentation.route.component.RoutePoint
 import com.skt.tmap.vsm.data.VSMMapPoint
 import com.skt.tmap.vsm.map.VSMMapView
 

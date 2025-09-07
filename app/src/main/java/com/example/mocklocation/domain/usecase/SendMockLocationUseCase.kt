@@ -2,7 +2,7 @@ package com.example.mocklocation.domain.usecase
 
 import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.domain.repository.MockLocationRepository
-import com.example.mocklocation.presentation.map.component.GpsMode
+import com.example.mocklocation.presentation.mock.component.GpsMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

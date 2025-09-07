@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.domain.service.MapService
-import com.example.mocklocation.presentation.map.component.GpsMode
-import com.example.mocklocation.presentation.map.component.RepeatMode
+import com.example.mocklocation.presentation.mock.component.GpsMode
+import com.example.mocklocation.presentation.mock.component.RepeatMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -17,9 +17,9 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.mocklocation.presentation.draw.DrawViewModel
 import com.example.mocklocation.presentation.file.FileUploadViewModel
 import com.example.mocklocation.presentation.file.UploadUiState
-import com.example.mocklocation.presentation.map.component.DrawRouteControls
+import com.example.mocklocation.presentation.draw.component.DrawRouteControls
 import com.example.mocklocation.presentation.map.component.ExpandableGpsMockCard
-import com.example.mocklocation.presentation.map.component.FileNameOverlayToastStyle
+import com.example.mocklocation.presentation.file.component.FileNameOverlayToastStyle
 import com.example.mocklocation.presentation.map.component.FloatingButtons
 import com.example.mocklocation.presentation.mock.MockLocationViewModel
 import com.example.mocklocation.presentation.route.RouteGuidanceState

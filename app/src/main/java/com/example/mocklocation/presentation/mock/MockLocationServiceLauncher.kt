@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import com.example.mocklocation.data.dto.toParcelable
 import com.example.mocklocation.domain.entity.GpsPoint
-import com.example.mocklocation.presentation.map.component.RepeatMode
+import com.example.mocklocation.presentation.mock.component.RepeatMode
 import com.example.mocklocation.androidservice.MockLocationSenderService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject

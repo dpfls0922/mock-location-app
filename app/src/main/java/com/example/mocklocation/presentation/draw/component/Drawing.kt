@@ -1,4 +1,4 @@
-package com.example.mocklocation.presentation.map.component
+package com.example.mocklocation.presentation.draw.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
