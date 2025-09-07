@@ -8,7 +8,7 @@ import com.example.mocklocation.data.dto.TvasHeader
 import com.example.mocklocation.data.dto.TvasVersion
 import com.example.mocklocation.data.dto.detailInfo
 import com.example.mocklocation.domain.entity.GpsPoint
-import com.example.mocklocation.domain.usecase.GpsDataParser
+import com.example.mocklocation.domain.parser.GpsDataParser
 import timber.log.Timber
 import java.nio.ByteBuffer
 import javax.inject.Inject

@@ -4,7 +4,7 @@ import android.content.Context
 import android.net.Uri
 import com.example.mocklocation.di.IoDispatcher
 import com.example.mocklocation.domain.entity.CsvFile
-import com.example.mocklocation.domain.usecase.GpsParserAbstractFactory
+import com.example.mocklocation.domain.factory.GpsParserAbstractFactory
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext

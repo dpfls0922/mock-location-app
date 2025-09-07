@@ -3,6 +3,7 @@ package com.example.mocklocation.domain.usecase
 import com.example.mocklocation.di.TvasNativeParser
 import com.example.mocklocation.domain.entity.Poi
 import com.example.mocklocation.domain.entity.RouteGuidanceData
+import com.example.mocklocation.domain.parser.GpsDataParser
 import com.example.mocklocation.domain.repository.TmapRepository
 import com.skt.tmap.vsm.data.VSMMapPoint
 import javax.inject.Inject

@@ -1,7 +1,7 @@
 package com.example.mocklocation.data.parser
 
 import com.example.mocklocation.domain.entity.GpsPoint
-import com.example.mocklocation.domain.usecase.GpsDataParser
+import com.example.mocklocation.domain.parser.GpsDataParser
 import timber.log.Timber
 import java.io.InputStream
 
