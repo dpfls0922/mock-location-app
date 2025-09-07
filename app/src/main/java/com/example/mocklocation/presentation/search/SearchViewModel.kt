@@ -11,6 +11,7 @@ import com.skt.tmap.vsm.data.VSMMapPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -57,10 +58,14 @@ class SearchViewModel @Inject constructor(
      */
     private fun observeCurrentLocation() {
         viewModelScope.launch {
-            getCurrentLocationUseCase().collectLatest { location ->
-                Timber.d("현재 위치 업데이트: $location")
-                _currentLocation.value = location
-            }
+            getCurrentLocationUseCase()
+                .catch { e ->
+                    Timber.e(e, "현재 위치 관찰 중 에러")
+                }
+                .collectLatest { location ->
+                    _currentLocation.value = location
+                    Timber.d("현재 위치 업데이트: $location")
+                }
         }
     }
 

@@ -8,16 +8,22 @@ import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import androidx.annotation.RequiresApi
+import com.example.mocklocation.di.DefaultDispatcher
+import com.example.mocklocation.di.IoDispatcher
 import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.domain.repository.MockLocationRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class MockLocationRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : MockLocationRepository {
     companion object {
         private const val PROVIDER_NAME = LocationManager.GPS_PROVIDER
@@ -30,7 +36,7 @@ class MockLocationRepositoryImpl @Inject constructor(
         context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     }
 
-    override fun startMocking() {
+    override suspend fun startMocking(): Unit = withContext(ioDispatcher) {
         runCatching {
             removeTestProvider()
 
@@ -46,7 +52,7 @@ class MockLocationRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun stopMocking() {
+    override suspend fun stopMocking(): Unit = withContext(ioDispatcher) {
         runCatching {
             removeTestProvider()
         }.onFailure {
@@ -55,9 +61,9 @@ class MockLocationRepositoryImpl @Inject constructor(
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    override fun sendLocation(point: GpsPoint): Result<Unit> {
+    override suspend fun sendLocation(point: GpsPoint): Result<Unit> = withContext(ioDispatcher) {
         val mockLocation = createMockLocation(point)
-        return runCatching {
+        runCatching {
             locationManager.setTestProviderLocation(PROVIDER_NAME, mockLocation)
             Timber.d("➡️ Mock GPS 전송: $mockLocation")
             Timber.d("➡️ Mock GPS 전송: (위도=${point.latitude}, 경도=${point.longitude}), 속도=${point.speed}m/s, 시간=${point.timestamp}, 정확도=${point.hAcc}m, 방위=${point.bearing}°, 위성=${point.satellites}개")
@@ -70,7 +76,7 @@ class MockLocationRepositoryImpl @Inject constructor(
         }
     }
 
-    private fun removeTestProvider() {
+    private suspend fun removeTestProvider() = withContext(ioDispatcher) {
         runCatching {
             locationManager.removeTestProvider(PROVIDER_NAME)
         }.onFailure {
@@ -79,10 +85,10 @@ class MockLocationRepositoryImpl @Inject constructor(
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun createMockLocation(gpsPoint: GpsPoint): Location {
+    private suspend fun createMockLocation(gpsPoint: GpsPoint): Location = withContext(defaultDispatcher) {
         val provider = if (gpsPoint.satellites < 3) "dr_gps" else "gps"
         Timber.i("[provider] $provider")
-        return Location(provider).apply {
+        Location(provider).apply {
             latitude = gpsPoint.latitude
             longitude = gpsPoint.longitude
             time = gpsPoint.timestamp
