@@ -2,10 +2,18 @@
 #include <stdexcept>
 
 template<typename T>
-T swapBytes(T value) {
+T ByteReader::swapBytes(T value) {
     uint8_t* bytePtr = reinterpret_cast<uint8_t*>(&value);
     std::reverse(bytePtr, bytePtr + sizeof(T));
     return value;
+}
+
+bool ByteReader::isBigEndian() {
+    static auto checkEndian = []() -> bool {
+        uint16_t num = 0x0102;
+        return reinterpret_cast<uint8_t*>(&num)[0] == 0x01;
+    };
+    return checkEndian();
 }
 
 template<typename T>

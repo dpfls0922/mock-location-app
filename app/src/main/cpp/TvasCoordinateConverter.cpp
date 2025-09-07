@@ -9,29 +9,15 @@ SKCoord::SKCoord(double x, double y) : x(x), y(y) {}
 SKCoord SKCoord::fromVertex(int x, int y, const TileOrigin& origin) {
     return SKCoord(origin.x * SCALE + x, origin.y * SCALE + y);
 }
-GpsPoint VSMMapPoint::toGpsPoint() const {
+GpsPoint VSMMapPoint::toGpsPoint(long timestamp) const {
     const std::string PROVIDER_NAME = "gps";
-    long timestamp = static_cast<long>(
-            std::chrono::duration_cast<std::chrono::milliseconds>(
-                    std::chrono::system_clock::now().time_since_epoch()
-            ).count()
-    );
-
     return GpsPoint{
             PROVIDER_NAME,
             timestamp,
             latitude,
             longitude,
-            5.0,
-            5.f,
-            5.f,
-            5.f,
-            5.f,
-            5.f,
-            5.f,
-            3,
-            3,
-            3
+            5.0,5.f,5.f,5.f,5.f,
+            5.f,5.f,3,3,3
     };
 }
 
