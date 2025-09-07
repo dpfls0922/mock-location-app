@@ -12,20 +12,14 @@ private:
     const std::vector<uint8_t>& buffer;
     size_t position;
 
+    static bool isBigEndian();
+    template<typename T>
+    T swapBytes(T value);
     template<typename T>
     T readPrimitive();
 
 public:
-    explicit ByteReader(const std::vector<uint8_t>& buf)
-        : buffer(buf), position(0) {}
-    bool isBigEndian() {
-        static auto checkEndian = []() -> bool {
-            uint16_t num = 0x0102;
-            return reinterpret_cast<uint8_t*>(&num)[0] == 0x01;
-        };
-        return checkEndian();
-    }
-
+    explicit ByteReader(const std::vector<uint8_t>& buf) : buffer(buf), position(0) {}
     size_t getPosition() const;
     void setPosition(size_t pos);
 

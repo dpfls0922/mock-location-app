@@ -6,8 +6,7 @@
 #       TvasCoordinateConverter.cpp \
 #       main.cpp \
 #       Base64Decoder.cpp \
-#       TvasParser.cpp \
-#       TvasSectionParser.cpp
+#       TvasParser.cpp
 #
 #OBJS = $(SRCS:.cpp=.o)
 #NAME = test_app

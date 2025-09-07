@@ -9,7 +9,7 @@ struct VSMMapPoint {
     double longitude;
     double latitude;
     VSMMapPoint(double lon, double lat);
-    GpsPoint toGpsPoint() const;
+    GpsPoint toGpsPoint(long timestamp) const;
 };
 
 struct TileOrigin {
