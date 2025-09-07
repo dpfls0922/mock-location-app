@@ -20,6 +20,9 @@ import com.example.mocklocation.data.dto.VertexData
 import com.example.mocklocation.data.dto.VertexHeader
 import com.example.mocklocation.data.dto.VertexList
 import com.example.mocklocation.data.dto.toGpsPoint
+import com.example.mocklocation.di.DefaultDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 
 enum class SectionId(val id: String) {
     TILE("TI"),
@@ -33,15 +36,15 @@ enum class SectionId(val id: String) {
 class TvasKotlinParser @Inject constructor(
     private val tileParser: TileSectionParser,
     private val vertexParser: VertexSectionParser,
-    private val converter: TvasToWgs84Converter
+    private val converter: TvasToWgs84Converter,
+    @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : GpsDataParser<String> {
-    override fun parse(input: String): List<GpsPoint> {
+    override suspend fun parse(input: String): List<GpsPoint> = withContext(defaultDispatcher) {
         val tvasBytes = Base64.decode(input, Base64.DEFAULT)
-        val tvas = parseTvas(tvasBytes, tileParser, vertexParser) ?: return emptyList()
+        val tvas = parseTvas(tvasBytes, tileParser, vertexParser) ?: return@withContext emptyList()
         val wgsPoints = converter.convert(tvas)
         Timber.d(tvas.detailInfo())
-
-        return wgsPoints.map { it.toGpsPoint() }
+        wgsPoints.map { it.toGpsPoint() }
     }
 }
 
