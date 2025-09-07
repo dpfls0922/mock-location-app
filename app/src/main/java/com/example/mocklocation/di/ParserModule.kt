@@ -4,9 +4,9 @@ import com.example.mocklocation.data.parser.CsvGpsParser
 import com.example.mocklocation.data.parser.TileSectionParser
 import com.example.mocklocation.data.parser.TvasToWgs84Converter
 import com.example.mocklocation.data.parser.VertexSectionParser
-import com.example.mocklocation.domain.usecase.GpsDataParser
-import com.example.mocklocation.domain.usecase.GpsParserAbstractFactory
-import com.example.mocklocation.domain.usecase.GpsParserFactory
+import com.example.mocklocation.domain.parser.GpsDataParser
+import com.example.mocklocation.domain.factory.GpsParserAbstractFactory
+import com.example.mocklocation.data.factory.GpsParserFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -54,7 +54,7 @@ object ParserModule {
     fun provideGpsParserFactory(
         @CsvParser csvParser: GpsDataParser<InputStream>,
         @TvasKotlinParser tvasKotlinParser: GpsDataParser<String>,
-        @TvasNativeParser tvasNativeParser:  GpsDataParser<String>
+        @TvasNativeParser tvasNativeParser: GpsDataParser<String>
     ): GpsParserAbstractFactory {
         return GpsParserFactory(csvParser, tvasKotlinParser, tvasNativeParser)
     }
