@@ -6,7 +6,7 @@ import android.os.Build
 import android.os.IBinder
 import com.example.mocklocation.data.dto.GpsPointParcelable
 import com.example.mocklocation.data.dto.toDomainModel
-import com.example.mocklocation.presentation.map.component.RepeatMode
+import com.example.mocklocation.presentation.mock.component.RepeatMode
 import com.example.mocklocation.presentation.mock.MockLocationHandler
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject

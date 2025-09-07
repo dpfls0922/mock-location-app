@@ -1,4 +1,4 @@
-package com.example.mocklocation.presentation.map.component
+package com.example.mocklocation.presentation.route.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

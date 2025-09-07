@@ -8,7 +8,7 @@ import com.example.mocklocation.domain.entity.CurrentLocation
 import com.example.mocklocation.domain.service.MapService
 import com.example.mocklocation.domain.usecase.CheckLocationPermissionUseCase
 import com.example.mocklocation.domain.usecase.GetCurrentLocationUseCase
-import com.example.mocklocation.presentation.map.component.MockLocationUiModel
+import com.example.mocklocation.presentation.search.component.MockLocationUiModel
 import com.skt.tmap.vsm.data.VSMMapPoint
 import com.skt.tmap.vsm.map.VSMMapView
 import dagger.hilt.android.lifecycle.HiltViewModel

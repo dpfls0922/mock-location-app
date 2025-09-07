@@ -26,6 +26,7 @@ import com.example.mocklocation.presentation.file.FileUploadViewModel
 import com.example.mocklocation.presentation.map.MapViewModel
 import com.example.mocklocation.presentation.mock.MockLocationViewModel
 import com.example.mocklocation.presentation.mock.MockingState
+import com.example.mocklocation.presentation.mock.component.MockGpsProgressBar
 import com.example.mocklocation.presentation.route.RouteGuidanceViewModel
 import com.example.mocklocation.presentation.search.SearchViewModel
 

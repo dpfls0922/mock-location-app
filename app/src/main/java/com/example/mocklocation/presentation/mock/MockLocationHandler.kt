@@ -4,8 +4,8 @@ import com.example.mocklocation.di.ApplicationScope
 import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.domain.usecase.MockLocationUpdate
 import com.example.mocklocation.domain.usecase.SendMockLocationUseCase
-import com.example.mocklocation.presentation.map.component.GpsMode
-import com.example.mocklocation.presentation.map.component.RepeatMode
+import com.example.mocklocation.presentation.mock.component.GpsMode
+import com.example.mocklocation.presentation.mock.component.RepeatMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

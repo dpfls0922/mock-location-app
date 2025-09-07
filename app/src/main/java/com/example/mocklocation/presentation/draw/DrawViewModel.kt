@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.mocklocation.data.dto.toGpsPoint
 import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.domain.service.MapService
-import com.example.mocklocation.presentation.map.component.RoutePoint
+import com.example.mocklocation.presentation.route.component.RoutePoint
 import com.skt.tmap.vsm.data.VSMMapPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
