@@ -1,7 +1,11 @@
+#include "includes/TvasCoordinateConverter.hpp"
+#include "includes/Log.hpp"
+
 #include <cmath>
 #include <chrono>
-#include <iostream>
-#include "includes/TvasCoordinateConverter.hpp"
+
+#undef LOG_TAG
+#define LOG_TAG "COORD_CONVERTER"
 
 VSMMapPoint::VSMMapPoint(double lon, double lat) : longitude(lon), latitude(lat) {}
 TileOrigin::TileOrigin(double x, double y) : x(x), y(y) {}
@@ -86,10 +90,10 @@ std::pair<double, double> TvasCoordinateConverter::CoordConverter::ecef2geod(dou
 std::vector<VSMMapPoint> TvasCoordinateConverter::convert(const Tvas& tvas) {
     std::vector<VSMMapPoint> points;
     try {
-        std::cout << "TVAS 좌표 변환 시작\n";
+        LOGI("TVAS 좌표 변환 시작");
 
         if (!tvas.tileInfo || !tvas.vertexInfo) {
-            std::cerr << "tileInfo 또는 vertexInfo가 없습니다.\n";
+            LOGE("tileInfo 또는 vertexInfo가 없습니다.");
             return points;
         }
 
@@ -105,13 +109,13 @@ std::vector<VSMMapPoint> TvasCoordinateConverter::convert(const Tvas& tvas) {
                 VSMMapPoint wgsPoint = CoordConverter::skToWGS84(skCoord);
                 points.push_back(wgsPoint);
 
-                std::cout << "Vertex " << (vxIndex + 1) << " 변환 성공: 위도=" << wgsPoint.latitude << ", 경도=" << wgsPoint.longitude << "\n";
+                LOGI("Vertex %zu 변환 성공: 위도=%.6f, 경도=%.6f", (vxIndex + 1), wgsPoint.latitude, wgsPoint.longitude);
                 vxIndex++;
             }
         }
-        std::cout << "총 " << points.size() << "개 좌표 변환 완료\n";
+        LOGI("총 %zu개 좌표 변환 완료", points.size());
     } catch (const std::exception& e) {
-        std::cerr << "좌표 변환 실패: " << e.what() << std::endl;
+        LOGE("좌표 변환 실패: %s", e.what());
         points.clear();
     }
     return points;
