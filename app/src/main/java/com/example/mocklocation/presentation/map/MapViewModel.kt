@@ -55,9 +55,16 @@ class MapViewModel @Inject constructor(
     }
 
     suspend fun checkAndFetchInitialLocation() {
-        val granted = checkPermissionUseCase()
-        _locationPermissionGranted.value = granted
-        if (granted) startLocationUpdates()
+        checkPermissionUseCase()
+            .onSuccess { granted ->
+                _locationPermissionGranted.value = granted
+                if (granted) {
+                    startLocationUpdates()
+                }
+            }.onFailure { throwable ->
+                Timber.e(throwable, "권한 얻기 실패")
+                _locationPermissionGranted.value = false
+            }
     }
 
     fun onPermissionResult(granted: Boolean) {

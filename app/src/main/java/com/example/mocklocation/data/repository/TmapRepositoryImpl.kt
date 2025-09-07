@@ -7,6 +7,7 @@ import com.example.mocklocation.data.dto.request.PoiSearchRequest
 import com.example.mocklocation.data.dto.request.RouteGuidanceRequest
 import com.example.mocklocation.data.dto.request.TouchSearchRequest
 import com.example.mocklocation.data.dto.response.toDomain
+import com.example.mocklocation.di.IoDispatcher
 import com.example.mocklocation.domain.entity.AutoComplete
 import com.example.mocklocation.domain.entity.CurrentLocation
 import com.example.mocklocation.domain.entity.Poi
@@ -15,23 +16,25 @@ import com.example.mocklocation.domain.entity.SKCoord
 import com.example.mocklocation.domain.entity.TouchLocation
 import com.example.mocklocation.domain.repository.TmapRepository
 import com.skt.tmap.vsm.coordinates.VSMCoordinates
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class TmapRepositoryImpl @Inject constructor(
-    private val dataSource: TmapDataSource
+    private val dataSource: TmapDataSource,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : TmapRepository {
-    override suspend fun getAutoCompleteSuggestions(keyword: String): List<AutoComplete> {
-        val dto = dataSource.getAutoCompleteSuggestions(keyword)
-        return dto.toDomain()
+    override suspend fun getAutoCompleteSuggestions(
+        keyword: String
+    ): List<AutoComplete> = withContext(ioDispatcher) {
+        dataSource.getAutoCompleteSuggestions(keyword).toDomain()
     }
 
     override suspend fun searchPoi(
         searchTypCd: String,
         keyword: String,
         currentLocation: CurrentLocation
-    ): List<Poi> = withContext(Dispatchers.IO) {
+    ): List<Poi> = withContext(ioDispatcher) {
         val (startX, startY) = VSMCoordinates.wgs84ToSK(
             currentLocation.longitude,
             currentLocation.latitude
@@ -51,7 +54,7 @@ class TmapRepositoryImpl @Inject constructor(
         start: Poi,
         dest: Poi,
         wayPoints: List<Poi>
-    ): RouteGuidance = withContext(Dispatchers.IO) {
+    ): RouteGuidance = withContext(ioDispatcher) {
         val waypointRequests = wayPoints.map { poi ->
             WayPointRequest(
                 x = poi.xPos,
@@ -73,7 +76,7 @@ class TmapRepositoryImpl @Inject constructor(
 
     override suspend fun searchRoadName(
         coord: SKCoord
-    ): TouchLocation = withContext(Dispatchers.IO) {
+    ): TouchLocation = withContext(ioDispatcher) {
         val requestDto = TouchSearchRequest(
             header = RequestHeaderFactory.create(),
             noorX = coord.x.toInt().toString(),

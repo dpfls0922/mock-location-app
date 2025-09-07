@@ -6,5 +6,7 @@ import javax.inject.Inject
 class CheckLocationPermissionUseCase @Inject constructor(
     private val locationRepository: LocationRepository
 ) {
-    suspend operator fun invoke(): Boolean = locationRepository.checkLocationPermission()
+    suspend operator fun invoke(): Result<Boolean> = runCatching {
+        locationRepository.checkLocationPermission()
+    }
 }

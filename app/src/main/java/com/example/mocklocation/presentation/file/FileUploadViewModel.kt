@@ -41,20 +41,20 @@ class FileUploadViewModel @Inject constructor(
 
     fun uploadFile(uri: Uri) {
         viewModelScope.launch {
-            try {
-                _uiState.value = UploadUiState.Loading
-                val uploadedFile = uploadCsvFileUseCase.execute(uri)
-                val gpsPoints = uploadedFile.gpsPoints
-                val vsmPoints = uploadedFile.gpsPoints.map { gps ->
-                    VSMMapPoint(gps.longitude, gps.latitude)
+            _uiState.value = UploadUiState.Loading
+            uploadCsvFileUseCase.execute(uri)
+                .onSuccess { uploadedFile ->
+                    val gpsPoints = uploadedFile.gpsPoints
+                    val vsmPoints = uploadedFile.gpsPoints.map { gps ->
+                        VSMMapPoint(gps.longitude, gps.latitude)
+                    }
+                    _uiState.value = UploadUiState.Success(uploadedFile, gpsPoints, vsmPoints)
+                    _currentFileName.value = uploadedFile.name
+                    _uiEvent.emit(UiEvent.ShowToast("주행 로그 파싱 완료"))
+                }.onFailure { e ->
+                    _uiState.value = UploadUiState.Error(e.localizedMessage ?: "업로드 실패")
+                    _uiEvent.emit(UiEvent.ShowToast("파일 업로드 실패"))
                 }
-                _uiState.value = UploadUiState.Success(uploadedFile, gpsPoints, vsmPoints)
-                _currentFileName.value = uploadedFile.name
-                _uiEvent.emit(UiEvent.ShowToast("주행 로그 파싱 완료"))
-            } catch (e: Exception) {
-                _uiState.value = UploadUiState.Error(e.localizedMessage ?: "업로드 실패")
-                _uiEvent.emit(UiEvent.ShowToast("파일 업로드 실패"))
-            }
         }
     }
 
