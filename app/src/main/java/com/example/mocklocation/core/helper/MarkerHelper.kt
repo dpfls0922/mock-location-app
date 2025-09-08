@@ -34,6 +34,8 @@ class MarkerHelper(
     private val mapEngine: MapEngine,
     private val iconProvider: MarkerIconProvider = DefaultMarkerIconProvider
 ) {
+    private var currentMarker: VSMMarkerBase? = null
+
     fun addLocationMarker(
         latitude: Double,
         longitude: Double,
@@ -43,19 +45,22 @@ class MarkerHelper(
             val position = VSMMapPoint(longitude, latitude)
             val iconInfo = iconProvider.getMarkerBitmap(context, type)
             val markerImage = iconInfo?.let { MarkerImage.fromBitmap(it) } ?: return@runCatching null
-
             val (width, height) = type.iconSize
+
             VSMMarkerLocation.Builder("marker_${type.name.lowercase()}")
                 .position(position)
                 .renderOrder(VSMMarkerBase.RENDERING_ORDER_AFTER_POINT_MARKER)
                 .visible(true)
                 .icon(markerImage)
-                .bearing(0f)
                 .iconSize(width, height)
                 .showGuide(true)
                 .renderMode(VSMMarkerLocation.RENDERMODE_BILLBOARD)
                 .create().also { marker ->
                     mapEngine.markerManager.addMarker(marker)
+                    if (type == MarkerType.CURRENT) {
+                        currentMarker?.let { removeMarker(it) }
+                        currentMarker = marker
+                    }
                     Timber.d("마커 추가 성공: ${marker.id}")
                 }
         }.onFailure { e ->
@@ -68,7 +73,7 @@ class MarkerHelper(
         wayPoints: List<RoutePoint>? = emptyList()
     ) {
         runCatching {
-            mapEngine.markerManager.removeMarkerAll()
+            removeAllMarkersExceptCurrent()
 
             if (points.size > 1) {
                 addEdgeMarkers(points, wayPoints)
@@ -117,10 +122,16 @@ class MarkerHelper(
 
     fun removeMarker(marker: VSMMarkerBase) {
         mapEngine.markerManager.removeMarker(marker)
+        if (marker.id == currentMarker?.id) {
+            currentMarker = null
+        }
     }
 
-    fun removeMarkerAll() {
+    fun removeAllMarkersExceptCurrent() {
         mapEngine.markerManager.removeMarkerAll()
+        currentMarker?.let {
+            mapEngine.markerManager.addMarker(it)
+        }
     }
 
     fun setCenter(latitude: Double, longitude: Double) {
