@@ -53,7 +53,7 @@ class TmapRepositoryImpl @Inject constructor(
         if (!dto.isSuccess()) {
             return@withContext ApiResult.Error(dto.errorMessageOrDefault())
         }
-        ApiResult.Success(dto.poiSearches.map { it.toDomain(startX.toInt(), startY.toInt()) })
+        ApiResult.Success(dto.poiSearches.map { it.toDomain() })
     }
 
     override suspend fun searchRouteGuidance(
