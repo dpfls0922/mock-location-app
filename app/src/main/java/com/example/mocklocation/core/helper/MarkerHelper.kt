@@ -82,7 +82,7 @@ class MarkerHelper(
                 }
 
                 val endPoint = points.last()
-                val destinationOffset = 0.001
+                val destinationOffset = 0.00005
                 addLocationMarker(endPoint.latitude - destinationOffset, endPoint.longitude, MarkerType.DESTINATION)
                 addLocationMarker(endPoint.latitude, endPoint.longitude, MarkerType.END)
 
