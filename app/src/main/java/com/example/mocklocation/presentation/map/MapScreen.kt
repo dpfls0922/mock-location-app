@@ -8,8 +8,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.LifecycleOwner
@@ -26,7 +28,10 @@ import com.example.mocklocation.presentation.route.RouteGuidanceState
 import com.example.mocklocation.presentation.route.RouteGuidanceViewModel
 import com.example.mocklocation.presentation.search.SearchViewModel
 import com.example.mocklocation.presentation.ui.theme.MapTheme
+import com.skt.tmap.vsm.data.VSMMapPoint
+import com.skt.tmap.vsm.map.VSMMapView
 import kotlinx.coroutines.flow.collectLatest
+import timber.log.Timber
 
 @Composable
 fun MapScreen(
@@ -44,13 +49,17 @@ fun MapScreen(
     val touchedLocation by mapViewModel.touchedLocation.collectAsState()
     val isDrawingMode by drawViewModel.isDrawingMode.collectAsState()
     val currentFileName by fileUploadViewModel.currentFileName.collectAsState()
+    val context = LocalContext.current
+    val mapView = remember {
+        mapViewModel.createMapView(context)
+    }
 
     LaunchedEffect(Unit) {
         routeGuidanceViewModel.uiState.collectLatest { state ->
             if (state is RouteGuidanceState.Success) {
-                val vsmPoints = state.routeData.vsmPoints
+                val vsmPoints = state.routeData?.vsmPoints
                 val wayPoints = state.wayPoints
-                if (vsmPoints.isNotEmpty()) {
+                if (!vsmPoints.isNullOrEmpty()) {
                     drawViewModel.drawRouteLine(vsmPoints, wayPoints)
                 }
             }
@@ -84,6 +93,7 @@ fun MapScreen(
     }
 
     MapUI(
+        mapView = mapView,
         lifecycleOwner = lifecycleOwner,
         mapViewModel = mapViewModel,
         drawViewModel = drawViewModel,
@@ -99,6 +109,7 @@ fun MapScreen(
 
 @Composable
 private fun MapUI(
+    mapView: VSMMapView,
     lifecycleOwner: LifecycleOwner,
     mapViewModel: MapViewModel,
     drawViewModel: DrawViewModel,
@@ -122,7 +133,7 @@ private fun MapUI(
         ) { innerPadding ->
             Box(Modifier.padding(innerPadding).fillMaxSize()) {
                 AndroidView(
-                    factory = { context -> mapViewModel.createMapView(context) },
+                    factory = { mapView },
                     modifier = Modifier.fillMaxSize()
                 )
                 MapLifecycleHandler(lifecycleOwner, mapViewModel)
