@@ -64,27 +64,14 @@ class MarkerHelper(
     }
 
     fun drawPolyline(
-         points: List<VSMMapPoint>,
-         wayPoints: List<RoutePoint>? = emptyList()
+        points: List<VSMMapPoint>,
+        wayPoints: List<RoutePoint>? = emptyList()
     ) {
         runCatching {
             mapEngine.markerManager.removeMarkerAll()
 
             if (points.size > 1) {
-                val startPoint = points.first()
-                addLocationMarker(startPoint.latitude, startPoint.longitude, MarkerType.START)
-
-                wayPoints?.forEachIndexed { index, wayPoint ->
-                    val markerType = waypointMarkerTypes.getOrElse(index) { MarkerType.WAYPOINT_1 }
-                    val (skX, skY) = wayPoint.location.xPos.toDouble() to wayPoint.location.yPos.toDouble()
-                    val location = VSMCoordinates.skToWGS84(skX, skY)
-                    addLocationMarker(location[1], location[0], markerType)
-                }
-
-                val endPoint = points.last()
-                val destinationOffset = 0.00005
-                addLocationMarker(endPoint.latitude - destinationOffset, endPoint.longitude, MarkerType.DESTINATION)
-                addLocationMarker(endPoint.latitude, endPoint.longitude, MarkerType.END)
+                addEdgeMarkers(points, wayPoints)
 
                 val strokeColor = 0xFF2979FF.toInt()
                 val fillColor = 0xAA2979FF.toInt()
@@ -103,6 +90,28 @@ class MarkerHelper(
             }
         }.onFailure { e ->
             Timber.e("Polyline 그리기 중 오류 발생", e)
+        }
+    }
+
+    private fun addEdgeMarkers(
+        points: List<VSMMapPoint>,
+        wayPoints: List<RoutePoint>?
+    ) {
+        points.firstOrNull()?.let {
+            addLocationMarker(it.latitude, it.longitude, MarkerType.START)
+        }
+
+        wayPoints?.forEachIndexed { i, wp ->
+            val markerType = waypointMarkerTypes[i] ?: MarkerType.WAYPOINT_1
+            val (skX, skY) = wp.location.xPos.toDouble() to wp.location.yPos.toDouble()
+            val location = VSMCoordinates.skToWGS84(skX, skY)
+            addLocationMarker(location[1], location[0], markerType)
+        }
+
+        points.lastOrNull()?.let {
+            val offset = 0.00005
+            addLocationMarker(it.latitude - offset, it.longitude, MarkerType.DESTINATION)
+            addLocationMarker(it.latitude, it.longitude, MarkerType.END)
         }
     }
 
