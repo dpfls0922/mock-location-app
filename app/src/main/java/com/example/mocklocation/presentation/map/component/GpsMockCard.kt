@@ -25,6 +25,7 @@ import com.example.mocklocation.presentation.mock.component.MockGpsButton
 import com.example.mocklocation.presentation.mock.component.MockGpsStatus
 import com.example.mocklocation.presentation.mock.component.RepeatMode
 import com.example.mocklocation.presentation.mock.component.SpeedSection
+import com.example.mocklocation.presentation.mock.component.TvasParserToggle
 import com.example.mocklocation.presentation.route.RouteGuidanceViewModel
 import com.example.mocklocation.presentation.route.component.RoutePointsList
 import com.example.mocklocation.presentation.route.component.RouteSelectionDialog
@@ -55,6 +56,7 @@ fun GPSMockCard(
     val selectedLocationForRoute by searchViewModel.selectedLocationForRoute.collectAsState()
     val routePoints by routeGuidanceViewModel.routePoints.collectAsState()
     val closeDialogEvent by routeGuidanceViewModel.closeRouteDialogEvent.collectAsState()
+    val tvasParserMode by routeGuidanceViewModel.tvasParserMode.collectAsState()
     val currentFileName by fileUploadViewModel.currentFileName.collectAsState()
     val fileUploaded = currentFileName != null
 
@@ -113,6 +115,13 @@ fun GPSMockCard(
                 }
 
                 CurrentLocation(location = currentLocationUiModel)
+
+                TvasParserToggle(
+                    mode = tvasParserMode,
+                    onModeChange = { selected ->
+                        routeGuidanceViewModel.onTvasParserModeChanged(selected)
+                    }
+                )
 
                 GPSMode(
                     gpsMode = gpsMode,
