@@ -24,7 +24,7 @@ import javax.inject.Inject
 class MapViewModel @Inject constructor(
     private val checkPermissionUseCase: CheckLocationPermissionUseCase,
     private val getCurrentLocationUseCase: GetCurrentLocationUseCase,
-    private val mapService: MapService,
+    private val mapService: MapService
 ): ViewModel() {
     private val _locationPermissionGranted = MutableStateFlow(false)
     val locationPermissionGranted: StateFlow<Boolean> = _locationPermissionGranted
