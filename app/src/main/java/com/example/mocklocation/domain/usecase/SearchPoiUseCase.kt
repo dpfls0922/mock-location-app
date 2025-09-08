@@ -1,5 +1,6 @@
 package com.example.mocklocation.domain.usecase
 
+import com.example.mocklocation.core.model.ApiResult
 import com.example.mocklocation.domain.entity.CurrentLocation
 import com.example.mocklocation.domain.entity.Poi
 import com.example.mocklocation.domain.repository.TmapRepository
@@ -12,7 +13,7 @@ class SearchPoiUseCase @Inject constructor(
         searchTypCd: String,
         keyword: String,
         currentLocation: CurrentLocation
-    ): Result<List<Poi>> = runCatching {
-        repository.searchPoi(searchTypCd, keyword, currentLocation)
+    ): ApiResult<List<Poi>> {
+        return repository.searchPoi(searchTypCd, keyword, currentLocation)
     }
 }

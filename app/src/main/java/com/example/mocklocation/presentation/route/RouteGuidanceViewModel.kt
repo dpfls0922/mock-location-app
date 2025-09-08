@@ -2,6 +2,7 @@ package com.example.mocklocation.presentation.route
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mocklocation.core.model.ApiResult
 import com.example.mocklocation.domain.entity.RouteGuidanceData
 import com.example.mocklocation.domain.usecase.GetRouteGuidanceUseCase
 import com.example.mocklocation.presentation.route.component.RoutePoint
@@ -21,7 +22,7 @@ import javax.inject.Inject
 sealed class RouteGuidanceState {
     data object Idle : RouteGuidanceState()
     data object Loading : RouteGuidanceState()
-    data class Success(val routeData: RouteGuidanceData, val wayPoints: List<RoutePoint>) : RouteGuidanceState()
+    data class Success(val routeData: RouteGuidanceData?, val wayPoints: List<RoutePoint>) : RouteGuidanceState()
     data class Error(val message: String) : RouteGuidanceState()
 }
 
@@ -108,22 +109,19 @@ class RouteGuidanceViewModel @Inject constructor(
             val endPoi = endPoint.location.toDomain()
             val wayPointPois = wayPoints.map { it.location.toDomain() }
 
-            getRouteGuidanceUseCase(startPoi, endPoi, wayPointPois)
-                .onSuccess { routeData ->
-                    if (routeData != null) {
-                        _uiState.value = RouteGuidanceState.Success(routeData, wayPoints)
-                        Timber.d("[ROUTE_GUIDANCE] 경로 안내 성공")
-                        _uiEvent.emit(UiEvent.ShowToast("tvas 파싱 완료 (${routeData.gpsPoints.size}개)"))
-                    } else {
-                        _uiState.value = RouteGuidanceState.Error("경로를 찾을 수 없습니다.")
-                        _uiEvent.emit(UiEvent.ShowToast("경로를 찾을 수 없습니다."))
-                    }
+            when (val result = getRouteGuidanceUseCase(startPoi, endPoi, wayPointPois)) {
+                is ApiResult.Success -> {
+                    val routeData = result.data
+                    _uiState.value = RouteGuidanceState.Success(routeData, wayPoints)
+                    Timber.d("[ROUTE_GUIDANCE] 경로 안내 성공")
+                    _uiEvent.emit(UiEvent.ShowToast("tvas 파싱 완료 (${routeData?.gpsPoints?.size}개)"))
                 }
-                .onFailure { exception ->
-                    _uiState.value = RouteGuidanceState.Error("경로 검색 실패: ${exception.message}")
-                    _uiEvent.emit(UiEvent.ShowToast("경로 검색 실패: ${exception.message}"))
-                    Timber.e(exception, "[ROUTE_GUIDANCE] 경로 안내 실패")
+                is ApiResult.Error -> {
+                    _uiState.value = RouteGuidanceState.Error(result.message)
+                    _uiEvent.emit(UiEvent.ShowToast(result.message))
+                    Timber.e(result.message, "[ROUTE_GUIDANCE] 경로 안내 실패")
                 }
+            }
         }
     }
 

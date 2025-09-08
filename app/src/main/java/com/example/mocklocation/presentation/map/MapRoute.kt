@@ -14,6 +14,7 @@ import com.example.mocklocation.presentation.map.MapRouteConstants.MIME_TYPE_TEX
 import com.example.mocklocation.presentation.mock.MockLocationViewModel
 import com.example.mocklocation.presentation.route.RouteGuidanceStatusHandler
 import com.example.mocklocation.presentation.route.RouteGuidanceViewModel
+import com.example.mocklocation.presentation.search.SearchStatusHandler
 import com.example.mocklocation.presentation.search.SearchViewModel
 import com.example.mocklocation.presentation.ui.common.rememberFileSelectorLauncher
 import com.example.mocklocation.presentation.ui.common.rememberPermissionLauncher
@@ -39,6 +40,7 @@ fun MapRoute(
     FileUploadStatusHandler()
     RouteGuidanceStatusHandler()
     DrawStatusHandler()
+    SearchStatusHandler()
 
     MapScreen(
         mapViewModel = mapViewModel,

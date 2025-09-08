@@ -1,5 +1,6 @@
 package com.example.mocklocation.data.dto.response
 
+import com.example.mocklocation.data.dto.common.BaseResponse
 import com.example.mocklocation.data.dto.common.ResponseHeader
 import com.example.mocklocation.domain.entity.Poi
 import com.example.mocklocation.domain.entity.PoiFeature
@@ -8,7 +9,7 @@ import kotlin.math.sqrt
 
 @Serializable
 data class PoiSearchResponse(
-    val header: ResponseHeader,
+    override val header: ResponseHeader,
     val searchEngine: String,
     val totalCnt: Int,
     val listCnt: Int,
@@ -26,7 +27,7 @@ data class PoiSearchResponse(
     val hotPlaceContainYn: String,
     val resSearchEngineInfo: String?,
     val poiSearches: List<PoiSearch>
-)
+) : BaseResponse
 
 @Serializable
 data class PoiSearch(

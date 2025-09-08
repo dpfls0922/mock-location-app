@@ -1,5 +1,7 @@
 package com.example.mocklocation.domain.usecase
 
+import com.example.mocklocation.core.model.ApiResult
+import com.example.mocklocation.core.model.mapSuccess
 import com.example.mocklocation.di.TvasNativeParser
 import com.example.mocklocation.domain.entity.Poi
 import com.example.mocklocation.domain.entity.RouteGuidanceData
@@ -17,19 +19,19 @@ class GetRouteGuidanceUseCase @Inject constructor(
         start: Poi,
         dest: Poi,
         wayPoints: List<Poi> = emptyList()
-    ): Result<RouteGuidanceData?> = runCatching {
-        val routeGuidance = tmapRepository.searchRouteGuidance(start, dest, wayPoints)
-        val tvasString = routeGuidance.tvases ?: return@runCatching null
-
-        val gpsPoints = tvasParser.parse(tvasString)
-        val vsmPoints = gpsPoints.map { gps ->
-            VSMMapPoint(gps.longitude, gps.latitude)
-        }
-
-        RouteGuidanceData(
-            tvasString = tvasString,
-            gpsPoints = gpsPoints,
-            vsmPoints = vsmPoints
-        )
+    ): ApiResult<RouteGuidanceData?> {
+        return tmapRepository.searchRouteGuidance(start, dest, wayPoints)
+            .mapSuccess { routeGuidance ->
+                val tvasString = routeGuidance.tvases ?: ""
+                val gpsPoints = tvasParser.parse(tvasString)
+                val vsmPoints = gpsPoints.map { gps ->
+                    VSMMapPoint(gps.longitude, gps.latitude)
+                }
+                RouteGuidanceData(
+                    tvasString = tvasString,
+                    gpsPoints = gpsPoints,
+                    vsmPoints = vsmPoints
+                )
+            }
     }
 }
