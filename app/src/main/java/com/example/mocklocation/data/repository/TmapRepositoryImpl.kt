@@ -1,8 +1,11 @@
 package com.example.mocklocation.data.repository
 
+import com.example.mocklocation.core.model.ApiResult
 import com.example.mocklocation.data.datasource.TmapDataSource
 import com.example.mocklocation.data.dto.common.RequestHeaderFactory
 import com.example.mocklocation.data.dto.common.WayPointRequest
+import com.example.mocklocation.data.dto.common.errorMessageOrDefault
+import com.example.mocklocation.data.dto.common.isSuccess
 import com.example.mocklocation.data.dto.request.PoiSearchRequest
 import com.example.mocklocation.data.dto.request.RouteGuidanceRequest
 import com.example.mocklocation.data.dto.request.TouchSearchRequest
@@ -34,7 +37,7 @@ class TmapRepositoryImpl @Inject constructor(
         searchTypCd: String,
         keyword: String,
         currentLocation: CurrentLocation
-    ): List<Poi> = withContext(ioDispatcher) {
+    ): ApiResult<List<Poi>> = withContext(ioDispatcher) {
         val (startX, startY) = VSMCoordinates.wgs84ToSK(
             currentLocation.longitude,
             currentLocation.latitude
@@ -47,14 +50,17 @@ class TmapRepositoryImpl @Inject constructor(
             noorY = startY.toInt().toString()
         )
         val dto = dataSource.searchPoi(requestDto)
-        dto.poiSearches.map { it.toDomain(startX.toInt(), startY.toInt()) }
+        if (!dto.isSuccess()) {
+            return@withContext ApiResult.Error(dto.errorMessageOrDefault())
+        }
+        ApiResult.Success(dto.poiSearches.map { it.toDomain(startX.toInt(), startY.toInt()) })
     }
 
     override suspend fun searchRouteGuidance(
         start: Poi,
         dest: Poi,
         wayPoints: List<Poi>
-    ): RouteGuidance = withContext(ioDispatcher) {
+    ): ApiResult<RouteGuidance> = withContext(ioDispatcher) {
         val waypointRequests = wayPoints.map { poi ->
             WayPointRequest(
                 x = poi.xPos,
@@ -71,18 +77,24 @@ class TmapRepositoryImpl @Inject constructor(
             wayPoints = waypointRequests.takeIf { it.isNotEmpty() }
         )
         val dto = dataSource.searchRouteGuidance(requestDto)
-        dto.toDomain()
+        if (!dto.isSuccess()) {
+            return@withContext ApiResult.Error(dto.errorMessageOrDefault())
+        }
+        ApiResult.Success(dto.toDomain())
     }
 
     override suspend fun searchRoadName(
         coord: SKCoord
-    ): TouchLocation = withContext(ioDispatcher) {
+    ): ApiResult<TouchLocation> = withContext(ioDispatcher) {
         val requestDto = TouchSearchRequest(
             header = RequestHeaderFactory.create(),
             noorX = coord.x.toInt().toString(),
             noorY = coord.y.toInt().toString()
         )
         val dto = dataSource.searchRoadName(requestDto)
-        dto.toDomain()
+        if (!dto.isSuccess()) {
+            return@withContext ApiResult.Error(dto.errorMessageOrDefault())
+        }
+        ApiResult.Success(dto.toDomain())
     }
 }
