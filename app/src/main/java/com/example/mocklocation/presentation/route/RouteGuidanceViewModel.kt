@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mocklocation.core.model.ApiResult
 import com.example.mocklocation.domain.entity.RouteGuidanceData
+import com.example.mocklocation.domain.factory.ParserType
 import com.example.mocklocation.domain.usecase.GetRouteGuidanceUseCase
 import com.example.mocklocation.presentation.route.component.RoutePoint
 import com.example.mocklocation.presentation.route.component.RoutePointType
@@ -30,6 +31,10 @@ sealed class UiEvent {
     data class ShowToast(val message: String): UiEvent()
 }
 
+enum class TvasParserMode {
+    NATIVE, KOTLIN
+}
+
 @HiltViewModel
 class RouteGuidanceViewModel @Inject constructor(
     private val getRouteGuidanceUseCase: GetRouteGuidanceUseCase
@@ -39,6 +44,9 @@ class RouteGuidanceViewModel @Inject constructor(
 
     private val _closeRouteDialogEvent = MutableStateFlow(false)
     val closeRouteDialogEvent: StateFlow<Boolean> = _closeRouteDialogEvent.asStateFlow()
+
+    private val _tvasParserMode = MutableStateFlow(TvasParserMode.NATIVE)
+    val tvasParserMode = _tvasParserMode.asStateFlow()
 
     private val _uiState = MutableStateFlow<RouteGuidanceState>(RouteGuidanceState.Idle)
     val uiState: StateFlow<RouteGuidanceState> = _uiState.asStateFlow()
@@ -108,8 +116,13 @@ class RouteGuidanceViewModel @Inject constructor(
             val startPoi = startPoint.location.toDomain()
             val endPoi = endPoint.location.toDomain()
             val wayPointPois = wayPoints.map { it.location.toDomain() }
+            val parserType = when (_tvasParserMode.value) {
+                TvasParserMode.NATIVE -> ParserType.TVAS_NATIVE
+                TvasParserMode.KOTLIN -> ParserType.TVAS_KOTLIN
+            }
 
-            when (val result = getRouteGuidanceUseCase(startPoi, endPoi, wayPointPois)) {
+            val result = getRouteGuidanceUseCase(startPoi, endPoi, wayPointPois, parserType)
+            when (result) {
                 is ApiResult.Success -> {
                     val routeData = result.data
                     _uiState.value = RouteGuidanceState.Success(routeData, wayPoints)
@@ -123,6 +136,11 @@ class RouteGuidanceViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun onTvasParserModeChanged(mode: TvasParserMode) {
+        _tvasParserMode.value = mode
+        Timber.i("[TVAS PARSER] 파서 모드: ${mode}")
     }
 
     fun resetRoutePoints() {

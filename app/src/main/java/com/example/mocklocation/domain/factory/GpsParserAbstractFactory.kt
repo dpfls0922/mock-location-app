@@ -1,10 +1,11 @@
 package com.example.mocklocation.domain.factory
 
 import com.example.mocklocation.domain.parser.GpsDataParser
-import java.io.InputStream
+
+enum class ParserType {
+    CSV, TVAS_KOTLIN, TVAS_NATIVE
+}
 
 interface GpsParserAbstractFactory {
-    fun createCsvParser(): GpsDataParser<InputStream>
-    fun createTvasKotlinParser(): GpsDataParser<String>
-    fun createTvasNativeParser(): GpsDataParser<String>
+    fun <IN> createParser(type: ParserType): GpsDataParser<IN>
 }
