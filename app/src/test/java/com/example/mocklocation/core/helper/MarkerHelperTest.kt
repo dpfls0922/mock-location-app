@@ -67,7 +67,7 @@ class MarkerHelperTest {
 
         markerHelper.drawPolyline(points)
 
-        verify { markerManager.removeMarkerAll() }
+        verify { markerHelper.removeAllMarkersExceptCurrent() }
         // Start, Destination, Polyline → 최소 3개 이상 addMarker 호출되어야 함
         verify(atLeast = 3) { markerManager.addMarker(any()) }
     }
