@@ -2,6 +2,8 @@ package com.example.mocklocation.domain.usecase
 
 import com.example.mocklocation.domain.entity.GpsPoint
 import com.example.mocklocation.domain.repository.MockLocationRepository
+import com.example.mocklocation.domain.service.GpsDistanceCalculator
+import com.example.mocklocation.domain.service.GpsDistanceCalculator.Companion.FLOATING_POINT_TOLERANCE
 import com.example.mocklocation.presentation.mock.component.GpsMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,8 +17,6 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.sqrt
 
 sealed class MockLocationUpdate {
     data class Location(val gpsPoint: GpsPoint) : MockLocationUpdate()
@@ -24,13 +24,12 @@ sealed class MockLocationUpdate {
 }
 
 class SendMockLocationUseCase @Inject constructor(
-    private val repository: MockLocationRepository
+    private val repository: MockLocationRepository,
+    private val distanceCalculator: GpsDistanceCalculator
 ) {
     companion object {
         private const val DEFAULT_UPDATE_INTERVAL_MS = 1000L
         private const val KMH_TO_MPS = 1000.0 / 3600.0
-        private const val METERS_PER_DEGREE_LATITUDE = 111_000.0
-        private const val FLOATING_POINT_ERROR = 0.01
     }
 
     fun createMockLocationFlow(
@@ -44,11 +43,10 @@ class SendMockLocationUseCase @Inject constructor(
             if (gpsPoints.isEmpty()) return@flow
             if (startIndex !in gpsPoints.indices) return@flow
 
-
             repository.startMocking()
             Timber.d("🗺️ Mocking Flow 전송 시작: (${startIndex}/${gpsPoints.size})")
 
-            val totalPathDistance = calculateTotalDistance(gpsPoints)
+            val totalPathDistance = distanceCalculator.calculateTotalDistance(gpsPoints)
             val speedState = MutableStateFlow(0.0)
 
             scope.launch(Dispatchers.Default) {
@@ -121,10 +119,10 @@ class SendMockLocationUseCase @Inject constructor(
 
         while (remainingDistance > 0 && mutableState.nextPointIndex < gpsPoints.size) {
             val nextPoint = gpsPoints[mutableState.nextPointIndex]
-            val distanceToNext = calculateDistance(mutableState.currentPoint, nextPoint)
+            val distanceToNext = distanceCalculator.calculateDistance(mutableState.currentPoint, nextPoint)
 
             if (distanceToNext >= remainingDistance) {
-                val virtualPoint = interpolate(mutableState.currentPoint, nextPoint, remainingDistance)
+                val virtualPoint = interpolate(mutableState.currentPoint, nextPoint, remainingDistance, distanceToNext)
                 emitLocation(applyGpsMode(virtualPoint, gpsMode))
 
                 logPositionUpdate(remainingDistance, mutableState.accumulatedDistance, speed, virtualPoint, mutableState.emittedVertices)
@@ -159,18 +157,18 @@ class SendMockLocationUseCase @Inject constructor(
 
     private fun isNavigationComplete(accumulatedDistance: Double, totalPathDistance: Double): Boolean {
         val remaining = totalPathDistance - accumulatedDistance
-        return remaining <= FLOATING_POINT_ERROR
+        return remaining <= FLOATING_POINT_TOLERANCE
     }
 
     private fun interpolate(
         start: GpsPoint,
         end: GpsPoint,
-        distanceToMove: Double
+        distanceToMove: Double,
+        segmentDistance: Double
     ): GpsPoint {
-        val bearing = calculateBearing(start, end)
-        val segmentDistance = calculateDistance(start, end)
-        if (segmentDistance == 0.0) return start
+        if (segmentDistance <= FLOATING_POINT_TOLERANCE) return start
         val ratio = distanceToMove / segmentDistance
+        val bearing = calculateBearing(start, end)
 
         return GpsPoint(
             provider = start.provider,
@@ -197,16 +195,6 @@ class SendMockLocationUseCase @Inject constructor(
             GpsMode.ORIGINAL -> point.satellites
         }
         return point.copy(satellites = satellites)
-    }
-
-    private fun calculateTotalDistance(gpsPoints: List<GpsPoint>): Double {
-        return gpsPoints.zipWithNext { a, b -> calculateDistance(a, b) }.sum()
-    }
-
-    private fun calculateDistance(p1: GpsPoint, p2: GpsPoint): Double {
-        val dx = (p2.longitude - p1.longitude) * METERS_PER_DEGREE_LATITUDE * cos(Math.toRadians(p1.latitude))
-        val dy = (p2.latitude - p1.latitude) * METERS_PER_DEGREE_LATITUDE
-        return sqrt(dx * dx + dy * dy)
     }
 
     private fun calculateBearing(p1: GpsPoint, p2: GpsPoint): Float {
