@@ -18,7 +18,7 @@ class GpsDistanceCalculator @Inject constructor() {
         private const val EARTH_RADIUS_METERS = 6_371_000.0
         private const val METERS_PER_DEGREE_LATITUDE = 111_321.0
         private const val DISTANCE_THRESHOLD = 200.0
-        const val FLOATING_POINT_TOLERANCE = 1e-10
+        const val FLOATING_POINT_TOLERANCE = 0.04
     }
 
     fun calculateDistance(p1: GpsPoint, p2: GpsPoint): Double {
