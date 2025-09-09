@@ -1,11 +1,10 @@
 package com.example.mocklocation.data.repository
 
+import com.example.mocklocation.core.helper.safeApiCall
 import com.example.mocklocation.core.model.ApiResult
 import com.example.mocklocation.data.datasource.TmapDataSource
 import com.example.mocklocation.data.dto.common.RequestHeaderFactory
 import com.example.mocklocation.data.dto.common.WayPointRequest
-import com.example.mocklocation.data.dto.common.errorMessageOrDefault
-import com.example.mocklocation.data.dto.common.isSuccess
 import com.example.mocklocation.data.dto.request.PoiSearchRequest
 import com.example.mocklocation.data.dto.request.RouteGuidanceRequest
 import com.example.mocklocation.data.dto.request.TouchSearchRequest
@@ -47,11 +46,13 @@ class TmapRepositoryImpl @Inject constructor(
             currentLocation.latitude
         )
         val requestDto = buildPoiSearchRequest(searchTypCd, keyword, startX, startY)
-        val dto = dataSource.searchPoi(requestDto)
-        if (!dto.isSuccess()) {
-            return@withContext ApiResult.Error(dto.errorMessageOrDefault())
-        }
-        ApiResult.Success(dto.poiSearches.map { it.toDomain() })
+
+        safeApiCall(
+            apiCall = { dataSource.searchPoi(requestDto) },
+            transformSuccess = { dto ->
+                dto.poiSearches.map { it.toDomain() }
+            }
+        )
     }
 
     private fun buildPoiSearchRequest(
@@ -74,12 +75,13 @@ class TmapRepositoryImpl @Inject constructor(
         parserType: ParserType
     ): ApiResult<RouteGuidanceData?> = withContext(ioDispatcher) {
         val requestDto = buildRouteGuidanceRequest(start, dest, wayPoints)
-        val dto = dataSource.searchRouteGuidance(requestDto)
-        if (!dto.isSuccess()) {
-            return@withContext ApiResult.Error(dto.errorMessageOrDefault())
-        }
-        val routeGuidanceData = parseRouteGuidance(dto.tvases, parserType)
-        ApiResult.Success(routeGuidanceData)
+
+        safeApiCall(
+            apiCall = { dataSource.searchRouteGuidance(requestDto) },
+            transformSuccess = { dto ->
+                parseRouteGuidance(dto.tvases, parserType)
+            }
+        )
     }
 
     private fun buildRouteGuidanceRequest(
@@ -128,10 +130,12 @@ class TmapRepositoryImpl @Inject constructor(
             noorX = coord.x.toInt().toString(),
             noorY = coord.y.toInt().toString()
         )
-        val dto = dataSource.searchRoadName(requestDto)
-        if (!dto.isSuccess()) {
-            return@withContext ApiResult.Error(dto.errorMessageOrDefault())
-        }
-        ApiResult.Success(dto.toDomain())
+
+        safeApiCall(
+            apiCall = { dataSource.searchRoadName(requestDto) },
+            transformSuccess = { dto ->
+                dto.toDomain()
+            }
+        )
     }
 }
