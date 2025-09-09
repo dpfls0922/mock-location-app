@@ -2,8 +2,6 @@ package com.example.mocklocation.data.dto.response
 
 import com.example.mocklocation.data.dto.common.BaseResponse
 import com.example.mocklocation.data.dto.common.ResponseHeader
-import com.example.mocklocation.domain.entity.Destination
-import com.example.mocklocation.domain.entity.RouteGuidance
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -51,19 +49,3 @@ data class UsedFavoriteRouteDto(
     val drivingCount: Int,
     val tripInitSessionId: String? = null
 )
-
-fun RouteGuidanceResponse.toDomain(): RouteGuidance {
-    val destinationDomain = this.destination.toDomain()
-    return RouteGuidance(
-        routeCount = this.routeCount.toInt(),
-        destination = destinationDomain,
-        tvases = tvases
-    )
-}
-
-fun DestinationDto.toDomain(): Destination {
-    return Destination(
-        destXPos = this.destXPos,
-        destYPos = this.destYPos,
-    )
-}
