@@ -1,18 +1,6 @@
 package com.example.mocklocation.di
 
 import com.example.mocklocation.BuildConfig
-import com.example.mocklocation.core.constants.NetworkConstants.ACCEPT
-import com.example.mocklocation.core.constants.NetworkConstants.APPLICATION_JSON
-import com.example.mocklocation.core.constants.NetworkConstants.CIH
-import com.example.mocklocation.core.constants.NetworkConstants.CLIENT_REQ_TIME
-import com.example.mocklocation.core.constants.NetworkConstants.CONTENT_TYPE
-import com.example.mocklocation.core.constants.NetworkConstants.DEFAULT_CIH
-import com.example.mocklocation.core.constants.NetworkConstants.DEFAULT_NONCE
-import com.example.mocklocation.core.constants.NetworkConstants.NETWORK_TYPE
-import com.example.mocklocation.core.constants.NetworkConstants.NETWORK_WIFI
-import com.example.mocklocation.core.constants.NetworkConstants.NONCE
-import com.example.mocklocation.core.constants.NetworkConstants.REQUESTER
-import com.example.mocklocation.core.constants.NetworkConstants.REQUESTER_CLIENT_SSL
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -33,6 +21,22 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object RetrofitModule {
+    // Headers
+    private const val CONTENT_TYPE = "Content-Type"
+    private const val ACCEPT = "Accept"
+    private const val REQUESTER = "Requester"
+    private const val CLIENT_REQ_TIME = "Client_ReqTime"
+    private const val NETWORK_TYPE = "Network-Type"
+    private const val NONCE = "Nonce"
+    private const val CIH = "CIH"
+
+    // Header Values
+    private const val APPLICATION_JSON = "application/json"
+    private const val REQUESTER_CLIENT_SSL = "CLIENT_SSL"
+    private const val NETWORK_WIFI = "WIFI"
+    private const val DEFAULT_NONCE = "1499634157"
+    private const val DEFAULT_CIH = "-86050318"
+
     @Provides
     @Singleton
     @Named("TmapAccessKey")
