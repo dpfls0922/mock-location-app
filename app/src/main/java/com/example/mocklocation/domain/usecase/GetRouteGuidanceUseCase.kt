@@ -24,14 +24,20 @@ class GetRouteGuidanceUseCase @Inject constructor(
         return tmapRepository.searchRouteGuidance(start, dest, wayPoints)
             .mapSuccess { routeGuidance ->
                 val tvasString = routeGuidance.tvases ?: ""
+
+                val startTime = System.currentTimeMillis()
                 val gpsPoints = parser.parse(tvasString)
+                val endTime = System.currentTimeMillis()
+                val parsingTimeMs = endTime - startTime
+
                 val vsmPoints = gpsPoints.map { gps ->
                     VSMMapPoint(gps.longitude, gps.latitude)
                 }
                 RouteGuidanceData(
                     tvasString = tvasString,
                     gpsPoints = gpsPoints,
-                    vsmPoints = vsmPoints
+                    vsmPoints = vsmPoints,
+                    parsingTimeMs = parsingTimeMs
                 )
             }
     }

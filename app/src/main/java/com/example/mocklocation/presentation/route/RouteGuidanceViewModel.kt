@@ -127,7 +127,7 @@ class RouteGuidanceViewModel @Inject constructor(
                     val routeData = result.data
                     _uiState.value = RouteGuidanceState.Success(routeData, wayPoints)
                     Timber.d("[ROUTE_GUIDANCE] 경로 안내 성공")
-                    _uiEvent.emit(UiEvent.ShowToast("tvas 파싱 완료 (${routeData?.gpsPoints?.size}개)"))
+                    _uiEvent.emit(UiEvent.ShowToast("tvas 파싱 완료 (${routeData?.gpsPoints?.size}개) (${routeData?.parsingTimeMs}ms)"))
                 }
                 is ApiResult.Error -> {
                     _uiState.value = RouteGuidanceState.Error(result.message)
