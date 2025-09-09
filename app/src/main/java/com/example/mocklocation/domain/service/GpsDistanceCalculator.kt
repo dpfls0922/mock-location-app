@@ -59,8 +59,10 @@ class GpsDistanceCalculator @Inject constructor() {
     }
 
     private fun euclideanDistance(p1: GpsPoint, p2: GpsPoint): Double {
-        val avgLatRad = Math.toRadians((p1.latitude + p2.latitude) / 2.0)
-        val dx = (p2.longitude - p1.longitude) * METERS_PER_DEGREE_LATITUDE * cos(avgLatRad)
+        val avgLatitude = Math.toRadians((p1.latitude + p2.latitude) / 2.0)
+        val metersPerDegreeLongitude = METERS_PER_DEGREE_LATITUDE * cos(avgLatitude)
+
+        val dx = (p2.longitude - p1.longitude) * metersPerDegreeLongitude
         val dy = (p2.latitude - p1.latitude) * METERS_PER_DEGREE_LATITUDE
         return sqrt(dx * dx + dy * dy)
     }
