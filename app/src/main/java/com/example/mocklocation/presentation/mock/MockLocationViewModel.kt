@@ -87,6 +87,9 @@ class MockLocationViewModel @Inject constructor(
     fun setTrackMode(enabled: Boolean) {
         _trackMode.value = enabled
         mapService.setTrackMode(enabled)
+        if (mockingState.value == MockingState.IDLE) {
+            mapService.zoomIn()
+        }
     }
 
     fun updateGpsPoints(newPoints: List<GpsPoint>) {

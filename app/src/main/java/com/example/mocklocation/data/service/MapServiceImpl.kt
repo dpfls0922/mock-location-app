@@ -94,21 +94,20 @@ class MapServiceImpl @Inject constructor() : MapService {
         }
     }
 
+    override fun setCenter(latitude: Double, longitude: Double) {
+        markerHelper?.setCenter(latitude, longitude)
+    }
+
     override fun setTrackMode(enabled: Boolean) {
         isTrackModeActive = enabled
         if (isTrackModeActive) {
             currentMarker?.let {
                 setCenter(it.position.latitude, it.position.longitude)
-                zoomIn()
             }
         }
     }
 
-    override fun setCenter(latitude: Double, longitude: Double) {
-        markerHelper?.setCenter(latitude, longitude)
-    }
-
-    private fun zoomIn() {
+    override fun zoomIn() {
         markerHelper?.zoomIn()
     }
 
