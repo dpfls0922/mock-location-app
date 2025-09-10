@@ -38,6 +38,7 @@ fun MapRoute(
 
     val coroutineScope = rememberCoroutineScope()
     val fileSelectorLauncher = rememberFileSelectorLauncher(coroutineScope = coroutineScope) { uri ->
+        mockViewModel.resetMocking()
         uploadViewModel.uploadFile(uri)
     }
 
