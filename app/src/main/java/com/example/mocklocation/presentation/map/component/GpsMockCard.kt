@@ -159,11 +159,13 @@ fun GPSMockCard(
                     gpsPoints = gpsPoints,
                     onStartMock = {
                         mockViewModel.startOrResumeMocking()
+                        mockViewModel.setTrackMode(true)
                         drawViewModel.disableDrawingMode()
                     },
                     onStopMock =  { mockViewModel.stopMocking() },
                     onResetMock = {
                         mockViewModel.resetMocking()
+                        mockViewModel.setTrackMode(false)
                         fileUploadViewModel.resetFileName()
                     }
                 )

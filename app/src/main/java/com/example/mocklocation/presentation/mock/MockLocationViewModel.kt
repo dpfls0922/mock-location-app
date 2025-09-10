@@ -40,6 +40,9 @@ class MockLocationViewModel @Inject constructor(
     private val _gpsMode = MutableStateFlow(GpsMode.GPS)
     val gpsMode: StateFlow<GpsMode> = _gpsMode
 
+    private val _trackMode = MutableStateFlow(false)
+    val trackMode: StateFlow<Boolean> = _trackMode
+
     init {
         mockLocationHandler.progressFlow
             .onEach { progress ->
@@ -79,6 +82,11 @@ class MockLocationViewModel @Inject constructor(
 
     private fun resetGpsPoints() {
         _gpsPoints.value = emptyList()
+    }
+
+    fun setTrackMode(enabled: Boolean) {
+        _trackMode.value = enabled
+        mapService.setTrackMode(enabled)
     }
 
     fun updateGpsPoints(newPoints: List<GpsPoint>) {

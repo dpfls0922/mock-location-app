@@ -30,6 +30,8 @@ class MapServiceImpl @Inject constructor() : MapService {
     private var onDrawingPointListener: ((List<VSMMapPoint>) -> Unit)? = null
     private var drawingTouchListener: View.OnTouchListener? = null
     private var currentMarker: VSMMarkerLocation? = null
+    private var isInitialLoad = false
+    private var isTrackModeActive = false
 
     override fun createView(context: Context): VSMMapView {
         val view = VSMMapView(context)
@@ -84,7 +86,21 @@ class MapServiceImpl @Inject constructor() : MapService {
                 bearing = location.bearing!!
             }
         }
-        setCenter(location.latitude, location.longitude)
+        if (!isInitialLoad) {
+            setCenter(location.latitude, location.longitude)
+            isInitialLoad = true
+        } else if (isTrackModeActive) {
+            setCenter(location.latitude, location.longitude)
+        }
+    }
+
+    override fun setTrackMode(enabled: Boolean) {
+        isTrackModeActive = enabled
+        if (isTrackModeActive) {
+            currentMarker?.let {
+                setCenter(it.position.latitude, it.position.longitude)
+            }
+        }
     }
 
     override fun setCenter(latitude: Double, longitude: Double) {
