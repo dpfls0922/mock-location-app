@@ -123,7 +123,12 @@ private fun MapUI(
             FloatingButtons(
                 onClickMyLocation = { mapViewModel.setCurrentLocation() },
                 onClickSelectCsvFile = onClickSelectCsvFile,
-                onClickDrawRoute = { drawViewModel.toggleDrawingMode() }
+                onClickDrawRoute = {
+                    drawViewModel.toggleDrawingMode()
+                    if (drawViewModel.isDrawingMode.value) {
+                        mockViewModel.resetMocking()
+                    }
+                }
             )
         }
     ) { innerPadding ->
