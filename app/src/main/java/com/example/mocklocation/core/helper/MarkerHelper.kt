@@ -10,6 +10,8 @@ import com.skt.tmap.vsm.map.marker.VSMMarkerPolyline
 import com.example.mocklocation.core.marker.DefaultMarkerIconProvider
 import com.example.mocklocation.core.marker.MarkerIconProvider
 import com.example.mocklocation.presentation.route.component.RoutePoint
+import com.skt.tmap.vsm.camera.CameraPosition
+import com.skt.tmap.vsm.camera.CameraUpdate
 import com.skt.tmap.vsm.coordinates.VSMCoordinates
 import com.skt.tmap.vsm.map.marker.MarkerImage
 import timber.log.Timber
@@ -27,6 +29,13 @@ enum class MarkerType(val resId: Int, val iconSize: Pair<Float, Float>) {
 private val waypointMarkerTypes = mapOf(
     0 to MarkerType.WAYPOINT_1,
     1 to MarkerType.WAYPOINT_2
+)
+
+data class BoundingBox(
+    val minLat: Double,
+    val maxLat: Double,
+    val minLon: Double,
+    val maxLon: Double
 )
 
 class MarkerHelper(
@@ -88,6 +97,7 @@ class MarkerHelper(
                     .lineWidth(5f)
                     .create()
                 mapEngine.markerManager.addMarker(polyline)
+                moveCameraToPolyline(points)
                 Timber.d("Polyline 정상적으로 지도에 표시됨")
 
             } else {
@@ -118,6 +128,45 @@ class MarkerHelper(
             addLocationMarker(it.latitude - offset, it.longitude, MarkerType.DESTINATION)
             addLocationMarker(it.latitude, it.longitude, MarkerType.END)
         }
+    }
+
+    private fun moveCameraToPolyline(points: List<VSMMapPoint>) {
+        if (points.isEmpty()) return
+
+        val box = calculateBoundingBox(points)
+        val northEast = VSMMapPoint(box.maxLon, box.maxLat)
+        val southWest = VSMMapPoint(box.minLon, box.minLat)
+        val viewSize = mapEngine.surfaceSize
+        val rect = android.graphics.Rect(0, 0, viewSize.x, viewSize.y)
+
+        val cameraUpdate = object : CameraUpdate {
+            override fun getCameraPosition(engine: MapEngine): CameraPosition? {
+                val defaultPos = engine.getCameraPositionForBounds(northEast, southWest, rect) ?: return null
+                val target = defaultPos.target ?: return null
+                val zoomAdjusted = (defaultPos.zoom - 0.6).coerceAtLeast(engine.minZoomLevelLimit.toDouble())
+
+                return CameraPosition(target, zoomAdjusted, defaultPos.tilt, defaultPos.bearing)
+            }
+        }
+
+        val newPos = cameraUpdate.getCameraPosition(mapEngine)
+        mapEngine.animateCamera(cameraUpdate)
+        Timber.d("[카메라 이동 및 줌 완료] center: (${newPos?.target?.latitude}, ${newPos?.target?.longitude}), zoom: ${newPos?.zoom}")
+    }
+
+    private fun calculateBoundingBox(points: List<VSMMapPoint>): BoundingBox {
+        var minLat = Double.MAX_VALUE
+        var maxLat = Double.MIN_VALUE
+        var minLon = Double.MAX_VALUE
+        var maxLon = Double.MIN_VALUE
+
+        for (point in points) {
+            if (point.latitude < minLat) minLat = point.latitude
+            if (point.latitude > maxLat) maxLat = point.latitude
+            if (point.longitude < minLon) minLon = point.longitude
+            if (point.longitude > maxLon) maxLon = point.longitude
+        }
+        return BoundingBox(minLat, maxLat, minLon, maxLon)
     }
 
     fun removeMarker(marker: VSMMarkerBase) {
