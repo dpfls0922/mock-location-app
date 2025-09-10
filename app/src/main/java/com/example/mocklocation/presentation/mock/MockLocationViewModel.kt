@@ -7,11 +7,13 @@ import com.example.mocklocation.domain.service.MapService
 import com.example.mocklocation.presentation.mock.component.GpsMode
 import com.example.mocklocation.presentation.mock.component.RepeatMode
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -42,7 +44,7 @@ class MockLocationViewModel @Inject constructor(
 
     private val _trackMode = MutableStateFlow(false)
     val trackMode: StateFlow<Boolean> = _trackMode
-
+    private var isInitialTrackModeSet = true
     init {
         mockLocationHandler.progressFlow
             .onEach { progress ->
@@ -86,8 +88,9 @@ class MockLocationViewModel @Inject constructor(
 
     fun setTrackMode(enabled: Boolean) {
         _trackMode.value = enabled
-        mapService.setTrackMode(enabled)
-        if (mockingState.value == MockingState.IDLE) {
+        viewModelScope.launch {
+            delay(1500L)
+            mapService.setTrackMode(enabled)
             mapService.zoomIn()
         }
     }
