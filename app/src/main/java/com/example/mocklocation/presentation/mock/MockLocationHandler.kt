@@ -182,7 +182,7 @@ class MockLocationHandler @Inject constructor(
                 currentNavigationState = newState
                 var newIndex = newState.nextPointIndex - 1
                 if (newIndex < 0) newIndex = 0
-                Timber.v("[Progress] 상태 업데이트 lastSentIndex=$newIndex")
+                lastSentIndex = newIndex
             }
         ).collect {
             emit(it)
