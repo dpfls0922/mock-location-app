@@ -27,11 +27,8 @@ import com.example.mocklocation.presentation.mock.MockLocationViewModel
 import com.example.mocklocation.presentation.route.RouteGuidanceState
 import com.example.mocklocation.presentation.route.RouteGuidanceViewModel
 import com.example.mocklocation.presentation.search.SearchViewModel
-import com.example.mocklocation.presentation.ui.theme.MapTheme
-import com.skt.tmap.vsm.data.VSMMapPoint
 import com.skt.tmap.vsm.map.VSMMapView
 import kotlinx.coroutines.flow.collectLatest
-import timber.log.Timber
 
 @Composable
 fun MapScreen(
@@ -121,56 +118,54 @@ private fun MapUI(
     isDrawingMode: Boolean,
     onClickSelectCsvFile: () -> Unit
 ) {
-    MapTheme {
-        Scaffold(
-            floatingActionButton = {
-                FloatingButtons(
-                    onClickMyLocation = { mapViewModel.setCurrentLocation() },
-                    onClickSelectCsvFile = onClickSelectCsvFile,
-                    onClickDrawRoute = { drawViewModel.toggleDrawingMode() }
-                )
-            }
-        ) { innerPadding ->
-            Box(Modifier.padding(innerPadding).fillMaxSize()) {
-                AndroidView(
-                    factory = { mapView },
-                    modifier = Modifier.fillMaxSize()
-                )
-                MapLifecycleHandler(lifecycleOwner, mapViewModel)
+    Scaffold(
+        floatingActionButton = {
+            FloatingButtons(
+                onClickMyLocation = { mapViewModel.setCurrentLocation() },
+                onClickSelectCsvFile = onClickSelectCsvFile,
+                onClickDrawRoute = { drawViewModel.toggleDrawingMode() }
+            )
+        }
+    ) { innerPadding ->
+        Box(Modifier.padding(innerPadding).fillMaxSize()) {
+            AndroidView(
+                factory = { mapView },
+                modifier = Modifier.fillMaxSize()
+            )
+            MapLifecycleHandler(lifecycleOwner, mapViewModel)
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = 28.dp),
-                    contentAlignment = Alignment.BottomCenter
-                ) {
-                    currentFileName?.let { name ->
-                        FileNameOverlayToastStyle(fileName = name)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 28.dp),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                currentFileName?.let { name ->
+                    FileNameOverlayToastStyle(fileName = name)
+                }
+            }
+
+            Box (
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                DrawRouteControls(
+                    isDrawingMode = isDrawingMode,
+                    onCancel = {
+                        drawViewModel.cancelDrawing()
+                        mockViewModel.resetMocking()
                     }
-                }
-
-                Box (
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.TopCenter
-                ) {
-                    DrawRouteControls(
-                        isDrawingMode = isDrawingMode,
-                        onCancel = {
-                            drawViewModel.cancelDrawing()
-                            mockViewModel.resetMocking()
-                        }
-                    )
-                }
-
-                ExpandableGpsMockCard(
-                    drawViewModel = drawViewModel,
-                    mockViewModel = mockViewModel,
-                    searchViewModel = searchViewModel,
-                    routeGuidanceViewModel = routeGuidanceViewModel,
-                    fileUploadViewModel = fileUploadViewModel,
-                    mapViewModel = mapViewModel
                 )
             }
+
+            ExpandableGpsMockCard(
+                drawViewModel = drawViewModel,
+                mockViewModel = mockViewModel,
+                searchViewModel = searchViewModel,
+                routeGuidanceViewModel = routeGuidanceViewModel,
+                fileUploadViewModel = fileUploadViewModel,
+                mapViewModel = mapViewModel
+            )
         }
     }
 }

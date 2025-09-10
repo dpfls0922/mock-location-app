@@ -9,14 +9,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
@@ -50,6 +53,26 @@ fun FileNameOverlayToastStyle(fileName: String) {
                 )
             }
         }
+    }
+}
+
+@Composable
+fun ProgressWithPercentage(progress: Float, modifier: Modifier = Modifier) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(
+            progress = { progress },
+            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.9f),
+            strokeWidth = 6.dp,
+            trackColor = ProgressIndicatorDefaults.circularIndeterminateTrackColor,
+        )
+        Text(
+            text = "${(progress * 100).toInt()}%",
+            style = MaterialTheme.typography.bodyLarge.copy(
+                color = MaterialTheme.colorScheme.secondary,
+                fontWeight = FontWeight.SemiBold
+            ),
+            modifier = Modifier.align(Alignment.Center)
+        )
     }
 }
 

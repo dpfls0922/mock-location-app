@@ -1,10 +1,13 @@
 package com.example.mocklocation.presentation.map
 
 import android.Manifest
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.mocklocation.presentation.draw.DrawStatusHandler
 import com.example.mocklocation.presentation.draw.DrawViewModel
@@ -18,6 +21,7 @@ import com.example.mocklocation.presentation.search.SearchStatusHandler
 import com.example.mocklocation.presentation.search.SearchViewModel
 import com.example.mocklocation.presentation.ui.common.rememberFileSelectorLauncher
 import com.example.mocklocation.presentation.ui.common.rememberPermissionLauncher
+import com.example.mocklocation.presentation.ui.theme.MapTheme
 
 @Composable
 fun MapRoute(
@@ -37,22 +41,26 @@ fun MapRoute(
         uploadViewModel.uploadFile(uri)
     }
 
-    FileUploadStatusHandler()
-    RouteGuidanceStatusHandler()
-    DrawStatusHandler()
-    SearchStatusHandler()
+    MapTheme {
+        Box(modifier = Modifier.fillMaxSize()) {
+            MapScreen(
+                mapViewModel = mapViewModel,
+                mockViewModel = mockViewModel,
+                searchViewModel = searchViewModel,
+                drawViewModel = drawViewModel,
+                routeGuidanceViewModel = routeGuidanceViewModel,
+                fileUploadViewModel = fileUploadViewModel,
+                permissionGranted = permissionGranted,
+                onRequestPermission = { permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION) },
+                onClickSelectCsvFile = { fileSelectorLauncher.launch(MIME_TYPE_TEXT) }
+            )
 
-    MapScreen(
-        mapViewModel = mapViewModel,
-        mockViewModel = mockViewModel,
-        searchViewModel = searchViewModel,
-        drawViewModel = drawViewModel,
-        routeGuidanceViewModel = routeGuidanceViewModel,
-        fileUploadViewModel = fileUploadViewModel,
-        permissionGranted = permissionGranted,
-        onRequestPermission = { permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION) },
-        onClickSelectCsvFile = { fileSelectorLauncher.launch(MIME_TYPE_TEXT) }
-    )
+            FileUploadStatusHandler()
+            RouteGuidanceStatusHandler()
+            DrawStatusHandler()
+            SearchStatusHandler()
+        }
+    }
 }
 
 private object MapRouteConstants {

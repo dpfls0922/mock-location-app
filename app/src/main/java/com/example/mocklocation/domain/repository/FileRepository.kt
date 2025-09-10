@@ -4,5 +4,8 @@ import com.example.mocklocation.domain.entity.CsvFile
 import android.net.Uri
 
 interface FileRepository {
-    suspend fun uploadCsvFile(uri: Uri): CsvFile
+    suspend fun uploadCsvFile(
+        uri: Uri,
+        onProgress: (Float) -> Unit
+    ): CsvFile
 }
