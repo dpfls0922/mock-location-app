@@ -187,4 +187,9 @@ class MarkerHelper(
         val result = mapEngine.setMapCenter(longitude, latitude, true)
         Timber.d("setCenter 호출 결과: $result")
     }
+
+    fun zoomIn() {
+        val result = mapEngine.setViewLevel(17, true)
+        Timber.d("setCenter 호출 결과: $result")
+    }
 }

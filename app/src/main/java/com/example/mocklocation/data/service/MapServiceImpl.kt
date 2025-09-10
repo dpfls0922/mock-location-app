@@ -99,12 +99,17 @@ class MapServiceImpl @Inject constructor() : MapService {
         if (isTrackModeActive) {
             currentMarker?.let {
                 setCenter(it.position.latitude, it.position.longitude)
+                zoomIn()
             }
         }
     }
 
     override fun setCenter(latitude: Double, longitude: Double) {
         markerHelper?.setCenter(latitude, longitude)
+    }
+
+    private fun zoomIn() {
+        markerHelper?.zoomIn()
     }
 
     override fun drawRouteLine(vsmPoints: List<VSMMapPoint>, wayPoints: List<RoutePoint>?) {
