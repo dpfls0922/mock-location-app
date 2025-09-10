@@ -108,10 +108,12 @@ fun GPSMockCard(
                         },
                         onReset = {
                             routeGuidanceViewModel.resetRoutePoints()
+                            fileUploadViewModel.resetFileName()
                             mockViewModel.resetMocking()
                         },
                         onRouteGuidance = {
                             mockViewModel.resetMocking()
+                            fileUploadViewModel.resetFileName()
                             routeGuidanceViewModel.startGuidance()
                         }
                     )

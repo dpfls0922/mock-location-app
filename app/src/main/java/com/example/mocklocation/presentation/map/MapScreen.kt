@@ -126,6 +126,7 @@ private fun MapUI(
                 onClickDrawRoute = {
                     drawViewModel.toggleDrawingMode()
                     if (drawViewModel.isDrawingMode.value) {
+                        fileUploadViewModel.resetFileName()
                         mockViewModel.resetMocking()
                     }
                 }
