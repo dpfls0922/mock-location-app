@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -40,6 +41,7 @@ class MockLocationHandler @Inject constructor(
 
     private var mockJob: Job? = null
     private var allGpsPoints: List<GpsPoint> = emptyList()
+
     private var lastSentIndex: Int = 0
     private var repeatMode: RepeatMode = RepeatMode.INFINITE
     private var repeatCount: Int = 0
@@ -55,15 +57,13 @@ class MockLocationHandler @Inject constructor(
             Timber.w("[WARN] GPS 지점이 없어 전송을 시작할 수 없습니다. (${mockingState.value})")
             return
         }
-        stopSending()
+        reset()
         this.allGpsPoints = gpsPoints
         this.repeatMode = repeatMode
         this.repeatCount = repeatCount
-        this.lastSentIndex = 0
-        this.currentRepeat = 0
         this.currentNavigationState = null
         Timber.i("[MODE] 설정 적용: $repeatMode / count=$repeatCount / points=${gpsPoints.size}")
-        startMockingFromIndex()
+        startMocking()
     }
 
     fun resumeSending() {
@@ -72,7 +72,7 @@ class MockLocationHandler @Inject constructor(
             return
         }
         Timber.i("[RESUME] 마지막 인덱스: $lastSentIndex, currentNavigationState: $currentNavigationState")
-        startMockingFromIndex()
+        startMocking()
     }
 
     fun stopSending() {
@@ -120,64 +120,79 @@ class MockLocationHandler @Inject constructor(
         Timber.i("[UPDATE] GPS 모드 업데이트: ${mode} 모드")
     }
 
-    private fun startMockingFromIndex() {
+    private fun startMocking() {
         if (mockingState.value == MockingState.RUNNING) {
-            Timber.w("[WARN] Mocking 작업이 이미 활성화되어 있습니다. (${mockingState.value})")
+            Timber.w("[WARN] 이미 작업 중")
             return
         }
 
         mockJob = scope.launch {
-            Timber.i("[START] Mocking 작업 시작 (${mockingState.value})")
+            _mockingState.value = MockingState.RUNNING
             try {
-                while (true) {
-                    _mockingState.value = MockingState.RUNNING
-                    if (repeatMode == RepeatMode.COUNT && currentRepeat >= repeatCount) break
-                    if (lastSentIndex >= allGpsPoints.size) {
-                        lastSentIndex = 0
-                        currentNavigationState = null
-                    }
-                    Timber.d("🔁 [${repeatMode.name} 모드] ${currentRepeat + 1} 회차 전송 시작")
-
-                    sendMockLocationUseCase.createMockLocationFlow(
-                        allGpsPoints,
-                        lastSentIndex,
-                        _speedFlow,
-                        gpsModeFlow,
-                        scope,
-                        currentNavigationState,
-                        onStateUpdate = { newState ->
-                            currentNavigationState = newState
-                            lastSentIndex = newState.nextPointIndex - 1
-                            if (lastSentIndex < 0) lastSentIndex = 0
-                            Timber.v("[Progress] 상태 업데이트 - lastSentIndex: $lastSentIndex, 누적거리: ${newState.accumulatedDistance}")
-                        }
-                    ).collect { update ->
-                        when (update) {
-                            is MockLocationUpdate.Location -> {
-                                val result = sendMockLocationUseCase.sendLocation(update.gpsPoint)
-                                if (result.isFailure) {
-                                    Timber.e("[ERROR] 위치 전송 실패: ${update.gpsPoint.latitude}, ${update.gpsPoint.longitude}")
-                                }
-                            }
-                            is MockLocationUpdate.Progress -> {
-                                _progressFlow.value = update.progressPercentage
-                            }
-                        }
-                    }
-
-                    currentRepeat++
-                    lastSentIndex = 0
-                    currentNavigationState = null
-                    Timber.d("🔁 [${repeatMode.name} 모드] ${currentRepeat} 회차 전송 완료")
-                }
+                doRepeatLoop()
             } finally {
-                if (mockJob != null && mockJob?.isCancelled == false) {
-                    Timber.i("[FINISH] 작업 정상 완료  (${mockingState.value})")
+                if (mockJob?.isCompleted == true) {
+                    Timber.i("[FINISH] 작업 정상 완료 (${mockingState.value})")
                     Timber.i("[FINISH] 반복 횟수 ($currentRepeat/$repeatCount)")
                     _progressFlow.value = 100.0
                     resetState()
                 }
             }
+        }
+    }
+
+    private suspend fun doRepeatLoop() {
+        while (true) {
+            if (repeatMode == RepeatMode.COUNT && currentRepeat >= repeatCount) break
+            if (lastSentIndex >= allGpsPoints.size) {
+                lastSentIndex = 0
+                currentNavigationState = null
+            }
+            Timber.d("[🔁] ${repeatMode.name} 모드 ${currentRepeat + 1} 회차 시작")
+
+            startCycle()
+
+            currentRepeat++
+            lastSentIndex = 0
+            currentNavigationState = null
+            Timber.d("[🔁] ${repeatMode.name} 모드 ${currentRepeat} 회차 완료")
+        }
+    }
+
+    private suspend fun startCycle() {
+        sendMockingFlow().collect { update ->
+            when (update) {
+                is MockLocationUpdate.Location -> handleLocationUpdate(update)
+                is MockLocationUpdate.Progress -> {
+                    _progressFlow.value = update.progressPercentage
+                }
+            }
+        }
+    }
+
+    private fun sendMockingFlow() = flow {
+        sendMockLocationUseCase.createMockLocationFlow(
+            allGpsPoints,
+            lastSentIndex,
+            _speedFlow,
+            gpsModeFlow,
+            scope,
+            currentNavigationState,
+            onStateUpdate = { newState ->
+                currentNavigationState = newState
+                var newIndex = newState.nextPointIndex - 1
+                if (newIndex < 0) newIndex = 0
+                Timber.v("[Progress] 상태 업데이트 lastSentIndex=$newIndex")
+            }
+        ).collect {
+            emit(it)
+        }
+    }
+
+    private suspend fun handleLocationUpdate(update: MockLocationUpdate.Location) {
+        val result = sendMockLocationUseCase.sendLocation(update.gpsPoint)
+        if (result.isFailure) {
+            Timber.e("[ERROR] 위치 전송 실패: ${update.gpsPoint.latitude},${update.gpsPoint.longitude}")
         }
     }
 
