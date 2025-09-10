@@ -22,10 +22,6 @@ class GpsDistanceCalculator @Inject constructor() {
     }
 
     fun calculateDistance(p1: GpsPoint, p2: GpsPoint): Double {
-        if (isSamePoint(p1, p2)) {
-            return 0.0
-        }
-
         val roughDistance = estimateDistance(p1, p2)
         return if (roughDistance < DISTANCE_THRESHOLD) {
             val distance = euclideanDistance(p1, p2)
@@ -74,11 +70,6 @@ class GpsDistanceCalculator @Inject constructor() {
         val a = sin(dLat / 2).pow(2) + cos(p1.latitude.toRadians()) * cos(p2.latitude.toRadians()) * sin(dLon / 2).pow(2)
         val c = 2 * atan2(sqrt(a), sqrt(1 - a))
         return EARTH_RADIUS_METERS * c
-    }
-
-    private fun isSamePoint(p1: GpsPoint, p2: GpsPoint): Boolean {
-        return abs(p1.latitude - p2.latitude) <= FLOATING_POINT_TOLERANCE &&
-                abs(p1.longitude - p2.longitude) <= FLOATING_POINT_TOLERANCE
     }
 }
 
