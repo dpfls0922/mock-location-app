@@ -1,14 +1,14 @@
 package com.example.mocklocation.data.dto.response
 
+import com.example.mocklocation.data.dto.common.BaseResponse
 import com.example.mocklocation.data.dto.common.ResponseHeader
 import com.example.mocklocation.domain.entity.Poi
 import com.example.mocklocation.domain.entity.PoiFeature
 import kotlinx.serialization.Serializable
-import kotlin.math.sqrt
 
 @Serializable
 data class PoiSearchResponse(
-    val header: ResponseHeader,
+    override val header: ResponseHeader,
     val searchEngine: String,
     val totalCnt: Int,
     val listCnt: Int,
@@ -26,7 +26,7 @@ data class PoiSearchResponse(
     val hotPlaceContainYn: String,
     val resSearchEngineInfo: String?,
     val poiSearches: List<PoiSearch>
-)
+) : BaseResponse
 
 @Serializable
 data class PoiSearch(
@@ -78,11 +78,9 @@ data class Image(
     val url: String
 )
 
-fun PoiSearch.toDomain(startX: Int, startY: Int): Poi {
+fun PoiSearch.toDomain(): Poi {
     val xPosInt = this.centerX.toIntOrNull() ?: 0
     val yPosInt = this.centerY.toIntOrNull() ?: 0
-
-    val distanceKm = calculateDistance(startX, startY, xPosInt, yPosInt)
 
     return Poi(
         pkey = this.pkey,
@@ -91,16 +89,10 @@ fun PoiSearch.toDomain(startX: Int, startY: Int): Poi {
         rpFlag = this.rpFlag,
         xPos = xPosInt,
         yPos = yPosInt,
-        distance = distanceKm,
+        distance = 0.0,
         feature = PoiFeature(
             hasParking = parkYn == "1",
             imgUrl = feature?.images?.firstOrNull()?.url
         )
     )
-}
-
-private fun calculateDistance(fromX: Int, fromY: Int, toX: Int, toY: Int): Double {
-    val dx = fromX - toX
-    val dy = fromY - toY
-    return sqrt((dx * dx + dy * dy).toDouble()) / 1000.0
 }

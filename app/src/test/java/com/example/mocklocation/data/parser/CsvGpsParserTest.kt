@@ -1,5 +1,7 @@
 package com.example.mocklocation.data.parser
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -14,7 +16,7 @@ class CsvGpsParserTest {
 
     @BeforeEach
     fun setup() {
-        parser = CsvGpsParser()
+        parser = CsvGpsParser(ioDispatcher = Dispatchers.Default)
     }
 
     @Test
@@ -75,13 +77,13 @@ class CsvGpsParserTest {
 
     @Test
     @DisplayName("parse: InputStream에서 GPS 데이터만 추출")
-    fun parseFileTest() {
+    fun parseFileTest() = runTest {
         val fileContent = """
-            728848 2025/06/24 14:33:58.608278 5469.4844 204 IDCE ALD LCAT 930 log info verbose 1 #onLocationChanged[5683]:isSensorMode false : accuracy:0.6268064, satelliteCount:40, speed:0.026479315, bearing:252.62878, provider:gps, time: 1750743262804 Location[gps 35.158273,129.027485 hAcc=0.6272337 et=+1h31m8s410ms alt=73.6487808227539 vAcc=1.0602552 vel=0.029629089 sAcc=0.38269743 bear=254.5032 bAcc=2.086191 {Bundle[{satellites=20, maxCn0=46, meanCn0=20}]}]
-            728848 2025/06/24 14:33:58.608278 5469.4844 204 IDCE ALD LCAT 930 log info verbose 1 #onLocationChanged[5683]:isSensorMode false : accuracy:0.6268064, satelliteCount:40, speed:0.026479315, bearing:252.62878, provider:gps, time: 1750743262804 Location[gps 35.158272,129.027485 hAcc=0.6268064 et=+1h31m9s417ms alt=73.7088623046875 vAcc=1.059966 vel=0.026479315 sAcc=0.38278857 bear=252.62878 bAcc=2.086191 {Bundle[{satellites=20, maxCn0=46, meanCn0=20}]}]
-            721559 2025/06/24 14:33:57.564911 5468.4412 190 IDCE ALD LCAT 930 log info verbose 1 #GPS_LOG[5683]: ...
-            721560 2025/06/24 14:33:57.564918 5468.4412 191 IDCE ALD LCAT 930 log info verbose 1 mcipcsvr[1133]:I: ...
-        """.trimIndent()
+        728848 2025/06/24 14:33:58.608278 5469.4844 204 IDCE ALD LCAT 930 log info verbose 1 #onLocationChanged[5683]:isSensorMode false : accuracy:0.6268064, satelliteCount:40, speed:0.026479315, bearing:252.62878, provider:gps, time: 1750743262804 Location[gps 35.158273,129.027485 hAcc=0.6272337 et=+1h31m8s410ms alt=73.6487808227539 vAcc=1.0602552 vel=0.029629089 sAcc=0.38269743 bear=254.5032 bAcc=2.086191 {Bundle[{satellites=20, maxCn0=46, meanCn0=20}]}]
+        728848 2025/06/24 14:33:58.608278 5469.4844 204 IDCE ALD LCAT 930 log info verbose 1 #onLocationChanged[5683]:isSensorMode false : accuracy:0.6268064, satelliteCount:40, speed:0.026479315, bearing:252.62878, provider:gps, time: 1750743262804 Location[gps 35.158272,129.027485 hAcc=0.6268064 et=+1h31m9s417ms alt=73.7088623046875 vAcc=1.059966 vel=0.026479315 sAcc=0.38278857 bear=252.62878 bAcc=2.086191 {Bundle[{satellites=20, maxCn0=46, meanCn0=20}]}]
+        721559 2025/06/24 14:33:57.564911 5468.4412 190 IDCE ALD LCAT 930 log info verbose 1 #GPS_LOG[5683]: ...
+        721560 2025/06/24 14:33:57.564918 5468.4412 191 IDCE ALD LCAT 930 log info verbose 1 mcipcsvr[1133]:I: ...
+    """.trimIndent()
 
         val inputStream: InputStream = fileContent.byteInputStream()
         val result = parser.parse(inputStream)

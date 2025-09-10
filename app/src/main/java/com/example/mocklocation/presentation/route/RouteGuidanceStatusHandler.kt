@@ -23,7 +23,11 @@ fun RouteGuidanceStatusHandler(
         when (uiState) {
             is RouteGuidanceState.Success -> {
                 val routeData = (uiState as RouteGuidanceState.Success).routeData
-                routeData.gpsPoints.let { mockViewModel.updateGpsPoints(it) }
+                routeData?.gpsPoints.let {
+                    if (it != null) {
+                        mockViewModel.updateGpsPoints(it)
+                    }
+                }
             }
             else -> Unit
         }

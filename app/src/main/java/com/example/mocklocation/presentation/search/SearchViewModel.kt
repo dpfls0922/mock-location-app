@@ -2,6 +2,7 @@ package com.example.mocklocation.presentation.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mocklocation.core.model.ApiResult
 import com.example.mocklocation.domain.entity.CurrentLocation
 import com.example.mocklocation.domain.usecase.GetAutoCompleteSuggestionsUseCase
 import com.example.mocklocation.domain.usecase.GetCurrentLocationUseCase
@@ -9,8 +10,10 @@ import com.example.mocklocation.domain.usecase.GetRoadNameUseCase
 import com.example.mocklocation.domain.usecase.SearchPoiUseCase
 import com.skt.tmap.vsm.data.VSMMapPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -22,6 +25,10 @@ sealed class SearchUiState {
     data object Loading : SearchUiState()
     data class Success(val results: List<SearchResultUiModel>) : SearchUiState()
     data class Error(val message: String) : SearchUiState()
+}
+
+sealed class UiEvent {
+    data class ShowToast(val message: String): UiEvent()
 }
 
 @HiltViewModel
@@ -48,6 +55,9 @@ class SearchViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<SearchUiState>(SearchUiState.Idle)
     val uiState: StateFlow<SearchUiState> = _uiState
+
+    private val _uiEvent = MutableSharedFlow<UiEvent>()
+    val uiEvent = _uiEvent.asSharedFlow()
 
     init {
         observeCurrentLocation()
@@ -121,17 +131,19 @@ class SearchViewModel @Inject constructor(
         if (keyword.isBlank() || (currentLocation.latitude == 0.0 && currentLocation.longitude == 0.0)) return@launch
 
         _uiState.value = SearchUiState.Loading
-        searchPoisUseCase("A", keyword, currentLocation)
-            .onSuccess { pois ->
-                val results = pois.map { it.toUiModel() }
+        when (val result = searchPoisUseCase("A", keyword, currentLocation)) {
+            is ApiResult.Success -> {
+                val results = result.data.map { it.toUiModel() }
                 _uiState.value = SearchUiState.Success(results)
                 if (results.isNotEmpty()) {
                     showRouteSelectionDialog(results.first())
                 }
             }
-            .onFailure { e ->
-                _uiState.value = SearchUiState.Error("검색에 실패했습니다.")
+            is ApiResult.Error -> {
+                _uiState.value = SearchUiState.Error(result.message)
+                _uiEvent.emit(UiEvent.ShowToast(result.message))
             }
+        }
     }
 
     /**
@@ -139,13 +151,15 @@ class SearchViewModel @Inject constructor(
      */
     fun showRouteSelectionDialogForMapPoint(location: VSMMapPoint) {
         viewModelScope.launch {
-            getRoadNameUseCase(location.longitude, location.latitude)
-                .onSuccess { touchLocation ->
-                    val resultUiModel = location.toUiModel(touchLocation)
+            when (val result = getRoadNameUseCase(location.longitude, location.latitude)) {
+                is ApiResult.Success -> {
+                    val resultUiModel = location.toUiModel(result.data)
                     showRouteSelectionDialog(resultUiModel)
                 }
-                .onFailure {
+                is ApiResult.Error -> {
+                    _uiEvent.emit(UiEvent.ShowToast(result.message))
                 }
+            }
         }
     }
 

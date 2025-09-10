@@ -4,9 +4,10 @@ import com.example.mocklocation.data.datasource.TmapDataSource
 import com.example.mocklocation.data.dto.response.AutoCompleteResponse
 import com.example.mocklocation.data.dto.response.Response
 import com.example.mocklocation.data.dto.response.Suggestion
-import com.example.mocklocation.domain.repository.TmapRepository
+import com.example.mocklocation.data.factory.GpsParserFactory
 import io.mockk.coEvery
 import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -14,13 +15,19 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 class TmapRepositoryImplTest {
-    private lateinit var repository: TmapRepository
+    private lateinit var repository: TmapRepositoryImpl
     private lateinit var mockDataSource: TmapDataSource
+    private lateinit var mockParserFactory: GpsParserFactory
 
     @BeforeEach
     fun setup() {
         mockDataSource = mockk()
-        repository = TmapRepositoryImpl(mockDataSource)
+        mockParserFactory = mockk()
+        repository = TmapRepositoryImpl(
+            dataSource = mockDataSource,
+            parserFactory = mockParserFactory,
+            ioDispatcher = Dispatchers.Unconfined
+        )
     }
 
     @Test

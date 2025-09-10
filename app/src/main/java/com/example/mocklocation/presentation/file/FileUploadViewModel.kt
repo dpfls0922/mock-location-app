@@ -33,6 +33,9 @@ class FileUploadViewModel @Inject constructor(
     private val _currentFileName = MutableStateFlow<String?>(null)
     val currentFileName: StateFlow<String?> = _currentFileName
 
+    private val _progress = MutableStateFlow(0f)
+    val progress: StateFlow<Float> = _progress
+
     private val _uiState = MutableStateFlow<UploadUiState>(UploadUiState.Idle)
     val uiState: StateFlow<UploadUiState> = _uiState
 
@@ -42,24 +45,31 @@ class FileUploadViewModel @Inject constructor(
     fun uploadFile(uri: Uri) {
         viewModelScope.launch {
             _uiState.value = UploadUiState.Loading
-            uploadCsvFileUseCase.execute(uri)
-                .onSuccess { uploadedFile ->
-                    val gpsPoints = uploadedFile.gpsPoints
-                    val vsmPoints = uploadedFile.gpsPoints.map { gps ->
-                        VSMMapPoint(gps.longitude, gps.latitude)
-                    }
-                    _uiState.value = UploadUiState.Success(uploadedFile, gpsPoints, vsmPoints)
-                    _currentFileName.value = uploadedFile.name
-                    _uiEvent.emit(UiEvent.ShowToast("주행 로그 파싱 완료"))
-                }.onFailure { e ->
-                    _uiState.value = UploadUiState.Error(e.localizedMessage ?: "업로드 실패")
-                    _uiEvent.emit(UiEvent.ShowToast("파일 업로드 실패"))
+            _progress.value = 0f
+
+            uploadCsvFileUseCase.execute(uri,
+                onProgress = { progressValue ->
+                    _progress.value = progressValue
                 }
+            ).onSuccess { uploadedFile ->
+                val gpsPoints = uploadedFile.gpsPoints
+                val vsmPoints = uploadedFile.gpsPoints.map { gps ->
+                    VSMMapPoint(gps.longitude, gps.latitude)
+                }
+                _uiState.value = UploadUiState.Success(uploadedFile, gpsPoints, vsmPoints)
+                _progress.value = 1f
+                _currentFileName.value = uploadedFile.name
+                _uiEvent.emit(UiEvent.ShowToast("주행 로그 파싱 완료"))
+            }.onFailure { e ->
+                _uiState.value = UploadUiState.Error(e.localizedMessage ?: "업로드 실패")
+                _uiEvent.emit(UiEvent.ShowToast("파일 업로드 실패"))
+            }
         }
     }
 
     fun resetState() {
         _uiState.value = UploadUiState.Idle
+        _progress.value = 0f
     }
 
     fun resetFileName() {

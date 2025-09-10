@@ -13,6 +13,7 @@ import com.skt.tmap.vsm.map.MapEngine
 import com.skt.tmap.vsm.map.MapTouchEventHandler
 import com.skt.tmap.vsm.map.VSMMapView
 import com.skt.tmap.vsm.map.marker.VSMMarkerBase
+import com.skt.tmap.vsm.map.marker.VSMMarkerLocation
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,14 +23,15 @@ class MapServiceImpl @Inject constructor() : MapService {
     private var mapView: VSMMapView? = null
     private var mapEngine: MapEngine? = null
     private var markerHelper: MarkerHelper? = null
-    private var currentMarker: VSMMarkerBase? = null
     private var mapTouchListener: ((MotionEvent) -> VSMMapPoint?)? = null
     private var mapTouchEventHandler: MapTouchEventHandler? = null
     private var lastTouchedMarker: VSMMarkerBase? = null
     private var drawingPoints = mutableListOf<VSMMapPoint>()
     private var onDrawingPointListener: ((List<VSMMapPoint>) -> Unit)? = null
     private var drawingTouchListener: View.OnTouchListener? = null
+    private var currentMarker: VSMMarkerLocation? = null
     private var isInitialLoad = false
+    private var isTrackModeActive = false
 
     override fun createView(context: Context): VSMMapView {
         val view = VSMMapView(context)
@@ -68,24 +70,45 @@ class MapServiceImpl @Inject constructor() : MapService {
     }
 
     override fun removeDrawingMarker() {
-        markerHelper?.removeMarkerAll()
+        markerHelper?.removeAllMarkersExceptCurrent()
     }
 
     override fun updateCurrentLocationMarker(location: CurrentLocation) {
-        currentMarker?.let { markerHelper?.removeMarker(it) }
-        currentMarker = markerHelper?.addLocationMarker(
-            location.latitude,
-            location.longitude,
-            MarkerType.CURRENT
-        )
+        if (currentMarker == null) {
+            currentMarker = markerHelper?.addLocationMarker(
+                location.latitude,
+                location.longitude,
+                MarkerType.CURRENT
+            )
+        } else {
+            currentMarker?.apply {
+                position = VSMMapPoint(location.longitude, location.latitude)
+                bearing = location.bearing!!
+            }
+        }
         if (!isInitialLoad) {
             setCenter(location.latitude, location.longitude)
             isInitialLoad = true
+        } else if (isTrackModeActive) {
+            setCenter(location.latitude, location.longitude)
         }
     }
 
     override fun setCenter(latitude: Double, longitude: Double) {
         markerHelper?.setCenter(latitude, longitude)
+    }
+
+    override fun setTrackMode(enabled: Boolean) {
+        isTrackModeActive = enabled
+        if (isTrackModeActive) {
+            currentMarker?.let {
+                setCenter(it.position.latitude, it.position.longitude)
+            }
+        }
+    }
+
+    override fun zoomIn() {
+        markerHelper?.zoomIn()
     }
 
     override fun drawRouteLine(vsmPoints: List<VSMMapPoint>, wayPoints: List<RoutePoint>?) {
