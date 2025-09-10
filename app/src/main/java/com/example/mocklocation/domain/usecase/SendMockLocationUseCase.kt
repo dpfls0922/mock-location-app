@@ -23,6 +23,13 @@ sealed class MockLocationUpdate {
     data class Progress(val progressPercentage: Double) : MockLocationUpdate()
 }
 
+data class NavigationState(
+    val currentPoint: GpsPoint,
+    val nextPointIndex: Int,
+    val accumulatedDistance: Double,
+    val emittedVertices: Int
+)
+
 class SendMockLocationUseCase @Inject constructor(
     private val repository: MockLocationRepository,
     private val distanceCalculator: GpsDistanceCalculator
@@ -37,9 +44,11 @@ class SendMockLocationUseCase @Inject constructor(
         startIndex: Int,
         speedFlow: Flow<Double>,
         gpsModeFlow: StateFlow<GpsMode>,
-        scope: CoroutineScope
+        scope: CoroutineScope,
+        initialState: NavigationState? = null,
+        onStateUpdate: ((NavigationState) -> Unit)? = null
     ): Flow<MockLocationUpdate> = flow {
-        runCatching {
+        try {
             if (gpsPoints.isEmpty()) return@flow
             if (startIndex !in gpsPoints.indices) return@flow
 
@@ -55,55 +64,53 @@ class SendMockLocationUseCase @Inject constructor(
                 }
             }
 
-            try {
-                var currentState = NavigationState(
-                    currentPoint = gpsPoints[startIndex],
-                    nextPointIndex = (startIndex + 1).coerceAtMost(gpsPoints.lastIndex),
-                    accumulatedDistance = 0.0,
-                    emittedVertices = 0
-                )
+            var currentState = initialState ?: NavigationState(
+                currentPoint = gpsPoints[startIndex],
+                nextPointIndex = (startIndex + 1).coerceAtMost(gpsPoints.lastIndex),
+                accumulatedDistance = 0.0,
+                emittedVertices = 0
+            )
 
-                emit(MockLocationUpdate.Location(applyGpsMode(currentState.currentPoint, gpsModeFlow.value)))
-                emit(MockLocationUpdate.Progress(0.0))
-                currentState = currentState.copy(emittedVertices = currentState.emittedVertices + 1)
+            emit(MockLocationUpdate.Location(applyGpsMode(currentState.currentPoint, gpsModeFlow.value)))
+            emit(MockLocationUpdate.Progress(0.0))
+            currentState = currentState.copy(emittedVertices = currentState.emittedVertices + 1)
 
-                while (!isNavigationComplete(currentState.accumulatedDistance, totalPathDistance)) {
-                    val speedMps = speedState.value
-                    val distanceToMove = minOf(speedMps, totalPathDistance - currentState.accumulatedDistance)
+            while (!isNavigationComplete(currentState.accumulatedDistance, totalPathDistance)) {
+                val speedMps = speedState.value
+                val distanceToMove = minOf(speedMps, totalPathDistance - currentState.accumulatedDistance)
 
-                    currentState = moveAlongPath(
-                        currentState,
-                        gpsPoints,
-                        distanceToMove,
-                        speedMps,
-                        gpsModeFlow.value,
-                    ) { gpsPoint ->
-                        emit(MockLocationUpdate.Location(gpsPoint))
-                    }
-
-                    val progress = (currentState.accumulatedDistance / totalPathDistance) * 100
-                    emit(MockLocationUpdate.Progress(progress))
-
-                    delay(DEFAULT_UPDATE_INTERVAL_MS)
+                currentState = moveAlongPath(
+                    currentState,
+                    gpsPoints,
+                    distanceToMove,
+                    speedMps,
+                    gpsModeFlow.value,
+                ) { gpsPoint ->
+                    emit(MockLocationUpdate.Location(gpsPoint))
                 }
 
-                if (currentState.currentPoint != gpsPoints.last()) {
-                    emit(MockLocationUpdate.Location(applyGpsMode(gpsPoints.last(), gpsModeFlow.value)))
-                    currentState = currentState.copy(emittedVertices = currentState.emittedVertices + 1)
-                }
-                emit(MockLocationUpdate.Progress(100.0))
+                onStateUpdate?.invoke(currentState)
 
-                Timber.i(
-                    "✅ Mocking 완료 | 총 버택스: ${currentState.emittedVertices} | " +
-                            "총 주행거리: ${"%.2f".format(currentState.accumulatedDistance)} m | " +
-                            "총 경로거리: ${"%.2f".format(totalPathDistance)} m"
-                )
-            } finally {
-                repository.stopMocking()
+                val progress = (currentState.accumulatedDistance / totalPathDistance) * 100
+                emit(MockLocationUpdate.Progress(progress))
+
+                delay(DEFAULT_UPDATE_INTERVAL_MS)
             }
-        }.onFailure { throwable ->
-            Timber.e(throwable, "[SendMockLocationUseCase] createMockLocationFlow 실패")
-        }.getOrThrow()
+
+            if (currentState.currentPoint != gpsPoints.last()) {
+                emit(MockLocationUpdate.Location(applyGpsMode(gpsPoints.last(), gpsModeFlow.value)))
+                currentState = currentState.copy(emittedVertices = currentState.emittedVertices + 1)
+            }
+            emit(MockLocationUpdate.Progress(100.0))
+
+            Timber.i(
+                "✅ Mocking 완료 | 총 버택스: ${currentState.emittedVertices} | " +
+                        "총 주행거리: ${"%.2f".format(currentState.accumulatedDistance)} m | " +
+                        "총 경로거리: ${"%.2f".format(totalPathDistance)} m"
+            )
+        } finally {
+            repository.stopMocking()
+        }
     }
 
     private suspend fun moveAlongPath(
@@ -124,9 +131,7 @@ class SendMockLocationUseCase @Inject constructor(
             if (distanceToNext >= remainingDistance) {
                 val virtualPoint = interpolate(mutableState.currentPoint, nextPoint, remainingDistance, distanceToNext)
                 emitLocation(applyGpsMode(virtualPoint, gpsMode))
-
                 logPositionUpdate(remainingDistance, mutableState.accumulatedDistance, speed, virtualPoint, mutableState.emittedVertices)
-
                 mutableState = mutableState.copy(
                     currentPoint = virtualPoint,
                     accumulatedDistance = mutableState.accumulatedDistance + remainingDistance,
@@ -135,7 +140,6 @@ class SendMockLocationUseCase @Inject constructor(
                 remainingDistance = 0.0
             } else {
                 logSegmentMove(distanceToNext, remainingDistance, mutableState.accumulatedDistance, nextPoint)
-
                 remainingDistance -= distanceToNext
                 mutableState = mutableState.copy(
                     currentPoint = nextPoint,
@@ -147,13 +151,6 @@ class SendMockLocationUseCase @Inject constructor(
         Timber.i("[moveAlongPath 루프 종료] 남은 거리: %.10f".format(remainingDistance))
         return mutableState
     }
-
-    private data class NavigationState(
-        val currentPoint: GpsPoint,
-        val nextPointIndex: Int,
-        val accumulatedDistance: Double,
-        val emittedVertices: Int
-    )
 
     private fun isNavigationComplete(accumulatedDistance: Double, totalPathDistance: Double): Boolean {
         val remaining = totalPathDistance - accumulatedDistance
