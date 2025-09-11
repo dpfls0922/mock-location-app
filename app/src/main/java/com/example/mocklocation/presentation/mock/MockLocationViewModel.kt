@@ -44,7 +44,7 @@ class MockLocationViewModel @Inject constructor(
 
     private val _trackMode = MutableStateFlow(false)
     val trackMode: StateFlow<Boolean> = _trackMode
-    private var isInitialTrackModeSet = true
+
     init {
         mockLocationHandler.progressFlow
             .onEach { progress ->
