@@ -164,7 +164,10 @@ fun GPSMockCard(
                         mockViewModel.setTrackMode(true)
                         drawViewModel.disableDrawingMode()
                     },
-                    onStopMock =  { mockViewModel.stopMocking() },
+                    onStopMock =  {
+                        mockViewModel.stopMocking()
+                        mockViewModel.setTrackMode(false)
+                    },
                     onResetMock = {
                         mockViewModel.resetMocking()
                         mockViewModel.setTrackMode(false)
